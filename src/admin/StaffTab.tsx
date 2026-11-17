@@ -26,7 +26,7 @@ export function StaffTab({ boot, toast, reloadBoot }: { boot: AdminBoot; toast: 
       <h1 class="large">{t('adm.tab_staff')}</h1>
       <Section footer={boot.staff.length > 1 || boot.can_manage ? t('adm.staff_note') : undefined}>
         {boot.staff.map((s, i) => (
-          <Cell title={`${s.name || t('staff.default')}${s.mine ? ' · ' + t('adm.me') : ''}`} subtitle={s.active ? summary(s) : t('adm.inactive')} chevron
+          <Cell title={`${s.name || t('staff.default')}${s.mine ? ' · ' + t('adm.me') : ''}${s.admin ? ' · ' + t('adm.admin_badge') : ''}`} subtitle={s.active ? summary(s) : t('adm.inactive')} chevron
             after={<span class="dot" style={{ '--c': colorOf(s, i) }} />} onClick={() => setEditing(s)} />
         ))}
         {boot.can_manage && <Cell icon="plus" title={t('adm.add_staff')} chevron onClick={() => setEditing('new')} />}
@@ -43,13 +43,14 @@ function Editor({ boot, initial, toast, onClose }: { boot: AdminBoot; initial: S
   const [off, setOff] = useState<number[]>(initial?.off ?? []);
   const [me, setMe] = useState(initial?.mine ?? false);
   const [active, setActive] = useState(initial?.active ?? true);
+  const [admin, setAdmin] = useState(initial?.admin ?? false);
   const [tgId, setTgId] = useState(initial?.tg_id && !initial.mine ? String(initial.tg_id) : '');
   const [weekly, setWeekly] = useState<Record<string, [string, string][]>>(initial ? JSON.parse(JSON.stringify(initial.weekly)) : JSON.parse(JSON.stringify(boot.staff[0]?.weekly ?? {})));
   const [busy, setBusy] = useState(false);
   const id = initial?.id;
 
   const setDay = (d: number, v: [string, string][]) => setWeekly((w) => ({ ...w, [String(d)]: v }));
-  const err = (code: string) => t(code === 'already_linked' ? 'adm.already_linked' : code === 'has_future' ? 'adm.has_future' : code === 'last_staff' ? 'adm.last_staff' : code === 'forbidden' ? 'err.forbidden' : code === 'bad_request' ? 'adm.bad_input' : 'err.network');
+  const err = (code: string) => t(code === 'self_demote' ? 'adm.self_demote' : code === 'already_linked' ? 'adm.already_linked' : code === 'has_future' ? 'adm.has_future' : code === 'last_staff' ? 'adm.last_staff' : code === 'forbidden' ? 'err.forbidden' : code === 'bad_request' ? 'adm.bad_input' : 'err.network');
 
   async function save() {
     if (busy) return;
@@ -59,6 +60,7 @@ function Editor({ boot, initial, toast, onClose }: { boot: AdminBoot; initial: S
       const r = await api<{ id: number }>('admin/staff/save', {
         ...(id ? { id } : { copy_hours_from: boot.staff[0]?.id }), name: name.trim(), bio: bio.trim(), color, off,
         ...(me ? { link: 'self' } : /^\d{1,15}$/.test(tgId.trim()) ? { link: 'tg', tg_id: Number(tgId.trim()) } : { link: initial?.linked ? 'none' : 'keep' }),
+        admin: admin && (me || /^\d{1,15}$/.test(tgId.trim())),
       }, newOpId());
       if (!r.ok) { setBusy(false); haptic.error(); toast(err(r.error.code)); return; }
       sid = r.data.id;
@@ -90,6 +92,7 @@ function Editor({ boot, initial, toast, onClose }: { boot: AdminBoot; initial: S
             </div>
             <Cell title={t('adm.this_is_me')} after={<Switch label={t('adm.this_is_me')} checked={me} onChange={setMe} />} />
             {!me && <label class="field"><span>{t('adm.tg_id')}</span><input inputMode="numeric" value={tgId} maxLength={15} onInput={(e) => setTgId((e.target as HTMLInputElement).value)} /><div class="muted" style={{ fontSize: '13px', marginTop: '4px' }}>{t('adm.tg_note')}</div></label>}
+            {(me || /^\d{1,15}$/.test(tgId.trim())) && <Cell title={t('adm.admin')} subtitle={t('adm.admin_note')} after={<Switch label={t('adm.admin')} checked={admin} onChange={setAdmin} />} />}
             {initial && <Cell title={t('adm.active')} after={<Switch label={t('adm.active')} checked={active} onChange={setActive} />} />}
           </Section>
           <Section title={t('adm.does')} footer={t('adm.does_note')}>

@@ -215,5 +215,9 @@
   "adm.hidden_only": "Má rezervace, proto byla pouze skryta",
   "adm.name_required": "Zadejte název",
   "adm.svc_empty": "Zatím žádné služby. Přidejte první níže.",
-  "adm.addon_note": "Doplňky lze přidat ke každé službě."
+  "adm.addon_note": "Doplňky lze přidat ke každé službě.",
+  "adm.admin": "Administrátor",
+  "adm.admin_note": "Plná kontrola: všechny kalendáře, personál, služby a nastavení. Bez toho vidí jen svůj kalendář.",
+  "adm.admin_badge": "Admin",
+  "adm.self_demote": "Vlastní administrátorský přístup nelze odebrat."
 }

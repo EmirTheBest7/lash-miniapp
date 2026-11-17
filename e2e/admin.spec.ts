@@ -201,3 +201,15 @@ test('services: add a service and an add-on, rename, then delete one (unused = r
   await page.getByRole('button', { name: 'Tap again to delete' }).click();
   await expect(page.getByRole('button', { name: /Brow tint/ })).toHaveCount(0);
 });
+
+test('administrator: the owner makes a person an admin (needs a Telegram ID) and the list shows the badge', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: 'Staff' }).click();
+  await page.getByRole('button', { name: /Eva/ }).click();
+  await expect(page.getByText('Administrator', { exact: true })).toHaveCount(0);          // no Telegram ID yet: nothing to grant
+  await page.getByLabel('Telegram ID of this person').fill('783917247');
+  await page.getByRole('switch', { name: 'Administrator' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
+  await toast(page, 'Saved');
+  await expect(page.getByRole('button', { name: /Eva · Admin/ })).toBeVisible();
+});

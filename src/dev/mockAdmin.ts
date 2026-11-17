@@ -18,8 +18,8 @@ const state = {
 function init(env: AdminMockEnv): void {
   if (state.inited) return;
   state.inited = true;
-  state.staff = [{ id: 1, name: 'Jana', bio: 'Senior lash artist', color: '#d4547a', active: true, linked: true, tg_id: null, mine: true, off: [], weekly: week(), future: 0 }];
-  if (env.two) state.staff.push({ id: 2, name: 'Eva', bio: 'Lifting and tinting', color: '#3b82c4', active: true, linked: false, tg_id: null, mine: false, off: [4], weekly: { ...week(), '6': [] }, future: 0 });
+  state.staff = [{ id: 1, name: 'Jana', bio: 'Senior lash artist', color: '#d4547a', active: true, linked: true, tg_id: null, mine: true, admin: false, off: [], weekly: week(), future: 0 }];
+  if (env.two) state.staff.push({ id: 2, name: 'Eva', bio: 'Lifting and tinting', color: '#3b82c4', active: true, linked: false, tg_id: null, mine: false, admin: false, off: [4], weekly: { ...week(), '6': [] }, future: 0 });
   state.services = [
     { id: 1, name: 'Lash extensions – full set', is_addon: false, duration_min: 150, buffer_min: 15, price: 1800, price_from: false, active: true, names: { cs: '', en: 'Lash extensions – full set', ru: '', uk: '' }, category_id: 1 },
     { id: 2, name: 'Lash fill', is_addon: false, duration_min: 75, buffer_min: 15, price: 1000, price_from: false, active: true, names: { cs: '', en: 'Lash fill', ru: '', uk: '' }, category_id: 1 },
@@ -108,8 +108,10 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
     case 'admin/staff/save': {
       if (!owner) return err(403, 'forbidden');
       let p = d.id ? state.staff.find((s) => s.id === d.id) : undefined;
-      if (!p) { p = { id: state.nextId++, name: '', bio: '', color: '', active: true, linked: false, tg_id: null, mine: false, off: [], weekly: JSON.parse(JSON.stringify(state.staff[0]?.weekly ?? {})), future: 0 }; state.staff.push(p); }
+      if (!p) { p = { id: state.nextId++, name: '', bio: '', color: '', active: true, linked: false, tg_id: null, mine: false, admin: false, off: [], weekly: JSON.parse(JSON.stringify(state.staff[0]?.weekly ?? {})), future: 0 }; state.staff.push(p); }
       Object.assign(p, { name: d.name, bio: d.bio, color: d.color, off: d.off });
+      if (d.admin === true && d.link !== 'self' && d.link !== 'tg') return err(400, 'bad_request');
+      p.admin = d.admin === true;
       if (d.link === 'tg') { p.linked = true; p.mine = false; p.tg_id = d.tg_id; } else if (d.link === 'self') { if (state.staff.some((s) => s.mine && s.id !== p!.id)) return err(409, 'already_linked'); p.mine = true; p.linked = true; } else if (d.link === 'none') { p.mine = false; p.linked = false; }
       return ok({ id: p.id, staff: boot().staff });
     }

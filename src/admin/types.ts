@@ -1,4 +1,4 @@
-export interface StaffRow { id: number; name: string; bio: string; color: string; active: boolean; linked: boolean; tg_id: number | null; mine: boolean; off: number[]; weekly: Record<string, [string, string][]>; future: number }
+export interface StaffRow { id: number; name: string; bio: string; color: string; active: boolean; linked: boolean; tg_id: number | null; mine: boolean; admin: boolean; off: number[]; weekly: Record<string, [string, string][]>; future: number }
 export interface SvcRow { id: number; name: string; is_addon: boolean; duration_min: number; buffer_min: number; price: number; price_from: boolean; active: boolean; names: Record<'cs' | 'en' | 'ru' | 'uk', string>; category_id: number | null }
 export interface AdminSettings { slot_step_min: number; min_notice_h: number; horizon_days: number; cancel_cutoff_h: number; buffer_may_exceed_close: boolean }
 export interface AdminBoot {
