@@ -1,0 +1,101 @@
+// Thin, typed, feature-detecting wrapper over window.Telegram.WebApp. Every call is a no-op when the client is too old.
+export interface ThemeParams {
+  bg_color?: string; text_color?: string; hint_color?: string; link_color?: string;
+  button_color?: string; button_text_color?: string; secondary_bg_color?: string;
+  header_bg_color?: string; accent_text_color?: string; section_bg_color?: string;
+  section_header_text_color?: string; subtitle_text_color?: string; destructive_text_color?: string;
+  section_separator_color?: string; bottom_bar_bg_color?: string;
+}
+interface Btn {
+  text: string; isVisible: boolean; isActive: boolean; isProgressVisible: boolean;
+  setText(t: string): Btn; onClick(cb: () => void): Btn; offClick(cb: () => void): Btn;
+  show(): Btn; hide(): Btn; enable(): Btn; disable(): Btn; showProgress(leave?: boolean): Btn; hideProgress(): Btn;
+}
+export interface WebApp {
+  initData: string;
+  initDataUnsafe: { user?: { id: number; first_name?: string; last_name?: string; username?: string; language_code?: string }; start_param?: string };
+  version: string; platform: string; colorScheme: 'light' | 'dark'; themeParams: ThemeParams;
+  isExpanded: boolean; viewportStableHeight: number;
+  safeAreaInset?: { top: number; bottom: number; left: number; right: number };
+  contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
+  ready(): void; expand(): void; close(): void;
+  isVersionAtLeast(v: string): boolean;
+  setHeaderColor(c: string): void; setBackgroundColor(c: string): void; setBottomBarColor?(c: string): void;
+  disableVerticalSwipes?(): void; enableClosingConfirmation?(): void; disableClosingConfirmation?(): void;
+  onEvent(e: string, cb: () => void): void; offEvent(e: string, cb: () => void): void;
+  BackButton: { isVisible: boolean; show(): void; hide(): void; onClick(cb: () => void): void; offClick(cb: () => void): void };
+  MainButton: Btn; SecondaryButton?: Btn;
+  HapticFeedback?: { impactOccurred(s: string): void; notificationOccurred(t: 'error' | 'success' | 'warning'): void; selectionChanged(): void };
+  showPopup?(p: { title?: string; message: string; buttons?: { id?: string; type?: string; text?: string }[] }, cb?: (id?: string) => void): void;
+  showConfirm?(m: string, cb: (ok: boolean) => void): void;
+  openLink?(url: string, o?: { try_instant_view?: boolean }): void;
+  openTelegramLink?(url: string): void;
+  requestContact?(cb?: (shared: boolean) => void): void;
+}
+declare global { interface Window { Telegram?: { WebApp?: WebApp } } }
+
+export const webApp = (): WebApp | undefined => window.Telegram?.WebApp;
+export const inTelegram = (): boolean => !!webApp()?.initData;
+export const initDataRaw = (): string => webApp()?.initData ?? '';
+export const startParam = (): string | null => webApp()?.initDataUnsafe.start_param ?? null;
+const atLeast = (v: string): boolean => { try { return !!webApp()?.isVersionAtLeast(v); } catch { return false; } };
+export const supports = (v: string): boolean => atLeast(v);
+
+export type Platform = 'ios' | 'android' | 'desktop';
+export function platform(): Platform {
+  const p = (webApp()?.platform ?? '').toLowerCase();
+  if (p === 'ios') return 'ios';
+  if (p === 'android' || p === 'android_x') return 'android';
+  return 'desktop';
+}
+
+export const haptic = {
+  select: () => webApp()?.HapticFeedback?.selectionChanged(),
+  success: () => webApp()?.HapticFeedback?.notificationOccurred('success'),
+  error: () => webApp()?.HapticFeedback?.notificationOccurred('error'),
+  warn: () => webApp()?.HapticFeedback?.notificationOccurred('warning'),
+  tap: () => webApp()?.HapticFeedback?.impactOccurred('light'),
+};
+
+/** Native BackButton bound to a handler. Returns an unbind function. */
+export function bindBack(handler: (() => void) | null): () => void {
+  const b = webApp()?.BackButton;
+  if (!b || !handler) { b?.hide(); return () => {}; }
+  b.onClick(handler); b.show();
+  return () => { b.offClick(handler); b.hide(); };
+}
+
+/** Native bottom button (MainButton). Returns an unbind function; setBusy toggles the native spinner. */
+export function bindMain(opts: { text: string; onClick: () => void; enabled?: boolean; busy?: boolean } | null): () => void {
+  const m = webApp()?.MainButton;
+  if (!m || !opts) { m?.hide(); return () => {}; }
+  m.setText(opts.text);
+  opts.enabled === false ? m.disable() : m.enable();
+  opts.busy ? m.showProgress(false) : m.hideProgress();
+  m.onClick(opts.onClick); m.show();
+  return () => { m.offClick(opts.onClick); m.hideProgress(); m.hide(); };
+}
+
+/** Native confirm if available; otherwise resolves false (never a window.confirm: it blocks the webview). */
+export function confirmNative(message: string): Promise<boolean> {
+  const w = webApp();
+  if (!w?.showConfirm) return Promise.resolve(false);
+  return new Promise((res) => w.showConfirm!(message, (ok) => res(!!ok)));
+}
+
+export function openTelegramLink(url: string): void { const w = webApp(); w?.openTelegramLink ? w.openTelegramLink(url) : window.open(url, '_blank'); }
+export function openLink(url: string): void { const w = webApp(); w?.openLink ? w.openLink(url) : window.open(url, '_blank'); }
+
+/** Asks Telegram to share the user's phone with the BOT (the bot validates user_id == sender). Resolves true when sent. */
+export function requestPhone(): Promise<boolean> {
+  const w = webApp();
+  if (!w?.requestContact || !atLeast('6.9')) return Promise.resolve(false);
+  return new Promise((res) => w.requestContact!((shared) => res(!!shared)));
+}
+
+export function readyAndExpand(): void {
+  const w = webApp();
+  if (!w) return;
+  w.ready(); w.expand();
+  if (atLeast('7.7')) w.disableVerticalSwipes?.();      // keeps drag gestures inside the calendar from closing the app
+}

@@ -1,0 +1,45 @@
+import { useCallback, useEffect, useState } from 'preact/hooks';
+import { api } from '../api';
+import { useToast } from '../hooks';
+import { t } from '../i18n';
+import { Button, Empty, Segmented, Skeleton, Toast } from '../ui/components';
+import { Calendar } from './Calendar';
+import { ServicesTab } from './ServicesTab';
+import { SettingsTab } from './SettingsTab';
+import { StaffTab } from './StaffTab';
+import type { AdminBoot } from './types';
+import './admin.css';
+
+type Tab = 'cal' | 'staff' | 'svc' | 'set';
+
+/** The staff app (owner and masters). A separate lazy chunk: clients never download it. */
+export function AdminApp({ onClientView }: { onClientView: () => void }) {
+  const [boot, setBoot] = useState<AdminBoot | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>('cal');
+  const [toastText, toast] = useToast();
+
+  const load = useCallback(async () => {
+    const r = await api<AdminBoot>('admin/bootstrap');
+    if (!r.ok) { setErr(r.error.code); return; }
+    setErr(null); setBoot(r.data);
+  }, []);
+  useEffect(() => { void load(); }, [load]);
+
+  if (err) return <Empty title={t(err === 'forbidden' ? 'err.forbidden' : err.startsWith('auth_') ? 'err.auth' : 'err.network')} icon="info" action={<Button onClick={() => void load()}>{t('btn.retry')}</Button>} />;
+  if (!boot) return <div class="page"><Skeleton lines={6} /></div>;
+  const tabs: { value: Tab; label: string }[] = [
+    { value: 'cal', label: t('adm.tab_calendar') }, { value: 'staff', label: t('adm.tab_staff') },
+    ...(boot.can_manage ? [{ value: 'svc' as Tab, label: t('adm.tab_services') }] : []), { value: 'set', label: t('adm.tab_settings') },
+  ];
+  return (
+    <>
+      <div class="adm-tabs"><Segmented options={tabs} value={tab} onChange={setTab} /></div>
+      {tab === 'cal' && <Calendar boot={boot} toast={toast} reloadBoot={load} />}
+      {tab === 'staff' && <StaffTab boot={boot} toast={toast} reloadBoot={load} />}
+      {tab === 'svc' && <ServicesTab boot={boot} toast={toast} reloadBoot={load} />}
+      {tab === 'set' && <SettingsTab boot={boot} toast={toast} reloadBoot={load} onClientView={onClientView} />}
+      <Toast text={toastText} />
+    </>
+  );
+}
