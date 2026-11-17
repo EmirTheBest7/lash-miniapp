@@ -114,7 +114,7 @@
   "adm.copied": "Copied.",
   "adm.buffer": "{n} min buffer",
   "adm.staff": "Specialist",
-  "adm.auto": "automatic",
+  "adm.auto": "Automatic messages (reminders, evening list, waitlist offers, expiry)",
   "adm.assign_to": "Assign to",
   "adm.phone": "Phone",
   "adm.confirm": "Confirm",
@@ -269,5 +269,7 @@
   "adm.backup_last": "Last backup: {h} h ago",
   "adm.backup_none": "No backup yet.",
   "adm.ad_days": "Ads: at most one per client every … days",
-  "adm.bc_skipped": "{n} skipped (got an ad within {d} days)."
+  "adm.bc_skipped": "{n} skipped (got an ad within {d} days).",
+  "adm.auto_off": "OFF: nothing is sent automatically. Check /status → Preview next 24 h, then switch it on.",
+  "adm.wl_notice": "Waitlist offers: minimum notice (hours)"
 }

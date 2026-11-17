@@ -114,7 +114,7 @@
   "adm.copied": "Zkopírováno.",
   "adm.buffer": "rezerva {n} min",
   "adm.staff": "Specialistka",
-  "adm.auto": "automaticky",
+  "adm.auto": "Automatické zprávy (připomínky, večerní seznam, nabídky z čekací listiny, expirace)",
   "adm.assign_to": "Předat komu",
   "adm.phone": "Telefon",
   "adm.confirm": "Potvrdit",
@@ -269,5 +269,7 @@
   "adm.backup_last": "Poslední záloha: před {h} h",
   "adm.backup_none": "Zatím žádná záloha.",
   "adm.ad_days": "Reklama: nejvýše jedna na klienta za … dní",
-  "adm.bc_skipped": "Přeskočeno {n} (reklamu dostali do {d} dnů)."
+  "adm.bc_skipped": "Přeskočeno {n} (reklamu dostali do {d} dnů).",
+  "adm.auto_off": "VYPNUTO: nic se neposílá automaticky. Zkontrolujte /status → Náhled 24 h a pak zapněte.",
+  "adm.wl_notice": "Nabídky z čekací listiny: minimální předstih (hodiny)"
 }

@@ -18,6 +18,7 @@ export interface ClientHit { id: number; name: string; phone: string | null; use
 export type MoveData = { outcome: string; appointment?: AdmAppt; alternatives?: { start: number; time: string; date: string }[]; reason?: string };
 
 export interface SchedSettings {
+  automation_on: boolean; waitlist_min_notice_h: number;
   rem1_on: boolean; rem1_h: number; rem1_auto: boolean; rem1_warn: boolean; rem2_on: boolean; rem2_h: number;
   rem_unanswered_on: boolean; rem_unanswered_h: number; agenda_on: boolean; agenda_time: string; agenda_empty: boolean;
   waitlist_on: boolean; waitlist_offer_h: number; backup_on: boolean; backup_time: string; backup_key: boolean; backup_last: number; ad_min_days: number;

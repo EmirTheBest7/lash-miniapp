@@ -38,7 +38,7 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView }: { boot: A
   const numField = (key: 'min_notice_h' | 'horizon_days' | 'cancel_cutoff_h', label: string) => (
     <label class="field"><span>{label}</span><input type="number" inputMode="numeric" min={0} value={s[key]} onChange={(e) => void save({ [key]: Math.max(0, Math.round(Number((e.target as HTMLInputElement).value) || 0)) })} /></label>
   );
-  const hoursField = (key: 'rem1_h' | 'rem2_h' | 'rem_unanswered_h' | 'ad_min_days', label: string, lo: number, hi: number) => (
+  const hoursField = (key: 'rem1_h' | 'rem2_h' | 'rem_unanswered_h' | 'ad_min_days' | 'waitlist_min_notice_h', label: string, lo: number, hi: number) => (
     <label class="field"><span>{label}</span><input type="number" inputMode="numeric" min={lo} max={hi} value={key === 'rem1_h' && s.rem1_auto ? 0 : s[key]} onChange={(e) => void save({ [key]: Math.min(hi, Math.max(lo, Math.round(Number((e.target as HTMLInputElement).value) || 0))) })} /></label>
   );
   return (
@@ -87,6 +87,8 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView }: { boot: A
       )}
       {boot.can_manage && (
         <Section title={t('adm.rem')} footer={t('adm.rem_note')}>
+          <Cell title={t('adm.auto')} after={<Switch label={t('adm.auto')} checked={s.automation_on} onChange={(on) => void save({ automation_enabled: on } as Partial<AdminSettings>)} />} />
+          {!s.automation_on && <div class="note" data-testid="auto-off">{t('adm.auto_off')}</div>}
           <Cell title={t('adm.rem1')} after={<Switch label={t('adm.rem1')} checked={s.rem1_on} onChange={(on) => void save({ rem1_on: on })} />} />
           {s.rem1_on && hoursField('rem1_h', t('adm.rem1_h'), 0, 168)}
           {s.rem1_on && s.rem1_warn && <div class="note" data-testid="rem1-warn">{t('adm.rem1_warn')}</div>}
@@ -103,6 +105,7 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView }: { boot: A
               {!s.backup_key ? t('adm.backup_nokey') : s.backup_last ? t('adm.backup_last', { h: Math.floor((Date.now() / 1000 - s.backup_last) / 3600) }) : t('adm.backup_none')}
             </div>
           )}
+          {s.waitlist_on && hoursField('waitlist_min_notice_h', t('adm.wl_notice'), 0, 72)}
           {hoursField('ad_min_days', t('adm.ad_days'), 0, 365)}
         </Section>
       )}

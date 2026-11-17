@@ -251,7 +251,7 @@ test('offers broadcast: admins see the audience, send a test, and a real send ne
   await open(page);
   await page.getByRole('tab', { name: 'Settings' }).click();
   await expect(page.getByTestId('bc-audience')).toContainText('2 of 5 clients');
-  await page.getByLabel('Message').fill('-20% on lashes this week');
+  await page.getByLabel('Message', { exact: true }).fill('-20% on lashes this week');
   await page.getByRole('button', { name: 'Send a test to me' }).click();
   await toast(page, 'Test sent to you');
   await page.getByRole('button', { name: 'Send to clients' }).click();
@@ -263,6 +263,10 @@ test('reminder settings: switches and hours save; a first reminder shorter than 
   await open(page);
   await page.getByRole('tab', { name: 'Settings' }).click();
   await expect(page.getByText('Reminders and schedule')).toBeVisible();
+  await expect(page.getByTestId('auto-off')).toBeVisible();
+  await page.getByRole('switch', { name: /Automatic messages/ }).click();
+  await toast(page, 'Saved');
+  await expect(page.getByTestId('auto-off')).toHaveCount(0);
   await expect(page.getByTestId('backup-status')).toContainText('BACKUP_KEY is missing');
   await expect(page.getByLabel('Hours before (0 = automatic: cancel cutoff + 2)')).toHaveValue('0');
   await page.getByLabel('Hours before (0 = automatic: cancel cutoff + 2)').fill('20');
