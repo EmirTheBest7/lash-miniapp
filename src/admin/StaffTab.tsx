@@ -49,7 +49,7 @@ function Editor({ boot, initial, toast, onClose }: { boot: AdminBoot; initial: S
   const id = initial?.id;
 
   const setDay = (d: number, v: [string, string][]) => setWeekly((w) => ({ ...w, [String(d)]: v }));
-  const err = (code: string, message?: string) => t(message === 'not_a_master' ? 'adm.not_a_master' : code === 'already_linked' ? 'adm.already_linked' : code === 'has_future' ? 'adm.has_future' : code === 'last_staff' ? 'adm.last_staff' : code === 'forbidden' ? 'err.forbidden' : code === 'bad_request' ? 'adm.bad_input' : 'err.network');
+  const err = (code: string) => t(code === 'already_linked' ? 'adm.already_linked' : code === 'has_future' ? 'adm.has_future' : code === 'last_staff' ? 'adm.last_staff' : code === 'forbidden' ? 'err.forbidden' : code === 'bad_request' ? 'adm.bad_input' : 'err.network');
 
   async function save() {
     if (busy) return;
@@ -60,7 +60,7 @@ function Editor({ boot, initial, toast, onClose }: { boot: AdminBoot; initial: S
         ...(id ? { id } : { copy_hours_from: boot.staff[0]?.id }), name: name.trim(), bio: bio.trim(), color, off,
         ...(me ? { link: 'self' } : /^\d{1,15}$/.test(tgId.trim()) ? { link: 'tg', tg_id: Number(tgId.trim()) } : { link: initial?.linked ? 'none' : 'keep' }),
       }, newOpId());
-      if (!r.ok) { setBusy(false); haptic.error(); toast(err(r.error.code, r.error.message)); return; }
+      if (!r.ok) { setBusy(false); haptic.error(); toast(err(r.error.code)); return; }
       sid = r.data.id;
       if (initial && active !== initial.active) {
         const a = await api('admin/staff/active', { id: sid, active }, newOpId());

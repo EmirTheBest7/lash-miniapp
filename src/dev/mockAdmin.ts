@@ -9,7 +9,7 @@ type Ev = { ok: true; data: unknown } | { ok: false; status: number; error: { co
 
 export interface AdminMockEnv { two: boolean; role: string }
 const state = {
-  staff: [] as StaffRow[], services: [] as SvcRow[], appts: [] as AdmAppt[], blocks: [] as { id: number; staff_id: number; start: number; end: number; reason: string }[],
+  staff: [] as StaffRow[], services: [] as SvcRow[], categories: [] as { id: number; name: string }[], appts: [] as AdmAppt[], blocks: [] as { id: number; staff_id: number; start: number; end: number; reason: string }[],
   overrides: [] as { staff_id: number; date: string; closed: boolean; intervals: [string, string][]; note: string }[],
   settings: { slot_step_min: 30, min_notice_h: 12, horizon_days: 60, cancel_cutoff_h: 24, buffer_may_exceed_close: true }, nextId: 500, inited: false,
   clients: [{ id: 1, name: 'Eva Kovářová', phone: '+420777000111', username: 'eva_k', tg: true }, { id: 2, name: 'Tereza Malá', phone: '+420777000222', username: null, tg: true }, { id: 3, name: 'Bára Svobodová', phone: null, username: null, tg: false }],
@@ -21,11 +21,12 @@ function init(env: AdminMockEnv): void {
   state.staff = [{ id: 1, name: 'Jana', bio: 'Senior lash artist', color: '#d4547a', active: true, linked: true, tg_id: null, mine: true, off: [], weekly: week(), future: 0 }];
   if (env.two) state.staff.push({ id: 2, name: 'Eva', bio: 'Lifting and tinting', color: '#3b82c4', active: true, linked: false, tg_id: null, mine: false, off: [4], weekly: { ...week(), '6': [] }, future: 0 });
   state.services = [
-    { id: 1, name: 'Lash extensions – full set', is_addon: false, duration_min: 150, buffer_min: 15, price: 1800, price_from: false, active: true },
-    { id: 2, name: 'Lash fill', is_addon: false, duration_min: 75, buffer_min: 15, price: 1000, price_from: false, active: true },
-    { id: 3, name: 'Lash lift', is_addon: false, duration_min: 60, buffer_min: 10, price: 0, price_from: false, active: true },
-    { id: 4, name: 'Lash tint', is_addon: true, duration_min: 15, buffer_min: 0, price: 150, price_from: false, active: true },
+    { id: 1, name: 'Lash extensions – full set', is_addon: false, duration_min: 150, buffer_min: 15, price: 1800, price_from: false, active: true, names: { cs: '', en: 'Lash extensions – full set', ru: '', uk: '' }, category_id: 1 },
+    { id: 2, name: 'Lash fill', is_addon: false, duration_min: 75, buffer_min: 15, price: 1000, price_from: false, active: true, names: { cs: '', en: 'Lash fill', ru: '', uk: '' }, category_id: 1 },
+    { id: 3, name: 'Lash lift', is_addon: false, duration_min: 60, buffer_min: 10, price: 0, price_from: false, active: true, names: { cs: '', en: 'Lash lift', ru: '', uk: '' }, category_id: 1 },
+    { id: 4, name: 'Lash tint', is_addon: true, duration_min: 15, buffer_min: 0, price: 150, price_from: false, active: true, names: { cs: '', en: 'Lash tint', ru: '', uk: '' }, category_id: null },
   ];
+  state.categories = [{ id: 1, name: 'Lashes' }];
   const mk = (id: number, staff: number, from: string, svc: number, client: number, status: AdmAppt['status']): AdmAppt => {
     const s = state.services.find((x) => x.id === svc)!, c = state.clients.find((x) => x.id === client)!;
     const start = toUtc('2026-11-16', parseHm(from), TZ);
@@ -53,7 +54,7 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
   const boot = (): AdminBoot => ({
     me: { id: 1, name: 'Anna Nováková', role: owner ? 'owner' : 'master', lang: 'en' }, config: { tz: TZ, studio_name: 'Lash Studio', server_time: NOW, today: '2026-11-16' },
     staff: scope.map((s) => ({ ...s, future: state.appts.filter((a) => a.staff_id === s.id && ['pending', 'confirmed'].includes(a.status)).length })),
-    services: state.services, settings: state.settings, can_manage: owner,
+    services: state.services, categories: state.categories, settings: state.settings, can_manage: owner,
   });
   const apptOf = (id: number) => state.appts.find((a) => a.id === id);
 
@@ -109,7 +110,7 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       let p = d.id ? state.staff.find((s) => s.id === d.id) : undefined;
       if (!p) { p = { id: state.nextId++, name: '', bio: '', color: '', active: true, linked: false, tg_id: null, mine: false, off: [], weekly: JSON.parse(JSON.stringify(state.staff[0]?.weekly ?? {})), future: 0 }; state.staff.push(p); }
       Object.assign(p, { name: d.name, bio: d.bio, color: d.color, off: d.off });
-      if (d.link === 'tg') { if (d.tg_id !== 900002) return { ok: false, status: 400, error: { code: 'bad_request', message: 'not_a_master' } as { code: string } }; p.linked = true; p.mine = false; p.tg_id = d.tg_id; } else if (d.link === 'self') { if (state.staff.some((s) => s.mine && s.id !== p!.id)) return err(409, 'already_linked'); p.mine = true; p.linked = true; } else if (d.link === 'none') { p.mine = false; p.linked = false; }
+      if (d.link === 'tg') { p.linked = true; p.mine = false; p.tg_id = d.tg_id; } else if (d.link === 'self') { if (state.staff.some((s) => s.mine && s.id !== p!.id)) return err(409, 'already_linked'); p.mine = true; p.linked = true; } else if (d.link === 'none') { p.mine = false; p.linked = false; }
       return ok({ id: p.id, staff: boot().staff });
     }
     case 'admin/staff/active': {
@@ -146,8 +147,27 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
     case 'admin/service/save': {
       if (!owner) return err(403, 'forbidden');
       if (d.duration_min % 5 || d.buffer_min % 5 || d.duration_min < 5) return err(400, 'bad_request');
-      Object.assign(state.services.find((s) => s.id === d.id)!, { duration_min: d.duration_min, buffer_min: d.buffer_min, price: d.price, price_from: d.price_from, active: d.active });
-      return ok({ services: state.services });
+      const names = d.names as SvcRow['names'] | undefined;
+      if (!d.id && (!names || !Object.values(names).some((n) => n.trim()))) return err(400, 'bad_request');
+      let cat: number | null = (d.category_id as number | null | undefined) ?? null;
+      if (d.new_category) { cat = state.categories.length + 1; state.categories.push({ id: cat, name: String(d.new_category) }); }
+      const label = names ? (names.en || names.cs || names.ru || names.uk) : '';
+      if (d.id) {
+        const row = state.services.find((s) => s.id === d.id)!;
+        Object.assign(row, { duration_min: d.duration_min, buffer_min: d.buffer_min, price: d.price, price_from: d.price_from, active: d.active });
+        if (names) Object.assign(row, { names, name: label });
+        if (!row.is_addon && ('category_id' in d || d.new_category)) row.category_id = cat;
+      } else {
+        const id = Math.max(0, ...state.services.map((s) => s.id)) + 1;
+        state.services.push({ id, name: label, is_addon: d.is_addon === true, duration_min: d.duration_min, buffer_min: d.buffer_min, price: d.price, price_from: d.price_from, active: d.active, names: names!, category_id: d.is_addon === true ? null : cat });
+      }
+      return ok({ services: state.services, categories: state.categories });
+    }
+    case 'admin/service/delete': {
+      if (!owner) return err(403, 'forbidden');
+      const used = state.appts.some((a) => a.service_id === d.id);
+      if (used) state.services.find((s) => s.id === d.id)!.active = false; else state.services = state.services.filter((s) => s.id !== d.id);
+      return ok({ deleted: !used, services: state.services, categories: state.categories });
     }
     case 'admin/settings/save': { if (!owner) return err(403, 'forbidden'); Object.assign(state.settings, d); return ok({ settings: state.settings }); }
     default: return err(404, 'not_found');

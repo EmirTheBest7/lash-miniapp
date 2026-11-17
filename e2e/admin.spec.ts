@@ -125,14 +125,11 @@ test('staff tab: add a person, set who does what and individual weekly hours wit
   await shot(page, 'admin-staff');
 });
 
-test('linking another person: only an id that is a master in the bot settings is accepted', async ({ page }) => {
+test('linking another person: the owner types any Telegram id and that person becomes a master', async ({ page }) => {
   await open(page);
   await page.getByRole('tab', { name: 'Staff' }).click();
   await page.getByRole('button', { name: /Eva/ }).click();
   await page.getByLabel('Telegram ID of this person').fill('777');
-  await page.getByRole('button', { name: 'Save' }).click();
-  await toast(page, 'not listed as a master');
-  await page.getByLabel('Telegram ID of this person').fill('900002');
   await page.getByRole('button', { name: 'Save' }).click();
   await toast(page, 'Saved');
 });
@@ -182,3 +179,25 @@ for (const [lang, theme, platform] of [['cs', 'light', 'ios'], ['ru', 'dark', 'a
     await shot(page, `admin-${lang}-${theme}-${platform}`);
   });
 }
+
+test('services: add a service and an add-on, rename, then delete one (unused = removed, used = hidden)', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: 'Services' }).click();
+  await page.getByRole('button', { name: 'New service' }).click();
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('status')).toContainText('Enter a name');
+  await page.getByLabel(/^Name · English/).fill('Brow lamination');
+  await page.getByLabel('Category').selectOption({ label: 'New category…' });
+  await page.getByPlaceholder('Category name').fill('Brows');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('button', { name: /Brow lamination/ })).toBeVisible();
+  await page.getByRole('button', { name: 'New add-on' }).click();
+  await page.getByLabel(/^Name · English/).fill('Brow tint');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('button', { name: /Brow tint/ })).toBeVisible();
+  // delete needs a second tap
+  await page.getByRole('button', { name: /Brow tint/ }).click();
+  await page.getByRole('button', { name: 'Delete', exact: true }).click();
+  await page.getByRole('button', { name: 'Tap again to delete' }).click();
+  await expect(page.getByRole('button', { name: /Brow tint/ })).toHaveCount(0);
+});
