@@ -52,7 +52,7 @@ export function App() {
     return <Empty title={t(key)} icon="info" action={state.code.startsWith('auth_') ? undefined : <Button onClick={() => void load(true)}>{t('btn.retry')}</Button>} />;
   }
   const boot = state.boot;
-  if (boot.me.role !== 'client' && !clientView) return Admin ? <Admin onClientView={() => setClientView(true)} /> : <div class="page"><Skeleton lines={6} /></div>;
+  if (boot.me.role !== 'client' && !clientView) return Admin ? <Admin onClientView={() => { setClientView(true); void load(); }} /> : <div class="page"><Skeleton lines={6} /></div>;
   const ctx: Ctx = {
     boot,
     push: (s) => setStack((st) => [...st, s]),
