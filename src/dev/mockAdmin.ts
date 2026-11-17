@@ -115,6 +115,13 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       if (d.link === 'tg') { p.linked = true; p.mine = false; p.tg_id = d.tg_id; } else if (d.link === 'self') { if (state.staff.some((s) => s.mine && s.id !== p!.id)) return err(409, 'already_linked'); p.mine = true; p.linked = true; } else if (d.link === 'none') { p.mine = false; p.linked = false; }
       return ok({ id: p.id, staff: boot().staff });
     }
+    case 'admin/staff/delete': {
+      if (!owner) return err(403, 'forbidden');
+      if (state.staff.length <= 1) return err(409, 'last_staff');
+      if (state.appts.some((a) => a.staff_id === d.id)) return err(409, 'has_history');
+      state.staff = state.staff.filter((s) => s.id !== d.id);
+      return ok({ staff: boot().staff });
+    }
     case 'admin/staff/active': {
       if (!owner) return err(403, 'forbidden');
       const p = state.staff.find((s) => s.id === d.id);

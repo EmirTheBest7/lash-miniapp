@@ -47,10 +47,21 @@ function Editor({ boot, initial, toast, onClose }: { boot: AdminBoot; initial: S
   const [tgId, setTgId] = useState(initial?.tg_id && !initial.mine ? String(initial.tg_id) : '');
   const [weekly, setWeekly] = useState<Record<string, [string, string][]>>(initial ? JSON.parse(JSON.stringify(initial.weekly)) : JSON.parse(JSON.stringify(boot.staff[0]?.weekly ?? {})));
   const [busy, setBusy] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
   const id = initial?.id;
 
   const setDay = (d: number, v: [string, string][]) => setWeekly((w) => ({ ...w, [String(d)]: v }));
-  const err = (code: string) => t(code === 'self_demote' ? 'adm.self_demote' : code === 'already_linked' ? 'adm.already_linked' : code === 'has_future' ? 'adm.has_future' : code === 'last_staff' ? 'adm.last_staff' : code === 'forbidden' ? 'err.forbidden' : code === 'bad_request' ? 'adm.bad_input' : 'err.network');
+  const err = (code: string) => t(code === 'has_history' ? 'adm.has_history' : code === 'self_demote' ? 'adm.self_demote' : code === 'already_linked' ? 'adm.already_linked' : code === 'has_future' ? 'adm.has_future' : code === 'last_staff' ? 'adm.last_staff' : code === 'forbidden' ? 'err.forbidden' : code === 'bad_request' ? 'adm.bad_input' : 'err.network');
+
+  async function remove() {
+    if (busy || !id) return;
+    if (!confirmDel) { setConfirmDel(true); return; }
+    setBusy(true);
+    const r = await api('admin/staff/delete', { id }, newOpId());
+    setBusy(false);
+    if (!r.ok) { setConfirmDel(false); haptic.error(); toast(err(r.error.code)); return; }
+    haptic.success(); toast(t('adm.deleted')); await onClose(true);
+  }
 
   async function save() {
     if (busy) return;
@@ -125,6 +136,7 @@ function Editor({ boot, initial, toast, onClose }: { boot: AdminBoot; initial: S
       </Section>
       <Button onClick={() => void save()} disabled={busy || (own && !initial && !name.trim())}>{busy ? '…' : t('adm.save')}</Button>
       <Button secondary onClick={() => void onClose(false)}>{t('short.cancel')}</Button>
+      {own && initial && <Button secondary onClick={() => void remove()} disabled={busy}>{confirmDel ? t('adm.delete_confirm') : t('adm.delete')}</Button>}
     </div>
   );
 }

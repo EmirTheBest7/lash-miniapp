@@ -226,3 +226,23 @@ test('loyalty settings: switch it on, set visits and percent; approve a waiting 
   await page.getByTestId('loy-1').getByRole('button', { name: 'Approve' }).click();
   await expect(page.getByTestId('loy-1')).toHaveCount(0);
 });
+
+test('staff delete: a person with bookings is refused with a hint; a new empty person is removed after a second tap', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: 'Staff' }).click();
+  await page.getByRole('button', { name: /Eva/ }).click();
+  await page.getByRole('button', { name: 'Delete', exact: true }).click();
+  await page.getByRole('button', { name: 'Tap again to delete' }).click();
+  await toast(page, 'Past bookings exist');
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  await page.getByRole('button', { name: 'Add staff member' }).click();
+  await page.getByLabel('Name').fill('Temp');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await toast(page, 'Saved');
+  await page.getByRole('button', { name: /Temp/ }).click();
+  await page.getByRole('button', { name: 'Delete', exact: true }).click();
+  await page.getByRole('button', { name: 'Tap again to delete' }).click();
+  await toast(page, 'Deleted');
+  await expect(page.getByRole('button', { name: /Temp/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Eva/ })).toBeVisible();
+});

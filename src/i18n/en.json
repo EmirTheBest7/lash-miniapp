@@ -235,5 +235,6 @@
   "adm.approve": "Approve",
   "adm.decline": "Decline",
   "adm.loy_approved": "Approved",
-  "adm.loy_declined": "Declined"
+  "adm.loy_declined": "Declined",
+  "adm.has_history": "Past bookings exist, so this person cannot be deleted. Switch Active off instead."
 }

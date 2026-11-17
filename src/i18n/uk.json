@@ -235,5 +235,6 @@
   "adm.approve": "Схвалити",
   "adm.decline": "Відхилити",
   "adm.loy_approved": "Схвалено",
-  "adm.loy_declined": "Відхилено"
+  "adm.loy_declined": "Відхилено",
+  "adm.has_history": "Є минулі записи, тому видалити не можна. Натомість вимкніть «Активний»."
 }

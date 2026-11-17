@@ -235,5 +235,6 @@
   "adm.approve": "Schválit",
   "adm.decline": "Zamítnout",
   "adm.loy_approved": "Schváleno",
-  "adm.loy_declined": "Zamítnuto"
+  "adm.loy_declined": "Zamítnuto",
+  "adm.has_history": "Existují minulé rezervace, takže osobu nelze smazat. Vypněte místo toho „Aktivní“."
 }
