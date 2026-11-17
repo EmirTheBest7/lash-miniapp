@@ -240,7 +240,7 @@
   "home.offers": "Nabídky a novinky",
   "home.offers_note": "Občasné nabídky a slevy od studia. Kdykoli lze vypnout.",
   "adm.bc": "Nabídky klientům",
-  "adm.bc_note": "Odesílá se každému klientovi, který přijal ochranu údajů a neodhlásil se. Každá zpráva má tlačítko Odhlásit a znovu se lze kdykoli přihlásit. Odchází asi 25 zpráv za minutu.",
+  "adm.bc_note": "Odesílá se každému klientovi, který bota používal a neodhlásil se. Každá zpráva má jedno tlačítko: Odhlásit, které se změní na Přihlásit znovu. Odchází asi 25 zpráv za minutu.",
   "adm.bc_text": "Zpráva",
   "adm.bc_audience": "Dostane ji {n} z {total} klientů.",
   "adm.bc_test": "Poslat test mně",

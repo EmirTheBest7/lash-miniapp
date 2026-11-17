@@ -240,7 +240,7 @@
   "home.offers": "Offers and news",
   "home.offers_note": "Occasional offers and discounts from the studio. You can switch this off any time.",
   "adm.bc": "Offers to clients",
-  "adm.bc_note": "Sent to every client who accepted the privacy notice and has not unsubscribed. Every message has an Unsubscribe button, and they can subscribe again any time. About 25 messages go out per minute.",
+  "adm.bc_note": "Sent to every client who has used the bot and has not unsubscribed. Every message has one button: Unsubscribe, which becomes Subscribe again. About 25 messages go out per minute.",
   "adm.bc_text": "Message",
   "adm.bc_audience": "{n} of {total} clients will receive it.",
   "adm.bc_test": "Send a test to me",
