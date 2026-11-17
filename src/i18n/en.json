@@ -236,5 +236,20 @@
   "adm.decline": "Decline",
   "adm.loy_approved": "Approved",
   "adm.loy_declined": "Declined",
-  "adm.has_history": "Past bookings exist, so this person cannot be deleted. Switch Active off instead."
+  "adm.has_history": "Past bookings exist, so this person cannot be deleted. Switch Active off instead.",
+  "home.offers": "Offers and news",
+  "home.offers_note": "Occasional offers and discounts from the studio. You can switch this off any time.",
+  "adm.bc": "Offers to clients",
+  "adm.bc_note": "Sent only to clients who switched on \"Offers and news\". Every message has an Unsubscribe button. About 25 messages go out per minute.",
+  "adm.bc_text": "Message",
+  "adm.bc_audience": "{n} of {total} clients will receive it.",
+  "adm.bc_test": "Send a test to me",
+  "adm.bc_send": "Send to clients",
+  "adm.bc_confirm": "Tap again: send to {n}",
+  "adm.bc_test_sent": "Test sent to you",
+  "adm.bc_sent": "Queued for {n} clients",
+  "adm.bc_none": "Nobody has switched on offers yet.",
+  "adm.bc_dup": "This exact message was already sent in the last hour.",
+  "adm.bc_many": "Three offers were already sent today.",
+  "adm.bc_changed": "The audience changed. Check the number and tap again."
 }

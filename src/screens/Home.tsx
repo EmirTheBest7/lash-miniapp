@@ -4,7 +4,7 @@ import { dayLong, duration, money } from '../format';
 import { LANGS, setLang, t } from '../i18n';
 import type { Ctx } from '../nav';
 import type { LangCode, Service } from '../types';
-import { Cell, Empty, Section, Segmented, Sheet } from '../ui/components';
+import { Cell, Empty, Section, Segmented, Sheet, Switch } from '../ui/components';
 
 const LANG_NAME: Record<LangCode, string> = { cs: 'Čeština', en: 'English', ru: 'Русский', uk: 'Українська' };
 
@@ -14,6 +14,13 @@ export function Home({ ctx }: { ctx: Ctx }) {
   const all = boot.categories.flatMap((c) => c.services);
   const again = boot.again ? all.find((s) => s.id === boot.again!.service_id) : undefined;
   const sub = (s: Service) => `${duration(s.duration_min)} · ${money(s.price, s.price_from)}`;
+
+  const [mk, setMk] = useState(boot.marketing);
+  async function toggleMarketing(on: boolean) {
+    setMk(on);
+    const r = await api('marketing', { on }, newOpId());
+    if (!r.ok) setMk(!on);
+  }
 
   async function changeLang(l: LangCode) {
     setLangOpen(false);
@@ -44,6 +51,7 @@ export function Home({ ctx }: { ctx: Ctx }) {
       {boot.me.role !== 'client' && <Section><Cell icon="settings" title={t('home.staff_app')} chevron onClick={() => ctx.exitClientView?.()} /></Section>}
       <Section>
         <Cell icon="list" title={t('home.my')} after={boot.my.length ? String(boot.my.length) : undefined} chevron onClick={() => ctx.push({ k: 'appts' })} />
+        <Cell icon="settings" title={t('home.offers')} subtitle={t('home.offers_note')} after={<Switch label={t('home.offers')} checked={mk} onChange={(on) => void toggleMarketing(on)} />} />
         <Cell icon="settings" title={t('home.language')} after={LANG_NAME[boot.me.lang]} chevron onClick={() => setLangOpen(true)} />
       </Section>
       <Sheet open={langOpen} onClose={() => setLangOpen(false)} title={t('home.language')}>

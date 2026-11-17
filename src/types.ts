@@ -18,6 +18,7 @@ export interface Bootstrap {
   again: { service_id: number; suggest: string } | null;
   policy: { cancel_cutoff_h: number; horizon_days: number };
   privacy: { title: string; text: string };
+  marketing: boolean;
   loyalty: { visits: number; percent: number; progress: number; ready: number | null; pending: boolean } | null;
 }
 export type Outcome = 'ok' | 'idempotent' | 'slot_taken' | 'needs_gate' | 'too_late' | 'not_active' | 'illegal_state';

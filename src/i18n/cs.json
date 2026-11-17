@@ -236,5 +236,20 @@
   "adm.decline": "Zamítnout",
   "adm.loy_approved": "Schváleno",
   "adm.loy_declined": "Zamítnuto",
-  "adm.has_history": "Existují minulé rezervace, takže osobu nelze smazat. Vypněte místo toho „Aktivní“."
+  "adm.has_history": "Existují minulé rezervace, takže osobu nelze smazat. Vypněte místo toho „Aktivní“.",
+  "home.offers": "Nabídky a novinky",
+  "home.offers_note": "Občasné nabídky a slevy od studia. Kdykoli lze vypnout.",
+  "adm.bc": "Nabídky klientům",
+  "adm.bc_note": "Odesílá se jen klientům, kteří zapnuli „Nabídky a novinky“. Každá zpráva má tlačítko Odhlásit. Odchází asi 25 zpráv za minutu.",
+  "adm.bc_text": "Zpráva",
+  "adm.bc_audience": "Dostane ji {n} z {total} klientů.",
+  "adm.bc_test": "Poslat test mně",
+  "adm.bc_send": "Poslat klientům",
+  "adm.bc_confirm": "Klepněte znovu: odeslat {n}",
+  "adm.bc_test_sent": "Test odeslán vám",
+  "adm.bc_sent": "Zařazeno pro {n} klientů",
+  "adm.bc_none": "Nabídky zatím nikdo nezapnul.",
+  "adm.bc_dup": "Přesně tato zpráva už byla odeslána v poslední hodině.",
+  "adm.bc_many": "Dnes už byly odeslány tři nabídky.",
+  "adm.bc_changed": "Počet příjemců se změnil. Zkontrolujte číslo a klepněte znovu."
 }

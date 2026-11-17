@@ -16,3 +16,5 @@ export interface Override { staff_id: number; date: string; closed: boolean; int
 export interface CalData { from: string; days: number; appointments: AdmAppt[]; work: Record<string, Record<string, [number, number][]>>; blocks: Block[]; overrides: Override[] }
 export interface ClientHit { id: number; name: string; phone: string | null; username: string | null; tg: boolean }
 export type MoveData = { outcome: string; appointment?: AdmAppt; alternatives?: { start: number; time: string; date: string }[]; reason?: string };
+
+export interface BroadcastInfo { optin: number; clients: number; last: { text: string; recipients: number; at: number } | null }

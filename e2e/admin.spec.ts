@@ -246,3 +246,22 @@ test('staff delete: a person with bookings is refused with a hint; a new empty p
   await expect(page.getByRole('button', { name: /Temp/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Eva/ })).toBeVisible();
 });
+
+test('offers broadcast: admins see the audience, send a test, and a real send needs a second tap', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await expect(page.getByTestId('bc-audience')).toContainText('2 of 5 clients');
+  await page.getByLabel('Message').fill('-20% on lashes this week');
+  await page.getByRole('button', { name: 'Send a test to me' }).click();
+  await toast(page, 'Test sent to you');
+  await page.getByRole('button', { name: 'Send to clients' }).click();
+  await page.getByRole('button', { name: 'Tap again: send to 2' }).click();
+  await toast(page, 'Queued for 2 clients');
+});
+
+test('a master (not an admin) does not see the broadcast form', async ({ page }) => {
+  await blockTelegramScript(page);
+  await page.goto(`${BASE}?mock=1&role=master&staff=2`);
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await expect(page.getByText('Offers to clients')).toHaveCount(0);
+});

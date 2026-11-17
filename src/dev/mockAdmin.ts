@@ -178,6 +178,11 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       if (used) state.services.find((s) => s.id === d.id)!.active = false; else state.services = state.services.filter((s) => s.id !== d.id);
       return ok({ deleted: !used, services: state.services, categories: state.categories });
     }
+    case 'admin/broadcast/info': return ok({ optin: 2, clients: 5, last: null });
+    case 'admin/broadcast/send': {
+      if (!owner) return err(403, 'forbidden');
+      return ok({ sent: d.test ? 1 : 2, test: d.test === true, optin: 2, clients: 5, last: null });
+    }
     case 'admin/loyalty/decide': {
       if (!owner) return err(403, 'forbidden');
       state.loyaltyPending = state.loyaltyPending.filter((p) => p.id !== d.id);

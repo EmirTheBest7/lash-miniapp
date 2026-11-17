@@ -215,3 +215,11 @@ test('loyalty: the card shows progress; an approved discount is applied and show
   await expect(page.getByText('−10%')).toBeVisible();
   await expect(page.getByText('900 Kč')).toBeVisible();                    // 1000 - 10%
 });
+
+test('offers and news: the client switches it on from the home screen', async ({ page }) => {
+  await open(page);
+  const sw = page.getByRole('switch', { name: 'Offers and news' });
+  await expect(sw).not.toBeChecked();
+  await sw.click();
+  await expect(sw).toBeChecked();
+});
