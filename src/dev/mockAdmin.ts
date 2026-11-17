@@ -11,7 +11,9 @@ export interface AdminMockEnv { two: boolean; role: string }
 const state = {
   staff: [] as StaffRow[], services: [] as SvcRow[], categories: [] as { id: number; name: string }[], appts: [] as AdmAppt[], blocks: [] as { id: number; staff_id: number; start: number; end: number; reason: string }[],
   overrides: [] as { staff_id: number; date: string; closed: boolean; intervals: [string, string][]; note: string }[],
-  settings: { slot_step_min: 30, min_notice_h: 12, horizon_days: 60, cancel_cutoff_h: 24, buffer_may_exceed_close: true, loyalty_enabled: false, loyalty_visits: 7, loyalty_percent: 10 }, loyaltyPending: [{ id: 1, client: 'Anna Nováková', percent: 10 }] as { id: number; client: string; percent: number }[], nextId: 500, inited: false,
+  settings: { slot_step_min: 30, min_notice_h: 12, horizon_days: 60, cancel_cutoff_h: 24, buffer_may_exceed_close: true, loyalty_enabled: false, loyalty_visits: 7, loyalty_percent: 10,
+    rem1_on: true, rem1_h: 26, rem1_auto: true, rem1_warn: false, rem2_on: true, rem2_h: 3, rem_unanswered_on: true, rem_unanswered_h: 12, agenda_on: true, agenda_time: '20:00', agenda_empty: false,
+    waitlist_on: true, waitlist_offer_h: 2, backup_on: true, backup_time: '03:30', backup_key: false, backup_last: 0, ad_min_days: 7 }, loyaltyPending: [{ id: 1, client: 'Anna Nováková', percent: 10 }] as { id: number; client: string; percent: number }[], nextId: 500, inited: false,
   clients: [{ id: 1, name: 'Eva Kovářová', phone: '+420777000111', username: 'eva_k', tg: true }, { id: 2, name: 'Tereza Malá', phone: '+420777000222', username: null, tg: true }, { id: 3, name: 'Bára Svobodová', phone: null, username: null, tg: false }],
 };
 
@@ -178,17 +180,17 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       if (used) state.services.find((s) => s.id === d.id)!.active = false; else state.services = state.services.filter((s) => s.id !== d.id);
       return ok({ deleted: !used, services: state.services, categories: state.categories });
     }
-    case 'admin/broadcast/info': return ok({ optin: 2, clients: 5, last: null });
+    case 'admin/broadcast/info': return ok({ optin: 2, clients: 5, skipped: 1, min_days: 7, last: null });
     case 'admin/broadcast/send': {
       if (!owner) return err(403, 'forbidden');
-      return ok({ sent: d.test ? 1 : 2, test: d.test === true, optin: 2, clients: 5, last: null });
+      return ok({ sent: d.test ? 1 : 2, skipped: d.test ? 0 : 1, test: d.test === true, optin: 2, clients: 5, last: null });
     }
     case 'admin/loyalty/decide': {
       if (!owner) return err(403, 'forbidden');
       state.loyaltyPending = state.loyaltyPending.filter((p) => p.id !== d.id);
       return ok({ loyalty_pending: state.loyaltyPending });
     }
-    case 'admin/settings/save': { if (!owner) return err(403, 'forbidden'); Object.assign(state.settings, d); return ok({ settings: state.settings }); }
+    case 'admin/settings/save': { if (!owner) return err(403, 'forbidden'); Object.assign(state.settings, d); if ('rem1_h' in d) { state.settings.rem1_auto = d.rem1_h === 0; state.settings.rem1_h = d.rem1_h === 0 ? state.settings.cancel_cutoff_h + 2 : d.rem1_h; state.settings.rem1_warn = !state.settings.rem1_auto && state.settings.rem1_h < state.settings.cancel_cutoff_h + 1; } return ok({ settings: state.settings }); }
     default: return err(404, 'not_found');
   }
 }

@@ -259,6 +259,22 @@ test('offers broadcast: admins see the audience, send a test, and a real send ne
   await toast(page, 'Queued for 2 clients');
 });
 
+test('reminder settings: switches and hours save; a first reminder shorter than the cancel cutoff shows a warning; backups say when the key is missing', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await expect(page.getByText('Reminders and schedule')).toBeVisible();
+  await expect(page.getByTestId('backup-status')).toContainText('BACKUP_KEY is missing');
+  await expect(page.getByLabel('Hours before (0 = automatic: cancel cutoff + 2)')).toHaveValue('0');
+  await page.getByLabel('Hours before (0 = automatic: cancel cutoff + 2)').fill('20');
+  await page.getByLabel('Hours before (0 = automatic: cancel cutoff + 2)').blur();
+  await toast(page, 'Saved');
+  await expect(page.getByTestId('rem1-warn')).toBeVisible();
+  await page.getByRole('switch', { name: 'Second reminder (address and pre-care)' }).click();
+  await toast(page, 'Saved');
+  await expect(page.getByLabel('Hours before', { exact: true })).toHaveCount(0);
+  await expect(page.getByTestId('bc-audience')).toContainText('1 skipped');
+});
+
 test('a master (not an admin) does not see the broadcast form', async ({ page }) => {
   await blockTelegramScript(page);
   await page.goto(`${BASE}?mock=1&role=master&staff=2`);
