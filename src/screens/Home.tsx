@@ -24,6 +24,11 @@ export function Home({ ctx }: { ctx: Ctx }) {
   return (
     <div class="page">
       <h1 class="large">{boot.config.studio_name || t('home.title')}</h1>
+      {boot.loyalty && (
+        <Section>
+          <Cell icon="calendar" title={t('loy.title')} subtitle={boot.loyalty.ready !== null ? t('loy.ready', { p: boot.loyalty.ready }) : boot.loyalty.pending ? t('loy.pending') : t('loy.progress', { n: boot.loyalty.progress, total: boot.loyalty.visits, p: boot.loyalty.percent })} after={`${boot.loyalty.progress}/${boot.loyalty.visits}`} />
+        </Section>
+      )}
       {again && boot.again && (
         <Section>
           <Cell icon="calendar" title={t('home.book_again', { service: again.name })} subtitle={t('home.suggested', { date: dayLong(boot.again.suggest) })} chevron

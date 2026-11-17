@@ -219,5 +219,21 @@
   "adm.admin": "Administrator",
   "adm.admin_note": "Full control: all calendars, staff, services and settings. Without it, this person only sees their own calendar.",
   "adm.admin_badge": "Admin",
-  "adm.self_demote": "You cannot remove your own administrator access."
+  "adm.self_demote": "You cannot remove your own administrator access.",
+  "loy.title": "Loyalty card",
+  "loy.progress": "{n} of {total} visits. A {p}% discount after {total}.",
+  "loy.ready": "You have {p}% off your next booking.",
+  "loy.pending": "A discount is waiting for approval.",
+  "sum.loyalty": "Loyalty discount",
+  "adm.loyalty": "Loyalty programme",
+  "adm.loyalty_on": "Reward regular clients",
+  "adm.loyalty_note": "Completed visits count. When a client reaches the number below, you approve a percentage discount for their next booking.",
+  "adm.loy_visits": "Visits needed",
+  "adm.loy_percent": "Discount (%)",
+  "adm.loy_pending": "Waiting for your approval",
+  "adm.loy_offer": "{p}% off the next booking",
+  "adm.approve": "Approve",
+  "adm.decline": "Decline",
+  "adm.loy_approved": "Approved",
+  "adm.loy_declined": "Declined"
 }

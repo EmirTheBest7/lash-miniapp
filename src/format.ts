@@ -41,3 +41,6 @@ export const daypart = (time: string): 'morning' | 'afternoon' | 'evening' => {
   const h = Number(time.slice(0, 2));
   return h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
 };
+
+/** Same rounding as the server (LoyaltyRepo::apply): whole crowns, nearest. */
+export const applyDiscount = (price: number, percent: number): number => Math.floor((price * (100 - percent) * 2 + 100) / 200);

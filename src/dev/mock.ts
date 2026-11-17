@@ -78,6 +78,7 @@ export function installMockApi(): void {
           start_param: null, categories: [{ id: 1, name: 'Lashes', services: SERVICES }], addons: ADDONS, my: st.my,
           again: q.has('again') ? { service_id: 2, suggest: iso(dayN(2)) } : null,
           policy: { cancel_cutoff_h: 24, horizon_days: 60 },
+          loyalty: q.get('loyalty') === 'ready' ? { visits: 7, percent: 10, progress: 0, ready: 10, pending: false } : q.get('loyalty') === 'card' ? { visits: 7, percent: 10, progress: 3, ready: null, pending: false } : null,
           privacy: { title: 'Privacy notice (draft – needs review)', text: 'We keep only what is necessary: your Telegram ID, name, phone, language and booking history.\nThe master is the data controller.' },
         });
       case 'language': st.lang = d.lang; return ok({ lang: d.lang });

@@ -219,5 +219,21 @@
   "adm.admin": "Administrátor",
   "adm.admin_note": "Plná kontrola: všechny kalendáře, personál, služby a nastavení. Bez toho vidí jen svůj kalendář.",
   "adm.admin_badge": "Admin",
-  "adm.self_demote": "Vlastní administrátorský přístup nelze odebrat."
+  "adm.self_demote": "Vlastní administrátorský přístup nelze odebrat.",
+  "loy.title": "Věrnostní karta",
+  "loy.progress": "{n} z {total} návštěv. Po {total} sleva {p} %.",
+  "loy.ready": "Máte slevu {p} % na příští rezervaci.",
+  "loy.pending": "Sleva čeká na schválení.",
+  "sum.loyalty": "Věrnostní sleva",
+  "adm.loyalty": "Věrnostní program",
+  "adm.loyalty_on": "Odměňovat stálé klienty",
+  "adm.loyalty_note": "Počítají se dokončené návštěvy. Když klient dosáhne počtu níže, schválíte mu procentní slevu na příští rezervaci.",
+  "adm.loy_visits": "Potřebný počet návštěv",
+  "adm.loy_percent": "Sleva (%)",
+  "adm.loy_pending": "Čeká na vaše schválení",
+  "adm.loy_offer": "Sleva {p} % na příští rezervaci",
+  "adm.approve": "Schválit",
+  "adm.decline": "Zamítnout",
+  "adm.loy_approved": "Schváleno",
+  "adm.loy_declined": "Zamítnuto"
 }

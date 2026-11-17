@@ -213,3 +213,16 @@ test('administrator: the owner makes a person an admin (needs a Telegram ID) and
   await toast(page, 'Saved');
   await expect(page.getByRole('button', { name: /Eva · Admin/ })).toBeVisible();
 });
+
+test('loyalty settings: switch it on, set visits and percent; approve a waiting discount', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await expect(page.getByTestId('loy-1')).toBeVisible();
+  await page.getByRole('switch', { name: 'Reward regular clients' }).click();
+  await page.getByLabel('Visits needed').fill('5');
+  await page.getByLabel('Discount (%)').fill('15');
+  await page.getByLabel('Discount (%)').blur();
+  await toast(page, 'Saved');
+  await page.getByTestId('loy-1').getByRole('button', { name: 'Approve' }).click();
+  await expect(page.getByTestId('loy-1')).toHaveCount(0);
+});

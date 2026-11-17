@@ -2,7 +2,7 @@ import { useState } from 'preact/hooks';
 import { api, newOpId } from '../api';
 import { t } from '../i18n';
 import { haptic } from '../tg';
-import { Cell, Section, Segmented, Switch } from '../ui/components';
+import { Button, Cell, Section, Segmented, Switch } from '../ui/components';
 import type { AdminBoot, AdminSettings } from './types';
 
 export function SettingsTab({ boot, toast, reloadBoot, onClientView }: { boot: AdminBoot; toast: (s: string) => void; reloadBoot: () => Promise<void>; onClientView: () => void }) {
@@ -13,6 +13,11 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView }: { boot: A
     const r = await api('admin/settings/save', patch, newOpId());
     if (!r.ok) { haptic.error(); setS(s); toast(t(r.error.code === 'bad_request' ? 'adm.bad_input' : 'err.network')); return; }
     haptic.success(); toast(t('adm.saved')); await reloadBoot();
+  }
+  async function decide(id: number, approve: boolean) {
+    const r = await api('admin/loyalty/decide', { id, approve }, newOpId());
+    if (!r.ok && r.status !== 409) { haptic.error(); toast(t('err.network')); return; }
+    haptic.success(); toast(t(approve ? 'adm.loy_approved' : 'adm.loy_declined')); await reloadBoot();
   }
   const numField = (key: 'min_notice_h' | 'horizon_days' | 'cancel_cutoff_h', label: string) => (
     <label class="field"><span>{label}</span><input type="number" inputMode="numeric" min={0} value={s[key]} onChange={(e) => void save({ [key]: Math.max(0, Math.round(Number((e.target as HTMLInputElement).value) || 0)) })} /></label>
@@ -33,6 +38,32 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView }: { boot: A
           <Section footer={t('adm.buffer_close_note')}>
             <Cell title={t('adm.buffer_close')} after={<Switch label={t('adm.buffer_close')} checked={!s.buffer_may_exceed_close} onChange={(on) => void save({ buffer_may_exceed_close: !on })} />} />
           </Section>
+        </>
+      )}
+      {boot.can_manage && (
+        <>
+          <Section title={t('adm.loyalty')} footer={t('adm.loyalty_note')}>
+            <Cell title={t('adm.loyalty_on')} after={<Switch label={t('adm.loyalty_on')} checked={s.loyalty_enabled} onChange={(on) => void save({ loyalty_enabled: on })} />} />
+            {s.loyalty_enabled && (
+              <>
+                <label class="field"><span>{t('adm.loy_visits')}</span><input type="number" inputMode="numeric" min={2} max={50} value={s.loyalty_visits} onChange={(e) => void save({ loyalty_visits: Math.min(50, Math.max(2, Math.round(Number((e.target as HTMLInputElement).value) || 7))) })} /></label>
+                <label class="field"><span>{t('adm.loy_percent')}</span><input type="number" inputMode="numeric" min={1} max={90} value={s.loyalty_percent} onChange={(e) => void save({ loyalty_percent: Math.min(90, Math.max(1, Math.round(Number((e.target as HTMLInputElement).value) || 10))) })} /></label>
+              </>
+            )}
+          </Section>
+          {boot.loyalty_pending.length > 0 && (
+            <Section title={t('adm.loy_pending')}>
+              {boot.loyalty_pending.map((p) => (
+                <div key={p.id} data-testid={`loy-${p.id}`}>
+                  <Cell title={p.client} subtitle={t('adm.loy_offer', { p: p.percent })} />
+                  <div class="row2">
+                    <Button onClick={() => void decide(p.id, true)}>{t('adm.approve')}</Button>
+                    <Button secondary onClick={() => void decide(p.id, false)}>{t('adm.decline')}</Button>
+                  </div>
+                </div>
+              ))}
+            </Section>
+          )}
         </>
       )}
       <Section footer={t('adm.client_view_note')}>

@@ -203,3 +203,15 @@ test('opening the app takes ONE API call; choosing a service takes ONE more', as
   await expect(page.getByRole('button', { name: '10:30', exact: true })).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { __calls: string[] }).__calls)).toEqual(['bootstrap', 'availability']);
 });
+
+test('loyalty: the card shows progress; an approved discount is applied and shown on the summary', async ({ page }) => {
+  await open(page, '&loyalty=card');
+  await expect(page.getByText('3 of 7 visits')).toBeVisible();
+  await expect(page.getByText('3/7')).toBeVisible();
+  await page.goto(`${BASE}?mock=1&loyalty=ready`);
+  await expect(page.getByText('You have 10% off your next booking.')).toBeVisible();
+  await toSummary(page, 'Lash fill');
+  await expect(page.getByText('Loyalty discount')).toBeVisible();
+  await expect(page.getByText('−10%')).toBeVisible();
+  await expect(page.getByText('900 Kč')).toBeVisible();                    // 1000 - 10%
+});

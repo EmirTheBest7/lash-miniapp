@@ -1,6 +1,6 @@
 import { useRef, useState } from 'preact/hooks';
 import { api, newOpId } from '../api';
-import { duration, money, whenLong } from '../format';
+import { applyDiscount, duration, money, whenLong } from '../format';
 import { useBack } from '../hooks';
 import { t } from '../i18n';
 import type { Ctx } from '../nav';
@@ -99,7 +99,8 @@ export function Summary({ ctx, service, addons, slot: initial, quote, move, staf
         {(staff || move?.staff) && <Cell title={t('sum.staff')} after={staff?.name ?? move?.staff ?? ''} />}
         <Cell title={t('sum.service')} subtitle={addonRows.map((a) => '+ ' + a.name).join(' · ') || undefined} after={svc.name} />
         <Cell title={t('sum.duration')} after={duration(dur)} />
-        <Cell title={t('sum.price')} after={money(price, svc.price_from)} />
+        {boot.loyalty?.ready != null && price > 0 && <Cell title={t('sum.loyalty')} after={`−${boot.loyalty.ready}%`} />}
+        <Cell title={t('sum.price')} after={money(boot.loyalty?.ready != null && price > 0 ? applyDiscount(price, boot.loyalty.ready) : price, svc.price_from)} />
       </Section>
       {!move && quote && (quote.warnings.length > 0 || quote.will_wait) && (
         <Section>

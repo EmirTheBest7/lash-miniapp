@@ -11,7 +11,7 @@ export interface AdminMockEnv { two: boolean; role: string }
 const state = {
   staff: [] as StaffRow[], services: [] as SvcRow[], categories: [] as { id: number; name: string }[], appts: [] as AdmAppt[], blocks: [] as { id: number; staff_id: number; start: number; end: number; reason: string }[],
   overrides: [] as { staff_id: number; date: string; closed: boolean; intervals: [string, string][]; note: string }[],
-  settings: { slot_step_min: 30, min_notice_h: 12, horizon_days: 60, cancel_cutoff_h: 24, buffer_may_exceed_close: true }, nextId: 500, inited: false,
+  settings: { slot_step_min: 30, min_notice_h: 12, horizon_days: 60, cancel_cutoff_h: 24, buffer_may_exceed_close: true, loyalty_enabled: false, loyalty_visits: 7, loyalty_percent: 10 }, loyaltyPending: [{ id: 1, client: 'Anna Nováková', percent: 10 }] as { id: number; client: string; percent: number }[], nextId: 500, inited: false,
   clients: [{ id: 1, name: 'Eva Kovářová', phone: '+420777000111', username: 'eva_k', tg: true }, { id: 2, name: 'Tereza Malá', phone: '+420777000222', username: null, tg: true }, { id: 3, name: 'Bára Svobodová', phone: null, username: null, tg: false }],
 };
 
@@ -54,7 +54,7 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
   const boot = (): AdminBoot => ({
     me: { id: 1, name: 'Anna Nováková', role: owner ? 'owner' : 'master', lang: 'en' }, config: { tz: TZ, studio_name: 'Lash Studio', server_time: NOW, today: '2026-11-16' },
     staff: scope.map((s) => ({ ...s, future: state.appts.filter((a) => a.staff_id === s.id && ['pending', 'confirmed'].includes(a.status)).length })),
-    services: state.services, categories: state.categories, settings: state.settings, can_manage: owner,
+    services: state.services, categories: state.categories, loyalty_pending: state.loyaltyPending, settings: state.settings, can_manage: owner,
   });
   const apptOf = (id: number) => state.appts.find((a) => a.id === id);
 
@@ -170,6 +170,11 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       const used = state.appts.some((a) => a.service_id === d.id);
       if (used) state.services.find((s) => s.id === d.id)!.active = false; else state.services = state.services.filter((s) => s.id !== d.id);
       return ok({ deleted: !used, services: state.services, categories: state.categories });
+    }
+    case 'admin/loyalty/decide': {
+      if (!owner) return err(403, 'forbidden');
+      state.loyaltyPending = state.loyaltyPending.filter((p) => p.id !== d.id);
+      return ok({ loyalty_pending: state.loyaltyPending });
     }
     case 'admin/settings/save': { if (!owner) return err(403, 'forbidden'); Object.assign(state.settings, d); return ok({ settings: state.settings }); }
     default: return err(404, 'not_found');
