@@ -4,8 +4,10 @@ import { ensureFresh } from './version';
 import { applyTheme, watchTheme } from './theme';
 import { readyAndExpand, webApp } from './tg';
 import './ui/ui.css';
+import { perfMark } from './perf';
 
 async function start(): Promise<void> {
+  perfMark('js-start');
   const q = new URLSearchParams(location.search);
   const wantMock = !webApp() && (import.meta.env.DEV || import.meta.env.VITE_MOCK === '1');
   if (wantMock) {
@@ -13,6 +15,7 @@ async function start(): Promise<void> {
     m.installMockTelegram();
     if (q.has('mock')) m.installMockApi();
   }
+  perfMark('tg-script-ready');
   readyAndExpand();
   applyTheme();
   watchTheme();

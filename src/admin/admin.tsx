@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import { api } from '../api';
+import { perfReport } from '../perf';
 import { useToast } from '../hooks';
 import { t } from '../i18n';
 import { Button, Empty, Segmented, Skeleton, Toast } from '../ui/components';
@@ -24,6 +25,7 @@ export function AdminApp({ onClientView }: { onClientView: () => void }) {
     const r = await api<AdminBoot>('admin/bootstrap');
     if (!r.ok) { setErr(r.error.code); return; }
     setErr(null); setBoot(r.data);
+    setTimeout(perfReport, 0);
   }, []);
   useEffect(() => { void load(); }, [load]);
 

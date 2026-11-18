@@ -1,4 +1,5 @@
 import { initDataRaw } from './tg';
+import { perfMark } from './perf';
 
 /**
  * EVERY call is a CORS "simple request": POST, body = JSON sent as text/plain, NO custom headers, NO query string.
@@ -18,7 +19,8 @@ declare global { interface Window { __MOCK_API__?: MockHandler } }
 export const newOpId = (): string => (crypto.randomUUID?.() ?? `${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`).replaceAll('-', '').slice(0, 32).padEnd(16, '0');
 
 export async function api<T>(route: string, data?: Record<string, unknown>, opId?: string): Promise<ApiResult<T>> {
-  if (window.__MOCK_API__) return (await window.__MOCK_API__(route, data ?? {})) as ApiResult<T>;
+  perfMark(`api:${route}:start`);
+  if (window.__MOCK_API__) { const out = (await window.__MOCK_API__(route, data ?? {})) as ApiResult<T>; perfMark(`api:${route}:end`); return out; }
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), 15000);
   try {
@@ -37,5 +39,6 @@ export async function api<T>(route: string, data?: Record<string, unknown>, opId
     return { ok: false, status: 0, error: { code: 'network' } };
   } finally {
     clearTimeout(timer);
+    perfMark(`api:${route}:end`);
   }
 }

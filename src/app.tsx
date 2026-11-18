@@ -1,6 +1,7 @@
 import type { ComponentType } from 'preact';
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { api } from './api';
+import { perfMark, perfReport } from './perf';
 import { Appts } from './screens/Appts';
 import { Done } from './screens/Done';
 import { Home } from './screens/Home';
@@ -36,6 +37,8 @@ export function App() {
     }
     setLang(r.data.me.lang);
     setState({ k: 'ready', boot: r.data });
+    perfMark('client-bootstrap-rendered');
+    if (r.data.me.role === 'client') setTimeout(perfReport, 0);
     // Deep link t.me/<bot>?startapp=svc_<id>: straight to that service (once).
     const m = /^svc_(\d{1,9})$/.exec(startParam() ?? r.data.start_param ?? '');
     if (m && !started.current) {
