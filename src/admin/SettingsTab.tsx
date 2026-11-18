@@ -110,6 +110,20 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView }: { boot: A
         </Section>
       )}
       {boot.can_manage && (
+        <Section title={t('adm.after')} footer={t('adm.after_note')}>
+          <Cell title={t('adm.fill_nudge')} after={<Switch label={t('adm.fill_nudge')} checked={s.fill_nudge_on} onChange={(on) => void save({ fill_nudge_on: on })} />} />
+          <Cell title={t('adm.autocomplete')} after={<Switch label={t('adm.autocomplete')} checked={s.autocomplete_on} onChange={(on) => void save({ autocomplete_on: on })} />} />
+          {s.autocomplete_on && <label class="field"><span>{t('adm.autocomplete_h')}</span><input type="number" inputMode="numeric" min={1} max={72} value={s.autocomplete_h} onChange={(e) => void save({ autocomplete_h: Math.min(72, Math.max(1, Math.round(Number((e.target as HTMLInputElement).value) || 1))) })} /></label>}
+          <label class="field"><span>{t('adm.review_url')}</span><input type="url" inputMode="url" placeholder="https://…" maxLength={500} value={s.google_review_url} onChange={(e) => void save({ google_review_url: (e.target as HTMLInputElement).value.trim() })} /></label>
+          {s.google_review_url !== '' && (
+            <>
+              <label class="field"><span>{t('adm.review_delay')}</span><input type="number" inputMode="numeric" min={1} max={168} value={s.review_delay_h} onChange={(e) => void save({ review_delay_h: Math.min(168, Math.max(1, Math.round(Number((e.target as HTMLInputElement).value) || 1))) })} /></label>
+              <label class="field"><span>{t('adm.review_gap')}</span><input type="number" inputMode="numeric" min={30} max={3650} value={s.review_gap_days} onChange={(e) => void save({ review_gap_days: Math.min(3650, Math.max(30, Math.round(Number((e.target as HTMLInputElement).value) || 30))) })} /></label>
+            </>
+          )}
+        </Section>
+      )}
+      {boot.can_manage && (
         <Section title={t('adm.bc')} footer={t('adm.bc_note')}>
           <label class="field"><span>{t('adm.bc_text')}</span><textarea maxLength={1000} rows={4} value={text} onInput={(e) => { setText((e.target as HTMLTextAreaElement).value); setConfirmSend(false); }} /></label>
           <div class="note" data-testid="bc-audience">{bc ? t('adm.bc_audience', { n: bc.optin, total: bc.clients }) : '…'}{bc && bc.skipped ? ' ' + t('adm.bc_skipped', { n: bc.skipped, d: bc.min_days ?? 7 }) : ''}</div>

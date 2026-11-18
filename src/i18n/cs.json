@@ -340,5 +340,17 @@
   "vch.too_big": "Karta je příliš velká k odeslání (přes 1 MB).",
   "vch.reissue": "Vydat znovu",
   "vch.reissue_confirm": "Klepněte znovu: starý kód přestane platit, vznikne nový",
-  "vch.reissue_reserved": "Poukaz drží rezervace. Nejdřív ji zrušte nebo dokončete."
+  "vch.reissue_reserved": "Poukaz drží rezervace. Nejdřív ji zrušte nebo dokončete.",
+  "adm.after": "Po návštěvě",
+  "adm.after_note": "Péče po návštěvě a návrh doplnění se nastavují u každé služby. Připomínka doplnění a žádost o recenzi jsou komerční zprávy: nesou označení a tlačítko Odhlásit. Návštěvy služeb jen pro personál nic z toho nespouštějí. Prázdný odkaz na recenze = žádosti vypnuté.",
+  "adm.fill_nudge": "Připomínka doplnění (když je čas a není nová rezervace)",
+  "adm.autocomplete": "Označovat návštěvy jako dokončené automaticky",
+  "adm.autocomplete_h": "… tolik hodin po skončení návštěvy",
+  "adm.review_url": "Odkaz na Google recenzi (https, zkopírovaný z Googlu)",
+  "adm.review_delay": "Požádat o recenzi po (hodinách)",
+  "adm.review_gap": "Nejvýše jedna žádost na klientku za (dnů)",
+  "adm.aftercare": "Péče po návštěvě a doplnění",
+  "adm.aftercare_note": "Odesílá se po dokončení návštěvy. Prázdný text = žádná zpráva pro daný jazyk (použije se jiný jazyk, pokud ho má). Dny doplnění: navrhovaný termín další návštěvy (0 = bez návrhu a bez připomínky).",
+  "adm.rebook_days": "Doplnění za (dnů)",
+  "adm.aftercare_text": "Text péče po návštěvě"
 }

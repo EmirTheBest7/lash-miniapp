@@ -1,5 +1,5 @@
 export interface StaffRow { id: number; name: string; bio: string; color: string; active: boolean; linked: boolean; tg_id: number | null; mine: boolean; admin: boolean; off: number[]; weekly: Record<string, [string, string][]>; future: number }
-export interface SvcRow { id: number; name: string; is_addon: boolean; duration_min: number; buffer_min: number; price: number; price_from: boolean; active: boolean; staff_only?: boolean; names: Record<'cs' | 'en' | 'ru' | 'uk', string>; category_id: number | null }
+export interface SvcRow { id: number; name: string; is_addon: boolean; duration_min: number; buffer_min: number; price: number; price_from: boolean; active: boolean; staff_only?: boolean; aftercare?: Record<'cs' | 'en' | 'ru' | 'uk', string>; rebook_after_days?: number | null; names: Record<'cs' | 'en' | 'ru' | 'uk', string>; category_id: number | null }
 export interface AdminSettings extends SchedSettings { slot_step_min: number; min_notice_h: number; horizon_days: number; cancel_cutoff_h: number; buffer_may_exceed_close: boolean; loyalty_enabled: boolean; loyalty_visits: number; loyalty_percent: number }
 export interface AdminBoot {
   me: { id: number; name: string; role: 'master' | 'owner'; lang: string };
@@ -29,5 +29,6 @@ export interface SchedSettings {
   rem1_on: boolean; rem1_h: number; rem1_auto: boolean; rem1_warn: boolean; rem2_on: boolean; rem2_h: number;
   rem_unanswered_on: boolean; rem_unanswered_h: number; agenda_on: boolean; agenda_time: string; agenda_empty: boolean;
   waitlist_on: boolean; waitlist_offer_h: number; backup_on: boolean; backup_time: string; backup_key: boolean; backup_last: number; ad_min_days: number;
+  autocomplete_on: boolean; autocomplete_h: number; fill_nudge_on: boolean; google_review_url: string; review_delay_h: number; review_gap_days: number;
 }
 export interface BroadcastInfo { optin: number; clients: number; skipped?: number; min_days?: number; last: { text: string; recipients: number; at: number } | null }

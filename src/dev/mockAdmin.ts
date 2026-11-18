@@ -12,7 +12,7 @@ const state = {
   staff: [] as StaffRow[], services: [] as SvcRow[], categories: [] as { id: number; name: string }[], appts: [] as AdmAppt[], blocks: [] as { id: number; staff_id: number; start: number; end: number; reason: string }[],
   overrides: [] as { staff_id: number; date: string; closed: boolean; intervals: [string, string][]; note: string }[],
   settings: { slot_step_min: 30, min_notice_h: 12, horizon_days: 60, cancel_cutoff_h: 24, buffer_may_exceed_close: true, loyalty_enabled: false, loyalty_visits: 7, loyalty_percent: 10,
-    automation_on: false, waitlist_min_notice_h: 2, rem1_on: true, rem1_h: 26, rem1_auto: true, rem1_warn: false, rem2_on: true, rem2_h: 3, rem_unanswered_on: true, rem_unanswered_h: 12, agenda_on: true, agenda_time: '20:00', agenda_empty: false,
+    automation_on: false, autocomplete_on: false, autocomplete_h: 3, fill_nudge_on: true, google_review_url: '', review_delay_h: 3, review_gap_days: 180, waitlist_min_notice_h: 2, rem1_on: true, rem1_h: 26, rem1_auto: true, rem1_warn: false, rem2_on: true, rem2_h: 3, rem_unanswered_on: true, rem_unanswered_h: 12, agenda_on: true, agenda_time: '20:00', agenda_empty: false,
     waitlist_on: true, waitlist_offer_h: 2, backup_on: true, backup_time: '03:30', backup_key: false, backup_last: 0, ad_min_days: 7 }, loyaltyPending: [{ id: 1, client: 'Anna Nováková', percent: 10 }] as { id: number; client: string; percent: number }[], nextId: 500, inited: false,
   clients: [{ id: 1, name: 'Eva Kovářová', phone: '+420777000111', username: 'eva_k', tg: true }, { id: 2, name: 'Tereza Malá', phone: '+420777000222', username: null, tg: true }, { id: 3, name: 'Bára Svobodová', phone: null, username: null, tg: false }],
 };
@@ -198,7 +198,9 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       const label = names ? (names.en || names.cs || names.ru || names.uk) : '';
       if (d.id) {
         const row = state.services.find((s) => s.id === d.id)!;
-        Object.assign(row, { duration_min: d.duration_min, buffer_min: d.buffer_min, price: d.price, price_from: d.price_from, active: d.active });
+        Object.assign(row, { duration_min: d.duration_min, buffer_min: d.buffer_min, price: d.price, price_from: d.price_from, active: d.active, staff_only: d.staff_only === true });
+        if (d.aftercare) row.aftercare = d.aftercare;
+        if ('rebook_after_days' in d) row.rebook_after_days = d.rebook_after_days || null;
         if (names) Object.assign(row, { names, name: label });
         if (!row.is_addon && ('category_id' in d || d.new_category)) row.category_id = cat;
       } else {
@@ -223,7 +225,7 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       state.loyaltyPending = state.loyaltyPending.filter((p) => p.id !== d.id);
       return ok({ loyalty_pending: state.loyaltyPending });
     }
-    case 'admin/settings/save': { if (!owner) return err(403, 'forbidden'); Object.assign(state.settings, d); if ('automation_enabled' in d) state.settings.automation_on = d.automation_enabled === true; if ('rem1_h' in d) { state.settings.rem1_auto = d.rem1_h === 0; state.settings.rem1_h = d.rem1_h === 0 ? state.settings.cancel_cutoff_h + 2 : d.rem1_h; state.settings.rem1_warn = !state.settings.rem1_auto && state.settings.rem1_h < state.settings.cancel_cutoff_h + 1; } return ok({ settings: state.settings }); }
+    case 'admin/settings/save': { if (!owner) return err(403, 'forbidden'); if ('google_review_url' in d && d.google_review_url !== '' && !/^https:\/\/\S{4,}$/.test(String(d.google_review_url))) return err(400, 'bad_request'); Object.assign(state.settings, d); if ('automation_enabled' in d) state.settings.automation_on = d.automation_enabled === true; if ('rem1_h' in d) { state.settings.rem1_auto = d.rem1_h === 0; state.settings.rem1_h = d.rem1_h === 0 ? state.settings.cancel_cutoff_h + 2 : d.rem1_h; state.settings.rem1_warn = !state.settings.rem1_auto && state.settings.rem1_h < state.settings.cancel_cutoff_h + 1; } return ok({ settings: state.settings }); }
     default: return err(404, 'not_found');
   }
 }

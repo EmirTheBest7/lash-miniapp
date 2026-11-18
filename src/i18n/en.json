@@ -340,5 +340,17 @@
   "vch.too_big": "The card is too large to send (over 1 MB).",
   "vch.reissue": "Reissue",
   "vch.reissue_confirm": "Tap again: old code stops, new one is created",
-  "vch.reissue_reserved": "A booking holds this voucher. Cancel or complete it first."
+  "vch.reissue_reserved": "A booking holds this voucher. Cancel or complete it first.",
+  "adm.after": "After the visit",
+  "adm.after_note": "Aftercare text and the fill suggestion are set per service. The fill nudge and the review request are commercial messages: they carry the label and an Unsubscribe button. Visits of staff-only services never trigger any of this. Leave the review link empty to switch review requests off.",
+  "adm.fill_nudge": "Fill nudge (when due, without a new booking)",
+  "adm.autocomplete": "Mark visits completed automatically",
+  "adm.autocomplete_h": "… this many hours after the visit ends",
+  "adm.review_url": "Google review link (https, pasted from Google)",
+  "adm.review_delay": "Ask for a review after (hours)",
+  "adm.review_gap": "At most one request per client every (days)",
+  "adm.aftercare": "Aftercare and fill",
+  "adm.aftercare_note": "Sent after the visit is completed. Empty text = no aftercare message for that language (another language is used if it has one). Fill days: the suggested time for the next visit (0 = no suggestion and no nudge).",
+  "adm.rebook_days": "Fill after (days)",
+  "adm.aftercare_text": "Aftercare text"
 }

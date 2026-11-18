@@ -327,3 +327,26 @@ test('vouchers tab (owner): create a value voucher, the code is shown once, list
   await page.goto(`${BASE}?mock=1&role=master&staff=2`);
   await expect(page.getByRole('tab', { name: 'Vouchers' })).toHaveCount(0);
 });
+
+test('after the visit (owner): review link must be https, delay fields appear once a link is set, service aftercare + fill days are editable; masters see none of it', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await expect(page.getByText('After the visit')).toBeVisible();
+  await expect(page.getByLabel('Ask for a review after (hours)')).toHaveCount(0);
+  await page.getByLabel('Google review link (https, pasted from Google)').fill('http://nope.example/x');
+  await page.getByLabel('Google review link (https, pasted from Google)').blur();
+  await expect(page.getByLabel('Ask for a review after (hours)')).toHaveCount(0);
+  await page.getByLabel('Google review link (https, pasted from Google)').fill('https://g.page/r/abc/review');
+  await page.getByLabel('Google review link (https, pasted from Google)').blur();
+  await expect(page.getByLabel('Ask for a review after (hours)')).toBeVisible();
+  await shot(page, 'admin-after-visit-settings');
+  await page.getByRole('tab', { name: 'Services' }).click();
+  await page.getByRole('button', { name: /Lash extensions/ }).first().click();
+  await page.getByLabel('Aftercare text · English').fill('Keep lashes dry for 24 h.');
+  await page.getByLabel('Fill after (days)').fill('21');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await toast(page, 'Saved');
+  await page.goto(`${BASE}?mock=1&role=master&staff=2`);
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await expect(page.getByText('After the visit')).toHaveCount(0);
+});
