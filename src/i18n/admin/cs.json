@@ -309,5 +309,17 @@
   "ln.m_manual": "Jen ručně",
   "ln.f_newmanual": "Nové klientky vždy ručně",
   "ln.t_day": "Den předem, 18:00",
-  "ln.t_now": "Hned"
+  "ln.t_now": "Hned",
+  "adm.adr_title": "Přesná adresa",
+  "adm.adr_footer": "Výchozí řídí pravidlo studia. Vždy: odešle se automaticky po potvrzení. Nikdy: jen ručně.",
+  "adm.adr_send": "📍 Poslat adresu",
+  "adm.adr_sent": "Adresa odeslána",
+  "adm.adr_p_default": "Výchozí",
+  "adm.adr_p_always": "Vždy",
+  "adm.adr_p_never": "Nikdy auto",
+  "adm.adr_sent_ok": "Adresa se odesílá",
+  "adm.adr_already_sent": "Adresa je už odeslána",
+  "adm.adr_need_confirm": "Nejdřív rezervaci potvrďte",
+  "adm.adr_no_address": "Adresa zatím není vyplněna",
+  "adm.adr_unreachable": "Klient není dostupný v Telegramu"
 }

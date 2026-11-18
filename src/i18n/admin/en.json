@@ -309,5 +309,17 @@
   "ln.m_manual": "Only by hand",
   "ln.f_newmanual": "First-time clients always by hand",
   "ln.t_day": "Day before, 18:00",
-  "ln.t_now": "At once"
+  "ln.t_now": "At once",
+  "adm.adr_title": "Exact address",
+  "adm.adr_footer": "Default follows the studio rule. Always: released automatically once the booking is confirmed. Never: only by hand.",
+  "adm.adr_send": "📍 Send address",
+  "adm.adr_sent": "Address sent",
+  "adm.adr_p_default": "Default",
+  "adm.adr_p_always": "Always",
+  "adm.adr_p_never": "Never auto",
+  "adm.adr_sent_ok": "Address is being sent",
+  "adm.adr_already_sent": "The address was already sent",
+  "adm.adr_need_confirm": "Confirm the booking first",
+  "adm.adr_no_address": "No address is set yet",
+  "adm.adr_unreachable": "This client cannot be reached in Telegram"
 }

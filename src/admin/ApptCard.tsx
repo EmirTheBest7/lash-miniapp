@@ -3,7 +3,7 @@ import { api, newOpId } from '../api';
 import { duration, money } from '../format';
 import { t } from '../i18n';
 import { confirmNative, haptic, openTelegramLink } from '../tg';
-import { Cell, Chip, Section, Sheet } from '../ui/components';
+import { Cell, Chip, Section, Segmented, Sheet } from '../ui/components';
 import { hhmm, minutesOf } from './time';
 import type { AdmAppt, AdminBoot, MoveData } from './types';
 
@@ -26,6 +26,26 @@ export function ApptCard({ open, appt: a, boot, tz, onClose, toast, reload, onMo
     haptic.success(); toast(r.data.outcome === 'ok' ? t('adm.saved') : t('err.generic')); onClose(); await reload();
   }
 
+  async function sendAddress() {
+    if (busy || !a) return;
+    setBusy(true);
+    const r = await api<{ result: string }>('admin/appointments/send-address', { id: a.id }, newOpId());
+    setBusy(false);
+    if (!r.ok) { toast(t('err.network')); return; }
+    const k: Record<string, string> = { queued: 'adm.adr_sent_ok', already: 'adm.adr_already_sent', not_confirmed: 'adm.adr_need_confirm', no_address: 'adm.adr_no_address', unreachable: 'adm.adr_unreachable' };
+    if (r.data.result === 'queued') haptic.success(); else haptic.warn();
+    toast(t(k[r.data.result] ?? 'err.generic')); await reload();
+  }
+
+  async function setPolicy(policy: 'default' | 'always' | 'never') {
+    if (busy || !a || policy === a.address_policy) return;
+    setBusy(true);
+    const r = await api('admin/clients/address-policy', { appt: a.id, policy }, newOpId());
+    setBusy(false);
+    if (!r.ok) { toast(t('err.network')); return; }
+    haptic.success(); toast(t('adm.saved')); await reload();
+  }
+
   async function reassign(staffId: number) {
     if (busy || !a) return;
     setBusy(true);
@@ -46,6 +66,14 @@ export function ApptCard({ open, appt: a, boot, tz, onClose, toast, reload, onMo
         {a.client.phone && <Cell title={t('adm.phone')} after={a.client.phone} onClick={() => { void navigator.clipboard?.writeText(a.client.phone!); toast(t('adm.copied')); }} />}
         {a.client.username && <Cell icon="user" title={`@${a.client.username}`} chevron onClick={() => openTelegramLink(`https://t.me/${a.client.username}`)} />}
       </Section>
+      {a.address !== 'none' && a.client.tg && (
+        <Section title={t('adm.adr_title')} footer={t('adm.adr_footer')}>
+          {a.status === 'confirmed' && a.address === 'held' && <Cell title={t('adm.adr_send')} chevron onClick={() => void sendAddress()} />}
+          {a.address === 'sent' && <Cell title={t('adm.adr_sent')} after="✅" />}
+          <Segmented value={a.address_policy} onChange={(v) => void setPolicy(v)} options={[
+            { value: 'default', label: t('adm.adr_p_default') }, { value: 'always', label: t('adm.adr_p_always') }, { value: 'never', label: t('adm.adr_p_never') }]} />
+        </Section>
+      )}
       {holds && others.length > 0 && (
         <Section title={t('adm.assign_to')}>
           <div class="chips">{others.map((s) => <Chip label={s.name || t('staff.default')} onClick={() => void reassign(s.id)} />)}</div>

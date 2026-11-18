@@ -32,7 +32,7 @@ function init(env: AdminMockEnv): void {
   const mk = (id: number, staff: number, from: string, svc: number, client: number, status: AdmAppt['status']): AdmAppt => {
     const s = state.services.find((x) => x.id === svc)!, c = state.clients.find((x) => x.id === client)!;
     const start = toUtc('2026-11-16', parseHm(from), TZ);
-    return { id, rev: 1, staff_id: staff, status, start, end: start + s.duration_min * 60, buffer_min: s.buffer_min, service_id: svc, service: s.name, addons: [], price: s.price, auto: false, by: 'client', client: c };
+    return { id, rev: 1, staff_id: staff, status, start, end: start + s.duration_min * 60, buffer_min: s.buffer_min, service_id: svc, service: s.name, addons: [], price: s.price, auto: false, by: 'client', address: 'held', address_policy: 'default', client: c };
   };
   state.appts = [mk(11, 1, '11:00', 2, 1, 'confirmed'), mk(12, 1, '14:00', 1, 2, 'pending')];
   if (env.two) state.appts.push(mk(13, 2, '13:00', 2, 3, 'confirmed'));
@@ -136,7 +136,7 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       const cands = d.staff > 0 ? [d.staff] : scope.filter((p) => !p.off.includes(d.service) && p.active).map((p) => p.id);
       const pick = cands.find((id: number) => !busy(id, d.start, end + s.buffer_min * 60) && (d.override || iv(id, new Date(d.start * 1000).toISOString().slice(0, 10)).some(([a, b]) => d.start >= a && end <= b)));
       if (pick === undefined) return ok({ outcome: 'slot_taken', alternatives: [] });
-      const a: AdmAppt = { id: state.nextId++, rev: 1, staff_id: pick, status: 'confirmed', start: d.start, end, buffer_min: s.buffer_min, service_id: s.id, service: s.name, addons: [], price: s.price, auto: d.staff === 0, by: 'master', client: cl };
+      const a: AdmAppt = { id: state.nextId++, rev: 1, staff_id: pick, status: 'confirmed', start: d.start, end, buffer_min: s.buffer_min, service_id: s.id, service: s.name, addons: [], price: s.price, auto: d.staff === 0, by: 'master', address: 'held', address_policy: 'default', client: cl };
       state.appts.push(a);
       return ok({ outcome: 'ok', appointment: a });
     }
@@ -149,6 +149,19 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       if (busy(to, d.start, end + a.buffer_min * 60, a.id) || (!d.override && !inHours)) return ok({ outcome: 'slot_taken', alternatives: [] });
       Object.assign(a, { start: d.start, end, staff_id: to, rev: a.rev + 1, auto: false });
       return ok({ outcome: 'ok', appointment: a });
+    }
+    case 'admin/appointments/send-address': {
+      const a = apptOf(d.id);
+      if (!a || !can(a.staff_id)) return err(404, 'not_found');
+      const result = a.address === 'sent' ? 'already' : a.status !== 'confirmed' ? 'not_confirmed' : 'queued';
+      if (result === 'queued') a.address = 'sent';
+      return ok({ result, appointment: a });
+    }
+    case 'admin/clients/address-policy': {
+      const a = apptOf(d.appt);
+      if (!a || !can(a.staff_id)) return err(404, 'not_found');
+      a.address_policy = d.policy;
+      return ok({ appointment: a });
     }
     case 'admin/appointments/status': {
       const a = apptOf(d.id);

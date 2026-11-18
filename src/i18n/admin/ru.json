@@ -309,5 +309,17 @@
   "ln.m_manual": "Только вручную",
   "ln.f_newmanual": "Новым клиенткам всегда вручную",
   "ln.t_day": "За день, 18:00",
-  "ln.t_now": "Сразу"
+  "ln.t_now": "Сразу",
+  "adm.adr_title": "Точный адрес",
+  "adm.adr_footer": "Обычный следует правилу студии. Всегда: уйдёт автоматически после подтверждения. Не авто: только вручную.",
+  "adm.adr_send": "📍 Адрес клиенту",
+  "adm.adr_sent": "Адрес отправлен",
+  "adm.adr_p_default": "Обычный",
+  "adm.adr_p_always": "Всегда",
+  "adm.adr_p_never": "Не авто",
+  "adm.adr_sent_ok": "Адрес отправляется",
+  "adm.adr_already_sent": "Адрес уже отправлен",
+  "adm.adr_need_confirm": "Сначала подтвердите запись",
+  "adm.adr_no_address": "Адрес ещё не указан",
+  "adm.adr_unreachable": "Клиент недоступен в Telegram"
 }

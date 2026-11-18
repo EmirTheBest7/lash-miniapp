@@ -45,6 +45,22 @@ test('appointment card: contact, person, and reassign to another person in one t
   await expect(col(page, 1).getByRole('button', { name: /Eva Kovářová/ })).toHaveCount(0);
 });
 
+test('appointment card: Send address (once) and the Default / Always / Never override', async ({ page }) => {
+  await open(page);
+  await col(page, 1).getByRole('button', { name: /Eva Kovářová/ }).click();
+  const card = page.getByRole('dialog');
+  await expect(card).toContainText('Exact address');
+  await card.getByRole('tab', { name: 'Always', exact: true }).click();
+  await toast(page, 'Saved');
+  await card.getByText('📍 Send address').click();
+  await toast(page, 'Address is being sent');
+  await expect(card).toContainText('Address sent');
+  await expect(card.getByText('📍 Send address')).toHaveCount(0);
+  await card.getByRole('tab', { name: 'Default', exact: true }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  await shot(page, 'admin-appt-address');
+});
+
 test('move = pick "Move", then tap the new time in any column (time and person change together); a busy time is refused', async ({ page }) => {
   await open(page);
   await col(page, 1).getByRole('button', { name: /Tereza Malá/ }).click();

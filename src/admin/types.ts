@@ -22,7 +22,7 @@ export interface VoucherCreated { replayed: boolean; code?: string; link?: strin
 export type AdmStatus = 'pending' | 'pending_deposit' | 'confirmed' | 'completed' | 'no_show';
 export interface AdmAppt {
   id: number; rev: number; staff_id: number; status: AdmStatus; start: number; end: number; buffer_min: number; service_id: number; service: string; addons: string[];
-  price: number; auto: boolean; by: string; client: { id: number; name: string; phone: string | null; username: string | null; tg: boolean };
+  price: number; auto: boolean; by: string; address: 'none' | 'held' | 'sent'; address_policy: 'default' | 'always' | 'never'; client: { id: number; name: string; phone: string | null; username: string | null; tg: boolean };
 }
 export interface Block { id: number; staff_id: number; start: number; end: number; reason: string }
 export interface Override { staff_id: number; date: string; closed: boolean; intervals: [string, string][]; note: string }
