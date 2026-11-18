@@ -27,7 +27,7 @@ export function LangTabs({ label, values, onChange, rows = 3, max, canTranslate,
     setBusy(true);
     const r = await api<{ drafts: Record<string, string> }>('admin/translate', { text: values[from], from, to: empty });
     setBusy(false);
-    if (!r.ok) { haptic.error(); toast(t(r.error.code === 'address_in_text' ? 'adm.s_addr_in_text' : r.error.code === 'limit' ? 'adm.s_tr_limit' : 'adm.s_tr_fail')); return; }
+    if (!r.ok) { haptic.error(); toast(t(r.error.code === 'address_in_text' ? 'adm.s_addr_in_text' : r.error.code === 'limit' ? 'adm.s_tr_limit' : 'adm.s_tr_fail') + (r.error.code === 'failed' && r.error.message ? ` (${r.error.message})` : '')); return; }
     setDrafts(r.data.drafts);
   }
   function use() {

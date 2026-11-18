@@ -120,7 +120,7 @@ test('service editor: name, description, aftercare and pre-care all have languag
   for (const label of ['Name', 'Description', 'Aftercare text', 'Pre-care before the visit']) {
     await expect(page.getByRole('tablist', { name: new RegExp('^' + label) }).getByRole('tab')).toHaveCount(4);
   }
-  await page.keyboard.press('Escape');
+  await page.locator('.sheet-back.open').click({ position: { x: 5, y: 5 } });
   await page.getByRole('tab', { name: 'Vouchers' }).click();
   await page.getByRole('button', { name: /Voucher settings/ }).click();
   await expect(page.getByRole('tablist').filter({ has: page.getByRole('tab', { name: /^CS/ }) }).last()).toBeVisible();

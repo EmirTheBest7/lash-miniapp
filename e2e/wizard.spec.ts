@@ -66,3 +66,17 @@ test('wizard: review links step adds a link (https only), and the administrator 
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('switch', { name: /Automatic messages/ })).toHaveCount(0);
 });
+
+test('wizard: a re-run from Help starts at step 1 and forgets what was skipped before', async ({ page }) => {
+  await open(page);
+  await page.getByRole('button', { name: 'Continue setup' }).click();
+  await page.getByRole('button', { name: 'Skip' }).click();
+  await page.getByRole('button', { name: /^Leave setup/ }).click();
+  await page.getByRole('button', { name: /^Help/ }).click();
+  await page.getByRole('button', { name: /Run the basic setup again/ }).click();
+  await page.getByRole('button', { name: 'Open the setup' }).click();
+  await expect(page.getByText('Step 1 of 9')).toBeVisible();
+  for (let k = 0; k < 8; k++) await page.getByRole('button', { name: 'Skip' }).click();
+  await expect(page.getByRole('heading', { name: 'All set' })).toBeVisible();
+  await expect(page.getByText('skipped', { exact: true })).toHaveCount(6);                       // this run's skips only (services and schedule are already green in the mock)
+});

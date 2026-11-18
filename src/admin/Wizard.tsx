@@ -21,12 +21,13 @@ export function Wizard({ c, startAt }: { c: Ctx; startAt?: number }) {
   const items = Object.fromEntries((home?.items ?? []).map((i) => [i.id, i.ok]));
   const isDone = (st: Step): boolean => (ITEM[st] ? !!items[ITEM[st]!] : false);
   const saved = home?.wizard ?? { step: 0, skipped: [] };
-  const [skipped, setSkipped] = useState<string[]>(saved.skipped);
+  const [skipped, setSkipped] = useState<string[]>(startAt === 0 ? [] : saved.skipped);        // a re-run from the start forgets what was skipped last time
   const first = STEPS.findIndex((s) => s !== 'done' && !isDone(s) && !saved.skipped.includes(s));
   const [i, setI] = useState<number>(startAt ?? (first >= 0 ? first : STEPS.length - 1));
   const step = STEPS[i] as Step;
   const topRef = useRef<HTMLDivElement>(null);
   useEffect(() => { window.scrollTo(0, 0); }, [i]);
+  useEffect(() => { if (startAt === 0) void api('admin/setup/save', { step: 0, skipped: [] }, newOpId()); }, []);
   async function go(n: number, nextSkipped = skipped) {
     const k = Math.max(0, Math.min(STEPS.length - 1, n));
     setI(k); setSkipped(nextSkipped);
