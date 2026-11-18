@@ -4,8 +4,14 @@ export interface AdminSettings extends SchedSettings { slot_step_min: number; mi
 export interface AdminBoot {
   me: { id: number; name: string; role: 'master' | 'owner'; lang: string };
   config: { tz: string; studio_name: string; server_time: number; today: string };
-  staff: StaffRow[]; services: SvcRow[]; categories: { id: number; name: string }[]; loyalty_pending: { id: number; client: string; percent: number }[]; settings: AdminSettings; can_manage: boolean;
+  staff: StaffRow[]; services: SvcRow[]; vouchers_on?: boolean; categories: { id: number; name: string }[]; loyalty_pending: { id: number; client: string; percent: number }[]; settings: AdminSettings; can_manage: boolean;
 }
+export type VoucherStatus = 'active' | 'reserved' | 'used' | 'expired' | 'void';
+export interface VoucherRow {
+  id: number; kind: 'value' | 'service'; hint: string; status: VoucherStatus; service: string | null; value: number; balance: number; reserved: number; partial: boolean;
+  expires_at: number; extended: boolean; sold_at: number; paid: number; method: 'cash' | 'transfer' | 'other'; received: number; note: string;
+}
+export interface VoucherCreated { replayed: boolean; code?: string; link?: string | null; voucher: VoucherRow }
 export type AdmStatus = 'pending' | 'pending_deposit' | 'confirmed' | 'completed' | 'no_show';
 export interface AdmAppt {
   id: number; rev: number; staff_id: number; status: AdmStatus; start: number; end: number; buffer_min: number; service_id: number; service: string; addons: string[];

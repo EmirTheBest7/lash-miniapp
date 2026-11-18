@@ -1,6 +1,6 @@
 // DEV / E2E ONLY: a stateful mock of the admin API (synthetic people, never real data). Follows TG-PHPBot docs/miniapp.md.
 import { addDays, isoWeekday, minutesOf, parseHm, toUtc } from '../admin/time';
-import type { AdmAppt, AdminBoot, CalData, StaffRow, SvcRow } from '../admin/types';
+import type { AdmAppt, AdminBoot, CalData, StaffRow, SvcRow, VoucherRow } from '../admin/types';
 
 const TZ = 'Europe/Prague';
 const NOW = toUtc('2026-11-16', 12 * 60, TZ);
@@ -45,6 +45,9 @@ const iv = (staff: number, date: string): [number, number][] => {
 };
 const busy = (staff: number, a: number, b: number, skip = 0) => state.appts.some((x) => x.id !== skip && x.staff_id === staff && ['pending', 'pending_deposit', 'confirmed'].includes(x.status) && x.start < b && a < x.end + x.buffer_min * 60);
 
+const vouchers: VoucherRow[] = [];
+const voucherOps = new Map<string, VoucherRow>();
+
 export function adminMock(route: string, d: Record<string, any>, env: AdminMockEnv): Ev | null {   // eslint-disable-line @typescript-eslint/no-explicit-any
   if (!route.startsWith('admin/')) return null;
   init(env);
@@ -56,12 +59,26 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
   const boot = (): AdminBoot => ({
     me: { id: 1, name: 'Anna Nováková', role: owner ? 'owner' : 'master', lang: 'en' }, config: { tz: TZ, studio_name: 'Lash Studio', server_time: NOW, today: '2026-11-16' },
     staff: scope.map((s) => ({ ...s, future: state.appts.filter((a) => a.staff_id === s.id && ['pending', 'confirmed'].includes(a.status)).length })),
-    services: state.services, categories: state.categories, loyalty_pending: state.loyaltyPending, settings: state.settings, can_manage: owner,
+    services: state.services, categories: state.categories, loyalty_pending: state.loyaltyPending, settings: state.settings, can_manage: owner, vouchers_on: owner,
   });
   const apptOf = (id: number) => state.appts.find((a) => a.id === id);
 
   switch (route) {
     case 'admin/bootstrap': return ok(boot());
+    case 'admin/vouchers/list': return owner ? ok({ enabled: true, items: [...vouchers].reverse() }) : err(403, 'forbidden');
+    case 'admin/vouchers/create': {
+      if (!owner) return err(403, 'forbidden');
+      const seen = voucherOps.get(d.op); if (seen) return ok({ replayed: true, voucher: seen });
+      if (d.kind === 'value' && !(d.value >= 100)) return err(400, 'bad_request');
+      const worth = d.kind === 'value' ? d.value : (state.services.find((s) => s.id === d.service)?.price ?? 0);
+      const v: VoucherRow = { id: vouchers.length + 1, kind: d.kind, hint: 'MOCK'.slice(0, 4), status: 'active', service: d.kind === 'service' ? (state.services.find((s) => s.id === d.service)?.name ?? '') : null,
+        value: d.kind === 'value' ? d.value : 0, balance: d.kind === 'value' ? d.value : 0, reserved: 0, partial: d.kind === 'value' && d.partial !== false, expires_at: NOW + 365 * 86400, extended: false,
+        sold_at: NOW, paid: worth, method: d.method, received: d.received, note: d.note ?? '' };
+      vouchers.push(v); voucherOps.set(d.op, v);
+      return ok({ replayed: false, code: 'MOCK-ABCD-EFGH-JKMN', link: 'https://t.me/mock_bot?start=gv_MOCKABCDEFGHJKMN', voucher: v });
+    }
+    case 'admin/vouchers/extend': { const v = vouchers.find((x) => x.id === d.id); if (!v) return err(404, 'not_found'); v.expires_at += d.months * 30 * 86400; v.extended = true; return ok({ ok: true, voucher: v }); }
+    case 'admin/vouchers/void': { const v = vouchers.find((x) => x.id === d.id); if (!v) return err(404, 'not_found'); v.status = 'void'; return ok({ ok: true, voucher: v }); }
     case 'admin/calendar': {
       const ids: number[] = (d.staff ?? scope.map((s) => s.id)).filter(can);
       const from = d.from as string, days = d.days ?? 1;

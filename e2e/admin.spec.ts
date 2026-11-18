@@ -285,3 +285,25 @@ test('a master (not an admin) does not see the broadcast form', async ({ page })
   await page.getByRole('tab', { name: 'Settings' }).click();
   await expect(page.getByText('Offers to clients')).toHaveCount(0);
 });
+
+test('vouchers tab (owner): create a value voucher, the code is shown once, list shows it with the year; extend and void; a master has no tab', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: 'Vouchers' }).click();
+  await expect(page.getByTestId('vch-empty')).toBeVisible();
+  await page.getByRole('button', { name: /New voucher/ }).click();
+  await page.getByLabel('Amount (Kč, at least 100)').fill('500');
+  await page.getByRole('button', { name: 'Create voucher' }).click();
+  await expect(page.getByTestId('vch-code')).toHaveText('MOCK-ABCD-EFGH-JKMN');
+  await expect(page.getByTestId('vch-link')).toContainText('t.me/mock_bot?start=gv_');
+  await shot(page, 'admin-voucher-created');
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /…MOCK · 500/ }).click();
+  await expect(page.getByText(/20\d\d/).first()).toBeVisible();              // the expiry date carries the year
+  await page.getByRole('button', { name: '+3 months' }).click();
+  await page.getByRole('button', { name: 'Void', exact: true }).click();
+  await page.getByRole('button', { name: 'Tap again to void' }).click();
+  await expect(page.getByText('void', { exact: true }).first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  await page.goto(`${BASE}?mock=1&role=master&staff=2`);
+  await expect(page.getByRole('tab', { name: 'Vouchers' })).toHaveCount(0);
+});
