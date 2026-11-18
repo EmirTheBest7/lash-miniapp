@@ -15,20 +15,20 @@ const NEW_CAT = -1;
 export function ServicesTab({ boot, toast, reloadBoot }: { boot: AdminBoot; toast: (s: string) => void; reloadBoot: () => Promise<void> }) {
   // edit: an existing row, or { addon } while creating
   const [edit, setEdit] = useState<SvcRow | { addon: boolean } | null>(null);
-  const [f, setF] = useState({ dur: 60, buf: 15, price: 0, from: false, active: true, names: EMPTY, cat: 0, newCat: '' });
+  const [f, setF] = useState({ dur: 60, buf: 15, price: 0, from: false, active: true, staffOnly: false, names: EMPTY, cat: 0, newCat: '' });
   const [busy, setBusy] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
   const existing = edit !== null && 'id' in edit ? edit : null;
   const isAddon = edit !== null && ('id' in edit ? edit.is_addon : edit.addon);
-  const open = (s: SvcRow) => { setEdit(s); setConfirmDel(false); setF({ dur: s.duration_min, buf: s.buffer_min, price: s.price, from: s.price_from, active: s.active, names: s.names, cat: s.category_id ?? 0, newCat: '' }); };
-  const create = (addon: boolean) => { setEdit({ addon }); setConfirmDel(false); setF({ dur: addon ? 15 : 60, buf: addon ? 0 : 15, price: 0, from: false, active: true, names: EMPTY, cat: 0, newCat: '' }); };
+  const open = (s: SvcRow) => { setEdit(s); setConfirmDel(false); setF({ dur: s.duration_min, buf: s.buffer_min, price: s.price, from: s.price_from, active: s.active, staffOnly: !!s.staff_only, names: s.names, cat: s.category_id ?? 0, newCat: '' }); };
+  const create = (addon: boolean) => { setEdit({ addon }); setConfirmDel(false); setF({ dur: addon ? 15 : 60, buf: addon ? 0 : 15, price: 0, from: false, active: true, staffOnly: false, names: EMPTY, cat: 0, newCat: '' }); };
   const num = (v: string): number => Math.max(0, Math.round(Number(v) || 0));
 
   async function save() {
     if (!edit || busy) return;
     if (!Object.values(f.names).some((n) => n.trim() !== '')) { haptic.error(); toast(t('adm.name_required')); return; }
     setBusy(true);
-    const body: Record<string, unknown> = { duration_min: f.dur, buffer_min: f.buf, price: f.price, price_from: f.from, active: f.active, names: f.names };
+    const body: Record<string, unknown> = { duration_min: f.dur, buffer_min: f.buf, price: f.price, price_from: f.from, active: f.active, staff_only: f.staffOnly, names: f.names };
     if (existing) body.id = existing.id; else body.is_addon = isAddon;
     if (!isAddon) { if (f.cat === NEW_CAT) { if (f.newCat.trim()) body.new_category = f.newCat.trim(); } else body.category_id = f.cat === 0 ? null : f.cat; }
     const r = await api('admin/service/save', body, newOpId());
@@ -49,7 +49,7 @@ export function ServicesTab({ boot, toast, reloadBoot }: { boot: AdminBoot; toas
 
   const group = (addon: boolean) => boot.services.filter((s) => s.is_addon === addon);
   const row = (s: SvcRow) => (
-    <Cell title={s.name} subtitle={`${duration(s.duration_min)} + ${t('adm.buffer', { n: s.buffer_min })} · ${money(s.price, s.price_from)}`} after={s.active ? undefined : t('adm.inactive')} chevron onClick={() => open(s)} />
+    <Cell title={s.name} subtitle={`${duration(s.duration_min)} + ${t('adm.buffer', { n: s.buffer_min })} · ${money(s.price, s.price_from)}`} after={s.active ? (s.staff_only ? t('adm.staff_only_tag') : undefined) : t('adm.inactive')} chevron onClick={() => open(s)} />
   );
   return (
     <div class="page">
@@ -86,6 +86,7 @@ export function ServicesTab({ boot, toast, reloadBoot }: { boot: AdminBoot; toas
         <Section>
           <Cell title={t('adm.price_from')} after={<Switch label={t('adm.price_from')} checked={f.from} onChange={(v) => setF({ ...f, from: v })} />} />
           <Cell title={t('adm.active')} after={<Switch label={t('adm.active')} checked={f.active} onChange={(v) => setF({ ...f, active: v })} />} />
+          <Cell title={t('adm.staff_only')} subtitle={t('adm.staff_only_hint')} after={<Switch label={t('adm.staff_only')} checked={f.staffOnly} onChange={(v) => setF({ ...f, staffOnly: v })} />} />
         </Section>
         <Button onClick={() => void save()} disabled={busy}>{busy ? '…' : t('adm.save')}</Button>
         {existing && <Button secondary onClick={() => void remove()} disabled={busy}>{confirmDel ? t('adm.delete_confirm') : t('adm.delete')}</Button>}
