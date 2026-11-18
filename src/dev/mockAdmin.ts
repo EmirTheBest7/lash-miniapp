@@ -49,6 +49,7 @@ const busy = (staff: number, a: number, b: number, skip = 0) => state.appts.some
 const MOCK_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 let vsettings: VoucherSettings = { months: 12, partial: true, min: 100, terms: { cs: '', en: '', ru: '', uk: '' } };
 const sentCards: number[] = [];
+const sentPreviews: string[] = [];
 const vouchers: VoucherRow[] = [];
 const voucherOps = new Map<string, VoucherRow>();
 
@@ -69,6 +70,7 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
 
   switch (route) {
     case 'admin/bootstrap': return ok(boot());
+    case 'admin/service/preview': return state.services.some((s) => s.id === d.id && !s.is_addon) && ['cs', 'en', 'ru', 'uk'].includes(d.lang) ? (sentPreviews.push(`${d.id}:${d.lang}`), ok({ sent: 3 })) : err(404, 'not_found');
     case 'admin/vouchers/list': return owner ? ok({ enabled: true, settings: vsettings, items: [...vouchers].reverse() }) : err(403, 'forbidden');
     case 'admin/vouchers/settings': { if (!owner) return err(403, 'forbidden'); if (!(d.months >= 1 && d.months <= 60) || !(d.min >= 1)) return err(400, 'bad_request'); vsettings = { months: d.months, partial: d.partial === true, min: d.min, terms: d.terms }; return ok({ settings: vsettings }); }
     case 'admin/vouchers/create': {

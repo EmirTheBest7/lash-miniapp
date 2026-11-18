@@ -352,5 +352,10 @@
   "adm.aftercare": "Aftercare and fill",
   "adm.aftercare_note": "Sent after the visit is completed. Empty text = no aftercare message for that language (another language is used if it has one). Fill days: the suggested time for the next visit (0 = no suggestion and no nudge).",
   "adm.rebook_days": "Fill after (days)",
-  "adm.aftercare_text": "Aftercare text"
+  "adm.aftercare_text": "Aftercare text",
+  "adm.preview": "Preview messages",
+  "adm.preview_note": "Sends the aftercare, fill-nudge and review-request messages to YOUR chat, exactly as a client would see them, each marked PREVIEW. Buttons do nothing. Nothing is booked or sent to a client.",
+  "adm.preview_lang": "Preview language",
+  "adm.preview_btn": "Send preview to my chat",
+  "adm.preview_sent": "Preview sent to your chat"
 }

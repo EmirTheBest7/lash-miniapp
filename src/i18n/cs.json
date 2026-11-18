@@ -352,5 +352,10 @@
   "adm.aftercare": "Péče po návštěvě a doplnění",
   "adm.aftercare_note": "Odesílá se po dokončení návštěvy. Prázdný text = žádná zpráva pro daný jazyk (použije se jiný jazyk, pokud ho má). Dny doplnění: navrhovaný termín další návštěvy (0 = bez návrhu a bez připomínky).",
   "adm.rebook_days": "Doplnění za (dnů)",
-  "adm.aftercare_text": "Text péče po návštěvě"
+  "adm.aftercare_text": "Text péče po návštěvě",
+  "adm.preview": "Náhled zpráv",
+  "adm.preview_note": "Pošle do VAŠEHO chatu zprávy péče po návštěvě, připomínky doplnění a žádosti o recenzi přesně tak, jak je uvidí klientka, každou s označením NÁHLED. Tlačítka nic nedělají. Nic se nerezervuje ani neposílá klientkám.",
+  "adm.preview_lang": "Jazyk náhledu",
+  "adm.preview_btn": "Poslat náhled do mého chatu",
+  "adm.preview_sent": "Náhled poslán do vašeho chatu"
 }

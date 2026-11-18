@@ -14,5 +14,5 @@ export function perfReport(): void {
   const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
   const res = performance.getEntriesByType('resource').map((r) => ({ name: r.name.replace(/^https?:\/\/[^/]+/, '').slice(0, 60), start: Math.round(r.startTime), ms: Math.round(r.duration), kB: Math.round(((r as PerformanceResourceTiming).transferSize ?? 0) / 1024) }));
   // eslint-disable-next-line no-console
-  console.info('[perf] marks (ms since navigation start)', Object.fromEntries(marks), '\n[perf] document', nav ? { ttfb: Math.round(nav.responseStart), domReady: Math.round(nav.domContentLoadedEventEnd), load: Math.round(nav.loadEventEnd) } : null, '\n[perf] resources', res);
+  console.info('[perf] marks (ms since navigation start): ' + marks.map(([n, v]) => `${n}=${v}`).join(' | '), '\n[perf] document', nav ? { ttfb: Math.round(nav.responseStart), domReady: Math.round(nav.domContentLoadedEventEnd), load: Math.round(nav.loadEventEnd) } : null, '\n[perf] resources', res);
 }

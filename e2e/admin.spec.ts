@@ -350,3 +350,19 @@ test('after the visit (owner): review link must be https, delay fields appear on
   await page.getByRole('tab', { name: 'Settings' }).click();
   await expect(page.getByText('After the visit')).toHaveCount(0);
 });
+
+test('preview messages: from the service editor (that service) and from Settings (pick a service), in a chosen language; sent to my own chat', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: 'Services' }).click();
+  await page.getByRole('button', { name: /Lash extensions/ }).first().click();
+  await page.getByLabel('Preview language').selectOption('ru');
+  await page.getByRole('button', { name: 'Send preview to my chat' }).click();
+  await toast(page, 'Preview sent to your chat');
+  const calls = await page.evaluate(() => ((window as unknown as { __mockCalls?: { route: string; data: { id?: number; lang?: string } }[] }).__mockCalls ?? []).filter((c) => c.route === 'admin/service/preview').map((c) => `${c.data.id}:${c.data.lang}`));
+  expect(calls).toEqual(['1:ru']);
+  await page.keyboard.press('Escape');
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await page.getByLabel('Preview language').selectOption('cs');
+  await page.getByRole('button', { name: 'Send preview to my chat' }).click();
+  await toast(page, 'Preview sent to your chat');
+});

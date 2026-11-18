@@ -4,6 +4,7 @@ import { duration, money } from '../format';
 import { t } from '../i18n';
 import { haptic } from '../tg';
 import { Button, Cell, Section, Sheet, Switch } from '../ui/components';
+import { PreviewBox } from './PreviewBox';
 import type { AdminBoot, SvcRow } from './types';
 
 type Names = Record<'cs' | 'en' | 'ru' | 'uk', string>;
@@ -96,6 +97,7 @@ export function ServicesTab({ boot, toast, reloadBoot }: { boot: AdminBoot; toas
             ))}
           </Section>
         )}
+        {existing && !isAddon && <PreviewBox boot={boot} toast={toast} serviceId={existing.id} />}
         <Button onClick={() => void save()} disabled={busy}>{busy ? '…' : t('adm.save')}</Button>
         {existing && <Button secondary onClick={() => void remove()} disabled={busy}>{confirmDel ? t('adm.delete_confirm') : t('adm.delete')}</Button>}
       </Sheet>

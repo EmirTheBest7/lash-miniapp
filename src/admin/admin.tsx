@@ -15,8 +15,8 @@ import './admin.css';
 type Tab = 'cal' | 'staff' | 'svc' | 'vch' | 'set';
 
 /** The staff app (owner and masters). A separate lazy chunk: clients never download it. */
-export function AdminApp({ onClientView }: { onClientView: () => void }) {
-  const [boot, setBoot] = useState<AdminBoot | null>(null);
+export function AdminApp({ onClientView, initial }: { onClientView: () => void; initial?: AdminBoot }) {
+  const [boot, setBoot] = useState<AdminBoot | null>(initial ?? null);
   const [err, setErr] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('cal');
   const [toastText, toast] = useToast();
@@ -27,7 +27,7 @@ export function AdminApp({ onClientView }: { onClientView: () => void }) {
     setErr(null); setBoot(r.data);
     setTimeout(perfReport, 0);
   }, []);
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => { if (initial) setTimeout(perfReport, 0); else void load(); }, [load]);      // `initial` came with the ONE bootstrap call
 
   if (err) return <Empty title={t(err === 'forbidden' ? 'err.forbidden' : err.startsWith('auth_') ? 'err.auth' : 'err.network')} icon="info" action={<Button onClick={() => void load()}>{t('btn.retry')}</Button>} />;
   if (!boot) return <div class="page"><Skeleton lines={6} /></div>;

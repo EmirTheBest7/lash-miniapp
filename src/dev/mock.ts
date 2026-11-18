@@ -72,6 +72,10 @@ export function installMockApi(): void {
     const err = (status: number, code: string) => ({ ok: false as const, status, error: { code } });
     switch (route) {
       case 'bootstrap':
+        if ((d as unknown as { auto?: boolean }).auto && (q.get('role') ?? 'client') !== 'client') {
+          const a = adminMock('admin/bootstrap', {}, { two, role: q.get('role') ?? 'client' });
+          return { ok: true as const, data: { me: { id: 1, role: q.get('role'), lang: 'en' }, admin: (a as { data: unknown }).data } };
+        }
         return ok({
           me: { id: 1, name: 'Anna Nováková', username: 'anna_n', role: q.get('role') ?? 'client', lang: st.lang, phone_set: st.phone, privacy_accepted: st.privacy },
           config: { tz: 'Europe/Prague', studio_name: 'Lash Studio', currency: 'CZK', min_client_version: 1, contact_username: 'lash_master', server_time: Math.floor(TODAY.getTime() / 1000) },

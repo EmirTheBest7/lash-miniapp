@@ -3,6 +3,7 @@ import { api, newOpId } from '../api';
 import { t } from '../i18n';
 import { haptic } from '../tg';
 import { Button, Cell, Section, Segmented, Switch } from '../ui/components';
+import { PreviewBox } from './PreviewBox';
 import type { AdminBoot, AdminSettings, BroadcastInfo } from './types';
 
 export function SettingsTab({ boot, toast, reloadBoot, onClientView }: { boot: AdminBoot; toast: (s: string) => void; reloadBoot: () => Promise<void>; onClientView: () => void }) {
@@ -123,6 +124,7 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView }: { boot: A
           )}
         </Section>
       )}
+      <PreviewBox boot={boot} toast={toast} />
       {boot.can_manage && (
         <Section title={t('adm.bc')} footer={t('adm.bc_note')}>
           <label class="field"><span>{t('adm.bc_text')}</span><textarea maxLength={1000} rows={4} value={text} onInput={(e) => { setText((e.target as HTMLTextAreaElement).value); setConfirmSend(false); }} /></label>
