@@ -11,7 +11,8 @@ export interface VoucherRow {
   id: number; kind: 'value' | 'service'; hint: string; status: VoucherStatus; service: string | null; value: number; balance: number; reserved: number; partial: boolean;
   expires_at: number; extended: boolean; sold_at: number; paid: number; method: 'cash' | 'transfer' | 'other'; received: number; note: string;
 }
-export interface VoucherCreated { replayed: boolean; code?: string; link?: string | null; voucher: VoucherRow }
+export interface VoucherSettings { months: number; partial: boolean; min: number; terms: Record<'cs' | 'en' | 'ru' | 'uk', string> }
+export interface VoucherCreated { replayed: boolean; code?: string; link?: string | null; qr?: string; voucher: VoucherRow }
 export type AdmStatus = 'pending' | 'pending_deposit' | 'confirmed' | 'completed' | 'no_show';
 export interface AdmAppt {
   id: number; rev: number; staff_id: number; status: AdmStatus; start: number; end: number; buffer_min: number; service_id: number; service: string; addons: string[];

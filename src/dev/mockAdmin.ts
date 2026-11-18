@@ -1,6 +1,6 @@
 // DEV / E2E ONLY: a stateful mock of the admin API (synthetic people, never real data). Follows TG-PHPBot docs/miniapp.md.
 import { addDays, isoWeekday, minutesOf, parseHm, toUtc } from '../admin/time';
-import type { AdmAppt, AdminBoot, CalData, StaffRow, SvcRow, VoucherRow } from '../admin/types';
+import type { AdmAppt, AdminBoot, CalData, StaffRow, SvcRow, VoucherRow, VoucherSettings } from '../admin/types';
 
 const TZ = 'Europe/Prague';
 const NOW = toUtc('2026-11-16', 12 * 60, TZ);
@@ -45,6 +45,9 @@ const iv = (staff: number, date: string): [number, number][] => {
 };
 const busy = (staff: number, a: number, b: number, skip = 0) => state.appts.some((x) => x.id !== skip && x.staff_id === staff && ['pending', 'pending_deposit', 'confirmed'].includes(x.status) && x.start < b && a < x.end + x.buffer_min * 60);
 
+// a 1x1 PNG stand-in for the QR in the mock (the real PNG is produced and decode-tested on the server)
+const MOCK_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+let vsettings: VoucherSettings = { months: 12, partial: true, min: 100, terms: { cs: '', en: '', ru: '', uk: '' } };
 const vouchers: VoucherRow[] = [];
 const voucherOps = new Map<string, VoucherRow>();
 
@@ -65,7 +68,8 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
 
   switch (route) {
     case 'admin/bootstrap': return ok(boot());
-    case 'admin/vouchers/list': return owner ? ok({ enabled: true, items: [...vouchers].reverse() }) : err(403, 'forbidden');
+    case 'admin/vouchers/list': return owner ? ok({ enabled: true, settings: vsettings, items: [...vouchers].reverse() }) : err(403, 'forbidden');
+    case 'admin/vouchers/settings': { if (!owner) return err(403, 'forbidden'); if (!(d.months >= 1 && d.months <= 60) || !(d.min >= 1)) return err(400, 'bad_request'); vsettings = { months: d.months, partial: d.partial === true, min: d.min, terms: d.terms }; return ok({ settings: vsettings }); }
     case 'admin/vouchers/create': {
       if (!owner) return err(403, 'forbidden');
       const seen = voucherOps.get(d.op); if (seen) return ok({ replayed: true, voucher: seen });
@@ -75,7 +79,7 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
         value: d.kind === 'value' ? d.value : 0, balance: d.kind === 'value' ? d.value : 0, reserved: 0, partial: d.kind === 'value' && d.partial !== false, expires_at: NOW + 365 * 86400, extended: false,
         sold_at: NOW, paid: worth, method: d.method, received: d.received, note: d.note ?? '' };
       vouchers.push(v); voucherOps.set(d.op, v);
-      return ok({ replayed: false, code: 'MOCK-ABCD-EFGH-JKMN', link: 'https://t.me/mock_bot?start=gv_MOCKABCDEFGHJKMN', voucher: v });
+      return ok({ replayed: false, qr: MOCK_QR, code: 'MOCK-ABCD-EFGH-JKMN', link: 'https://t.me/mock_bot?start=gv_MOCKABCDEFGHJKMN', voucher: v });
     }
     case 'admin/vouchers/extend': { const v = vouchers.find((x) => x.id === d.id); if (!v) return err(404, 'not_found'); v.expires_at += d.months * 30 * 86400; v.extended = true; return ok({ ok: true, voucher: v }); }
     case 'admin/vouchers/void': { const v = vouchers.find((x) => x.id === d.id); if (!v) return err(404, 'not_found'); v.status = 'void'; return ok({ ok: true, voucher: v }); }

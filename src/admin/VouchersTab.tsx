@@ -4,19 +4,43 @@ import { money } from '../format';
 import { getLang, t } from '../i18n';
 import { haptic, openTelegramLink } from '../tg';
 import { Button, Cell, Section, Segmented, Sheet, Skeleton, Switch } from '../ui/components';
-import type { AdminBoot, VoucherCreated, VoucherRow } from './types';
+import type { AdminBoot, VoucherCreated, VoucherRow, VoucherSettings } from './types';
 
 const LOCALE: Record<string, string> = { cs: 'cs-CZ', en: 'en-GB', ru: 'ru-RU', uk: 'uk-UA' };
 /** A date WITH the year: a voucher that expires is no place for a guess. */
 const dateOf = (ts: number): string => new Intl.DateTimeFormat(LOCALE[getLang()] ?? 'en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Prague' }).format(new Date(ts * 1000));
+/** The printable card (PNG): studio, what the voucher is, expiry, the QR, only the LAST 4 characters of the code as text. Drawn on a canvas so every language and font works. */
+async function cardPng(opts: { studio: string; title: string; what: string; until: string; hint: string; scan: string; qr: string }): Promise<Blob | null> {
+  const img = new Image();
+  img.src = opts.qr;
+  try { await img.decode(); } catch { return null; }
+  const W = 900, H = 1200, c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  if (!g) return null;
+  g.fillStyle = '#ffffff'; g.fillRect(0, 0, W, H);
+  g.strokeStyle = '#222'; g.lineWidth = 6; g.strokeRect(30, 30, W - 60, H - 60);
+  g.fillStyle = '#111'; g.textAlign = 'center';
+  const fit = (text: string, size: number, y: number, weight = 600) => { let s = size; g.font = `${weight} ${s}px system-ui, sans-serif`; while (g.measureText(text).width > W - 160 && s > 18) { s -= 2; g.font = `${weight} ${s}px system-ui, sans-serif`; } g.fillText(text, W / 2, y); };
+  fit(opts.studio, 54, 140); fit(opts.title, 40, 215, 400); fit(opts.what, 76, 335);
+  fit(opts.until, 38, 410, 400);
+  g.imageSmoothingEnabled = false;
+  g.drawImage(img, (W - 560) / 2, 460, 560, 560);
+  fit(opts.scan, 30, 1070, 400);
+  g.font = '600 44px ui-monospace, Menlo, monospace'; g.fillText(opts.hint, W / 2, 1135);
+  return new Promise((res) => c.toBlob((b) => res(b), 'image/png'));
+}
+const saveBlob = (blob: Blob, name: string): void => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
 const num = (v: string): number => Math.max(0, Math.round(Number(v) || 0));
 
 type Form = { kind: 'value' | 'service'; value: number; service: number; months: number; date: string; partial: boolean; method: 'cash' | 'transfer' | 'other'; received: string; note: string };
-const blank = (boot: AdminBoot): Form => ({ kind: 'value', value: 500, service: boot.services.find((s) => !s.is_addon)?.id ?? 0, months: 12, date: '', partial: true, method: 'cash', received: '', note: '' });
+const blank = (boot: AdminBoot, d?: VoucherSettings): Form => ({ kind: 'value', value: Math.max(500, d?.min ?? 0), service: boot.services.find((s) => !s.is_addon)?.id ?? 0, months: d?.months ?? 12, date: '', partial: d?.partial ?? true, method: 'cash', received: '', note: '' });
 
 /** Gift vouchers (owner). A voucher is created only after the money was received; its code is shown ONCE, here, right after creation. */
 export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: string) => void }) {
   const [items, setItems] = useState<VoucherRow[] | null>(null);
+  const [defs, setDefs] = useState<VoucherSettings | null>(null);
+  const [editDefs, setEditDefs] = useState<VoucherSettings | null>(null);
   const [err, setErr] = useState(false);
   const [open, setOpen] = useState<VoucherRow | null>(null);
   const [creating, setCreating] = useState(false);
@@ -27,9 +51,9 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
   const [confirmVoid, setConfirmVoid] = useState(false);
 
   const load = useCallback(async () => {
-    const r = await api<{ enabled: boolean; items: VoucherRow[] }>('admin/vouchers/list');
+    const r = await api<{ enabled: boolean; settings: VoucherSettings; items: VoucherRow[] }>('admin/vouchers/list');
     if (!r.ok) { setErr(true); return; }
-    setErr(false); setItems(r.data.items);
+    setErr(false); setItems(r.data.items); setDefs(r.data.settings);
   }, []);
   useEffect(() => { void load(); }, [load]);
 
@@ -39,7 +63,8 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
 
   async function create() {
     if (busy) return;
-    if (f.kind === 'value' && f.value < 100) { haptic.error(); toast(t('vch.min')); return; }
+    const min = defs?.min ?? 100;
+    if (f.kind === 'value' && f.value < min) { haptic.error(); toast(t('vch.min', { n: min })); return; }
     setBusy(true);
     const body: Record<string, unknown> = { op, kind: f.kind, partial: f.partial, method: f.method, received: f.received === '' ? worth : num(f.received), note: f.note.trim() };
     if (f.kind === 'value') body.value = f.value; else body.service = f.service;
@@ -47,7 +72,7 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
     const r = await api<VoucherCreated>('admin/vouchers/create', body);
     setBusy(false);
     if (!r.ok) { haptic.error(); toast(t(r.error.code === 'bad_request' ? 'adm.bad_input' : 'err.network')); return; }
-    haptic.success(); setCreating(false); setCreated(r.data); setOp(newOpId()); setF(blank(boot)); await load();
+    haptic.success(); setCreating(false); setCreated(r.data); setOp(newOpId()); setF(blank(boot, defs ?? undefined)); await load();
   }
 
   async function act(route: 'extend' | 'void', body: Record<string, unknown>) {
@@ -59,6 +84,15 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
     haptic.success(); setOpen(r.data.voucher); setConfirmVoid(false); await load();
   }
 
+  const [card, setCard] = useState<string | null>(null);
+  const downloadQr = (c: VoucherCreated) => { if (!c.qr) return; const a = document.createElement('a'); a.href = c.qr; a.download = 'voucher-qr.png'; document.body.appendChild(a); a.click(); a.remove(); toast(t('vch.saved_hint')); };
+  const downloadCard = async (c: VoucherCreated) => {
+    if (!c.qr) return;
+    const v = c.voucher;
+    const blob = await cardPng({ studio: boot.config.studio_name, title: t('vch.card_title'), what: v.kind === 'service' ? (v.service ?? '') : money(v.value), until: t('vch.valid') + ' ' + dateOf(v.expires_at), hint: `••••-${v.hint}`, scan: t('vch.card_scan'), qr: c.qr });
+    if (!blob) { toast(t('err.network')); return; }
+    setCard(URL.createObjectURL(blob)); saveBlob(blob, 'voucher-card.png'); toast(t('vch.saved_hint'));
+  };
   const copy = async (text: string) => { try { await navigator.clipboard.writeText(text); toast(t('vch.copied')); } catch { toast(text); } };
   const share = (c: VoucherCreated) => openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(c.link ?? '')}&text=${encodeURIComponent(c.link ? t('vch.share_text') : `${t('vch.share_text')} ${c.code ?? ''}`)}`);
 
@@ -68,7 +102,8 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
     <div class="page">
       <h1 class="large">{t('adm.tab_vouchers')}</h1>
       <Section footer={t('vch.note')}>
-        <Cell title={t('vch.new')} icon="plus" chevron onClick={() => { setF(blank(boot)); setCreating(true); }} />
+        <Cell title={t('vch.new')} icon="plus" chevron onClick={() => { setF(blank(boot, defs ?? undefined)); setCreating(true); }} />
+        <Cell title={t('vch.defaults')} chevron onClick={() => setEditDefs(defs ? JSON.parse(JSON.stringify(defs)) : null)} />
       </Section>
       {items.length === 0 ? <div class="note" data-testid="vch-empty">{t('vch.none')}</div> : (
         <Section>
@@ -81,7 +116,7 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
       <Sheet open={creating} onClose={() => setCreating(false)} title={t('vch.new')}>
         <Segmented options={[{ value: 'value', label: t('vch.k_value') }, { value: 'service', label: t('vch.k_service') }]} value={f.kind} onChange={(v) => setF({ ...f, kind: v })} />
         {f.kind === 'value'
-          ? <label class="field"><span>{t('vch.amount')}</span><input type="number" inputMode="numeric" min={100} step={50} value={f.value} onInput={(e) => setF({ ...f, value: num((e.target as HTMLInputElement).value) })} /></label>
+          ? <label class="field"><span>{t('vch.amount', { n: defs?.min ?? 100 })}</span><input type="number" inputMode="numeric" min={defs?.min ?? 100} step={50} value={f.value} onInput={(e) => setF({ ...f, value: num((e.target as HTMLInputElement).value) })} /></label>
           : <label class="field"><span>{t('vch.service')}</span>
               <select value={f.service} onChange={(e) => setF({ ...f, service: Number((e.target as HTMLSelectElement).value) })}>
                 {boot.services.filter((s) => !s.is_addon).map((s) => <option value={s.id} key={s.id}>{s.name}</option>)}
@@ -103,16 +138,43 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
         <Button onClick={() => void create()} disabled={busy}>{busy ? '…' : t('vch.create')}</Button>
       </Sheet>
 
-      <Sheet open={created !== null} onClose={() => setCreated(null)} title={t('vch.created')}>
+      <Sheet open={editDefs !== null} onClose={() => setEditDefs(null)} title={t('vch.defaults')}>
+        {editDefs && (
+          <>
+            <label class="field"><span>{t('vch.def_months')}</span><input type="number" inputMode="numeric" min={1} max={60} value={editDefs.months} onInput={(e) => setEditDefs({ ...editDefs, months: Math.min(60, Math.max(1, num((e.target as HTMLInputElement).value))) })} /></label>
+            <label class="field"><span>{t('vch.def_min')}</span><input type="number" inputMode="numeric" min={1} value={editDefs.min} onInput={(e) => setEditDefs({ ...editDefs, min: Math.max(1, num((e.target as HTMLInputElement).value)) })} /></label>
+            <Section footer={t('vch.partial_hint')}><Cell title={t('vch.partial')} after={<Switch label={t('vch.partial')} checked={editDefs.partial} onChange={(v) => setEditDefs({ ...editDefs, partial: v })} />} /></Section>
+            <Section footer={t('vch.terms_hint')}>
+              {(['cs', 'en', 'ru', 'uk'] as const).map((l) => (
+                <label class="field" key={l}><span>{t('vch.terms')} · {l.toUpperCase()}</span><textarea rows={3} maxLength={600} value={editDefs.terms[l]} onInput={(e) => setEditDefs({ ...editDefs, terms: { ...editDefs.terms, [l]: (e.target as HTMLTextAreaElement).value } })} /></label>
+              ))}
+            </Section>
+            <Button disabled={busy} onClick={async () => {
+              setBusy(true);
+              const r = await api<{ settings: VoucherSettings }>('admin/vouchers/settings', { ...editDefs }, newOpId());
+              setBusy(false);
+              if (!r.ok) { haptic.error(); toast(t('adm.bad_input')); return; }
+              haptic.success(); toast(t('adm.saved')); setDefs(r.data.settings); setEditDefs(null);
+            }}>{busy ? '…' : t('adm.save')}</Button>
+          </>
+        )}
+      </Sheet>
+
+      <Sheet open={created !== null} onClose={() => { setCreated(null); setCard(null); }} title={t('vch.created')}>
         {created && (created.replayed
           ? <div class="note">{t('vch.replayed')}</div>
           : <>
               <div class="note">{t('vch.once')}</div>
               <div class="vch-code" data-testid="vch-code">{created.code}</div>
+              {created.qr && <img class="vch-qr" data-testid="vch-qr" alt="QR" src={created.qr} />}
               {created.link ? <div class="note" data-testid="vch-link">{created.link}</div> : <div class="note">{t('vch.no_link')}</div>}
               <Button onClick={() => void copy(created.code ?? '')}>{t('vch.copy_code')}</Button>
               {created.link && <Button secondary onClick={() => void copy(created.link ?? '')}>{t('vch.copy_link')}</Button>}
               <Button secondary onClick={() => share(created)}>{t('vch.share')}</Button>
+              {created.qr && <Button secondary onClick={() => downloadQr(created)}>{t('vch.dl_qr')}</Button>}
+              {created.qr && <Button secondary onClick={() => void downloadCard(created)}>{t('vch.dl_card')}</Button>}
+              <div class="note">{t('vch.in_chat')}</div>
+              {card && <img class="vch-qr" data-testid="vch-card" alt="" src={card} />}
             </>)}
       </Sheet>
 
