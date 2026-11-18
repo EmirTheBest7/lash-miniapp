@@ -1,18 +1,18 @@
 // DEV / E2E ONLY: a stateful mock of the admin API (synthetic people, never real data). Follows TG-PHPBot docs/miniapp.md.
 import { addDays, isoWeekday, minutesOf, parseHm, toUtc } from '../admin/time';
-import type { AdmAppt, AdminBoot, CalData, StaffRow, StudioInfo, SvcRow, VoucherRow, VoucherSettings } from '../admin/types';
+import type { AdmAppt, AdminBoot, CalData, ReviewLink, StaffRow, StudioInfo, SvcRow, VoucherRow, VoucherSettings } from '../admin/types';
 
 const TZ = 'Europe/Prague';
 const NOW = toUtc('2026-11-16', 12 * 60, TZ);
 const week = (): Record<string, [string, string][]> => ({ '1': [['10:00', '18:00']], '2': [['10:00', '18:00']], '3': [['10:00', '18:00']], '4': [['10:00', '18:00']], '5': [['10:00', '18:00']], '6': [['10:00', '14:00']] });
 type Ev = { ok: true; data: unknown } | { ok: false; status: number; error: { code: string } };
 
-export interface AdminMockEnv { two: boolean; role: string; noTranslate?: boolean }
+export interface AdminMockEnv { two: boolean; role: string; noTranslate?: boolean; lang?: string }
 const state = {
   staff: [] as StaffRow[], services: [] as SvcRow[], categories: [] as { id: number; name: string }[], appts: [] as AdmAppt[], blocks: [] as { id: number; staff_id: number; start: number; end: number; reason: string }[],
   overrides: [] as { staff_id: number; date: string; closed: boolean; intervals: [string, string][]; note: string }[],
   settings: { slot_step_min: 30, min_notice_h: 12, horizon_days: 60, cancel_cutoff_h: 24, buffer_may_exceed_close: true, loyalty_enabled: false, loyalty_visits: 7, loyalty_percent: 10,
-    automation_on: false, autocomplete_on: false, autocomplete_h: 3, fill_nudge_on: true, google_review_url: '', review_delay_h: 3, review_gap_days: 180, waitlist_min_notice_h: 2, rem1_on: true, rem1_h: 26, rem1_auto: true, rem1_warn: false, rem2_on: true, rem2_h: 3, rem_unanswered_on: true, rem_unanswered_h: 12, agenda_on: true, agenda_time: '20:00', agenda_empty: false,
+    review_links: [] as ReviewLink[], automation_on: false, autocomplete_on: false, autocomplete_h: 3, fill_nudge_on: true, google_review_url: '', review_delay_h: 3, review_gap_days: 180, waitlist_min_notice_h: 2, rem1_on: true, rem1_h: 26, rem1_auto: true, rem1_warn: false, rem2_on: true, rem2_h: 3, rem_unanswered_on: true, rem_unanswered_h: 12, agenda_on: true, agenda_time: '20:00', agenda_empty: false,
     waitlist_on: true, waitlist_offer_h: 2, backup_on: true, backup_time: '03:30', backup_key: false, backup_last: 0, ad_min_days: 7 }, loyaltyPending: [{ id: 1, client: 'Anna Nováková', percent: 10 }] as { id: number; client: string; percent: number }[], nextId: 500, inited: false,
   clients: [{ id: 1, name: 'Eva Kovářová', phone: '+420777000111', username: 'eva_k', tg: true }, { id: 2, name: 'Tereza Malá', phone: '+420777000222', username: null, tg: true }, { id: 3, name: 'Bára Svobodová', phone: null, username: null, tg: false }],
 };
@@ -49,7 +49,8 @@ const busy = (staff: number, a: number, b: number, skip = 0) => state.appts.some
 const MOCK_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 let vsettings: VoucherSettings = { months: 12, partial: true, min: 100, terms: { cs: '', en: '', ru: '', uk: '' } };
 const privacyMock = { on: false };
-const studioMock: StudioInfo = { studio_name: 'Lash Studio', address: '', area_text_cs: '', area_text_ru: '', area_text_uk: '', area_text_en: '', address_mode: 'after_approval', address_new_clients_manual: true, address_release_timing: 'day_before', lat: 50.0755, lon: 14.4378, contact_name: 'Lash Master', contact_username: '', instagram: '', portfolio_url: '', cancel_policy_cs: '', cancel_policy_en: '', cancel_policy_ru: '', cancel_policy_uk: '' };
+const studioMock: StudioInfo = { studio_name: 'Lash Studio', address: '', studio_description_cs: '', studio_description_ru: '', studio_description_uk: '', studio_description_en: '', area_text_cs: '', area_text_ru: '', area_text_uk: '', area_text_en: '', address_mode: 'after_approval', address_new_clients_manual: true, address_release_timing: 'day_before', lat: 50.0755, lon: 14.4378, contact_name: 'Lash Master', contact_username: '', instagram: '', portfolio_url: '', cancel_policy_cs: '', cancel_policy_en: '', cancel_policy_ru: '', cancel_policy_uk: '' };
+let wizardMock: { step: number; skipped: string[] } = { step: 0, skipped: [] };
 const sentCards: number[] = [];
 const sentPreviews: string[] = [];
 const vouchers: VoucherRow[] = [];
@@ -65,7 +66,7 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
   const scope = owner ? state.staff : state.staff.filter((s) => s.mine);
   const can = (id: number) => scope.some((s) => s.id === id);
   const boot = (): AdminBoot => ({
-    me: { id: 1, name: 'Anna Nováková', role: realOwner ? 'owner' : owner ? 'admin' : 'master', lang: 'en' }, config: { tz: TZ, studio_name: 'Lash Studio', server_time: NOW, today: '2026-11-16' },
+    me: { id: 1, name: 'Anna Nováková', role: realOwner ? 'owner' : owner ? 'admin' : 'master', lang: env.lang ?? 'en' }, config: { tz: TZ, studio_name: 'Lash Studio', server_time: NOW, today: '2026-11-16' },
     staff: scope.map((s) => ({ ...s, future: state.appts.filter((a) => a.staff_id === s.id && ['pending', 'confirmed'].includes(a.status)).length })),
     services: state.services, categories: state.categories, loyalty_pending: state.loyaltyPending, settings: state.settings, can_manage: owner, is_owner: realOwner, vouchers_on: owner,
   });
@@ -77,7 +78,7 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       const done = (b: boolean, id: string, required = true, where = 'set') => ({ id, ok: b, required, where });
       const items = [done(studioMock.studio_name !== '' && studioMock.studio_name !== 'Lash Studio', 'studio', true, 'studio'), done(studioMock.address !== '', 'address', true, 'studio'), done(studioMock.contact_username !== '', 'contact', true, 'studio'),
         done(true, 'service', true, 'svc'), done(false, 'aftercare', true, 'svc'), done(true, 'hours', true, 'staff'), done(studioMock.cancel_policy_cs !== '', 'policy', true, 'studio'),
-        done(privacyMock.on, 'privacy', true, 'privacy'), done(false, 'secrets', true, 'server'), done(state.settings.automation_on, 'automation', true, 'automation'), done(state.settings.google_review_url !== '', 'review', false, 'set'),
+        done(privacyMock.on, 'privacy', true, 'privacy'), done(false, 'secrets', true, 'server'), done(state.settings.automation_on, 'automation', true, 'automation'), done((state.settings.review_links ?? []).some((l: { enabled: boolean }) => l.enabled), 'review', false, 'set'),
         done(false, 'ai', false, 'chat'), done(false, 'staff', true, 'staff')];
       const req = items.filter((i) => i.required);
       const mine = realOwner ? items : items.filter((i) => !['secrets', 'automation', 'ai'].includes(i.id));
@@ -96,10 +97,21 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       return ok({
         progress: l.progress, items: l.items, next: open[0] ? { id: open[0].id, screen: screens[open[0].id] } : null,
         studio: { name: studioMock.studio_name, area: studioMock.area_text_cs, address_set: studioMock.address !== '', mode: studioMock.address_mode }, days_off: 2, vouchers: { n: vouchers.length, sum: vouchers.reduce((a, v) => a + v.balance, 0) },
-        translate: !env.noTranslate, lang_hint: [studioMock.area_text_cs, studioMock.area_text_ru, studioMock.area_text_uk, studioMock.area_text_en].filter((x) => x !== '').length === 1,
+        wizard: wizardMock, translate: !env.noTranslate, lang_hint: [studioMock.area_text_cs, studioMock.area_text_ru, studioMock.area_text_uk, studioMock.area_text_en].filter((x) => x !== '').length === 1,
         attention: { studio: bad.some((x) => ['studio', 'contact', 'address'].includes(x)), services: bad.some((x) => ['service', 'aftercare'].includes(x)), schedule: bad.includes('hours'), rules: bad.some((x) => ['policy', 'privacy'].includes(x)), marketing: false, team: bad.includes('staff'), ...(realOwner ? { system: bad.some((x) => ['secrets', 'automation'].includes(x)) } : {}) },
         ...(realOwner ? { system: { automation: state.settings.automation_on, backup_h: 3, keys: false } } : {}),
       });
+    }
+    case 'admin/setup/save': {
+      if (!owner) return err(403, 'forbidden');
+      wizardMock = { step: d.step, skipped: d.skipped };
+      return ok({ wizard: wizardMock });
+    }
+    case 'admin/review/save': {
+      if (!owner) return err(403, 'forbidden');
+      if (!Array.isArray(d.links) || d.links.length > 4 || d.links.some((l: { url: string }) => !/^https:\/\/\S{4,}$/.test(l.url))) return err(400, 'bad_request');
+      state.settings.review_links = (d.links as ReviewLink[]).map((l, i) => ({ ...l, id: l.id || 'r' + i, platform: 'other' }));
+      return ok({ links: state.settings.review_links });
     }
     case 'admin/translate': {
       if (!owner) return err(403, 'forbidden');

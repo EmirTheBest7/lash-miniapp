@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { api, newOpId } from '../api';
 import { t } from '../i18n';
@@ -9,13 +10,15 @@ import type { LaunchData, Lang4, StudioInfo } from './types';
 import type { Ctx } from './useSettings';
 
 /** Studio: name, contacts, where clients are received (public area per language, exact address, pin, who gets it and when). ONE Save. */
-export function StudioScreen({ c }: { c: Ctx }) {
+/** `part` + `onDone` = embedded in the wizard (no header; the button is "Next" and moves on after a successful save). */
+export function StudioScreen({ c, part = 'all', onDone }: { c: Ctx; part?: 'all' | 'name' | 'contacts' | 'place'; onDone?: () => void }) {
   const [f, setF] = useState<StudioInfo | null>(null);
   const [pin, setPin] = useState({ lat: '', lon: '' });          // raw text: a typed "50." must keep its dot
   const [err, setErr] = useState<{ code: string; field: string } | null>(null);
   const [busy, setBusy] = useState(false);
   useEffect(() => { void api<LaunchData>('admin/launch', {}).then((r) => { if (r.ok && r.data.studio) { setF(r.data.studio); setPin({ lat: r.data.studio.lat === null ? '' : String(r.data.studio.lat), lon: r.data.studio.lon === null ? '' : String(r.data.studio.lon) }); } }); }, []);
-  if (!f) return <Shell title={t('adm.s_studio')} onBack={() => c.open(null)}>{null}</Shell>;
+  const wrap = (kids: ComponentChildren) => (onDone ? <>{kids}</> : <Shell title={t('adm.s_studio')} onBack={() => c.open(null)}>{kids}</Shell>);
+  if (!f) return wrap(null);
   const set = (patch: Partial<StudioInfo>) => { setF((prev) => (prev ? { ...prev, ...patch } : prev)); setErr(null); };
   const text = (k: 'studio_name' | 'contact_name' | 'contact_username' | 'instagram' | 'portfolio_url' | 'address', label: string, max: number, extra: Record<string, string> = {}) => (
     <>
@@ -23,6 +26,7 @@ export function StudioScreen({ c }: { c: Ctx }) {
       <FieldErr show={err?.field === k} text={t(err?.code === 'address_in_text' ? 'adm.s_addr_in_text' : 'adm.s_err_field')} />
     </>
   );
+  const descs: Record<Lang4, string> = { cs: f.studio_description_cs, ru: f.studio_description_ru, uk: f.studio_description_uk, en: f.studio_description_en };
   const areas: Record<Lang4, string> = { cs: f.area_text_cs, ru: f.area_text_ru, uk: f.area_text_uk, en: f.area_text_en };
   async function save() {
     if (!f || busy) return;
@@ -33,18 +37,29 @@ export function StudioScreen({ c }: { c: Ctx }) {
     setBusy(true);
     const r = await api('admin/studio/save', body, newOpId());
     setBusy(false);
-    if (!r.ok) { haptic.error(); const field = r.error.message ?? ''; setErr({ code: r.error.code, field: field.startsWith('area_text') || field.startsWith('cancel_policy') ? 'area' : field === 'lat/lon' ? 'pin' : field }); c.toast(t(r.error.code === 'address_in_text' ? 'adm.s_addr_in_text' : 'adm.bad_input')); return; }
-    haptic.success(); c.toast(t('adm.saved')); await c.reloadBoot(); void c.reloadHome(); c.open(null);
+    if (!r.ok) { haptic.error(); const field = r.error.message ?? ''; setErr({ code: r.error.code, field: field.startsWith('area_text') ? 'area' : field === 'lat/lon' ? 'pin' : field }); c.toast(t(r.error.code === 'address_in_text' ? 'adm.s_addr_in_text' : 'adm.bad_input')); return; }
+    haptic.success(); c.toast(t('adm.saved')); await c.reloadBoot(); void c.reloadHome(); if (onDone) onDone(); else c.open(null);
   }
-  return (
-    <Shell title={t('adm.s_studio')} onBack={() => c.open(null)}>
-      <Section>
-        {text('studio_name', t('ln.f_name'), 60)}
-        {text('contact_name', t('ln.f_contact_name'), 60)}
-        {text('contact_username', t('ln.f_username'), 33, { placeholder: 'username' })}
-        {text('instagram', t('ln.f_instagram'), 200)}
-        {text('portfolio_url', t('ln.f_portfolio'), 300, { type: 'url', placeholder: 'https://…' })}
-      </Section>
+  const showName = part === 'all' || part === 'name', showContacts = part === 'all' || part === 'contacts', showPlace = part === 'all' || part === 'place';
+  return wrap(
+    <>
+      {(showName || showContacts) && (
+        <Section>
+          {showName && text('studio_name', t('ln.f_name'), 60)}
+          {showContacts && text('contact_name', t('ln.f_contact_name'), 60)}
+          {showContacts && text('contact_username', t('ln.f_username'), 33, { placeholder: 'username' })}
+          {showContacts && text('instagram', t('ln.f_instagram'), 200)}
+          {showContacts && text('portfolio_url', t('ln.f_portfolio'), 300, { type: 'url', placeholder: 'https://…' })}
+        </Section>
+      )}
+      {showName && (
+        <Section footer={t('adm.s_desc_note')}>
+          <LangTabs label={t('adm.s_desc')} values={descs} rows={3} max={300} canTranslate={!!(c.boot.can_translate || c.home?.translate)} toast={c.toast}
+            onChange={(l, v) => set({ [`studio_description_${l}`]: v } as Partial<StudioInfo>)} />
+          <FieldErr show={!!err?.field.startsWith('studio_description')} text={t('adm.s_addr_in_text')} />
+        </Section>
+      )}
+      {showPlace && <>
       <Section title={t('adm.s_place')} footer={t('adm.s_place_note')}>
         <LangTabs label={t('adm.s_area')} values={areas} rows={2} max={80} canTranslate={!!c.home?.translate} toast={c.toast}
           onChange={(l, v) => set({ [`area_text_${l}`]: v } as Partial<StudioInfo>)} />
@@ -65,7 +80,8 @@ export function StudioScreen({ c }: { c: Ctx }) {
         <Cell title={t('ln.f_newmanual')} after={<Switch label={t('ln.f_newmanual')} checked={f.address_new_clients_manual} onChange={(on) => set({ address_new_clients_manual: on })} />} />
         <Segmented value={f.address_release_timing} onChange={(v) => set({ address_release_timing: v })} options={[{ value: 'day_before', label: t('ln.t_day') }, { value: 'on_release', label: t('ln.t_now') }]} />
       </Section>
-      <div class="section"><Button onClick={() => void save()} disabled={busy}>{busy ? '…' : t('adm.save')}</Button></div>
-    </Shell>
+      </>}
+      <div class="section"><Button onClick={() => void save()} disabled={busy}>{busy ? '…' : t(onDone ? 'adm.w_next' : 'adm.save')}</Button></div>
+    </>
   );
 }

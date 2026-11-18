@@ -76,7 +76,7 @@ export function installMockApi(): void {
 
   window.__MOCK_API__ = async (route, raw) => {
     ((window as unknown as { __mockCalls?: { route: string; data: unknown }[] }).__mockCalls ??= []).push({ route, data: raw });   // e2e asserts on what the app sends
-    const adm = adminMock(route, raw as Record<string, never>, { two, role: q.get('role') ?? 'client', noTranslate: q.has('notranslate') });
+    const adm = adminMock(route, raw as Record<string, never>, { two, role: q.get('role') ?? 'client', noTranslate: q.has('notranslate'), lang: q.get('lang') ?? 'en' });
     if (adm) return adm;
     const d = raw as Record<string, never> & { service: number; addons?: number[]; date: string; from?: string; start: number; id: number; revision: number; lang: string };
     const ok = (data: unknown) => ({ ok: true as const, data });
@@ -84,8 +84,8 @@ export function installMockApi(): void {
     switch (route) {
       case 'bootstrap':
         if ((d as unknown as { auto?: boolean }).auto && (q.get('role') ?? 'client') !== 'client') {
-          const a = adminMock('admin/bootstrap', {}, { two, role: q.get('role') ?? 'client', noTranslate: q.has('notranslate') });
-          return { ok: true as const, data: { me: { id: 1, role: q.get('role'), lang: 'en' }, admin: (a as { data: unknown }).data } };
+          const a = adminMock('admin/bootstrap', {}, { two, role: q.get('role') ?? 'client', noTranslate: q.has('notranslate'), lang: q.get('lang') ?? 'en' });
+          return { ok: true as const, data: { me: { id: 1, role: q.get('role'), lang: q.get('lang') ?? 'en' }, admin: (a as { data: unknown }).data } };
         }
         return ok({
           me: { id: 1, name: 'Anna Nováková', username: 'anna_n', role: q.get('role') ?? 'client', lang: st.lang, phone_set: st.phone, privacy_accepted: st.privacy },

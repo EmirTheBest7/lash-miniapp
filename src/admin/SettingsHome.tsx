@@ -2,21 +2,8 @@ import { useEffect, useState } from 'preact/hooks';
 import { t } from '../i18n';
 import { Button, Cell, Section, Sheet } from '../ui/components';
 import type { IconName } from '../ui/Icon';
-import { itemLabel, LaunchList, TECHNICAL, type Screen, type Tab } from './LaunchBox';
+import { itemLabel, LaunchList, TECHNICAL } from './LaunchBox';
 import type { Ctx } from './useSettings';
-
-/** Where the "next missing item" is fixed (the wizard will take over this button in S2). */
-function nextTarget(screen: string): { tab?: Tab; screen?: Screen } {
-  switch (screen) {
-    case 'name': case 'contacts': case 'place': return { screen: 'studio' };
-    case 'services': return { tab: 'svc' };
-    case 'schedule': case 'team': return { tab: 'staff' };
-    case 'policy': case 'privacy': return { screen: 'rules' };
-    case 'reviews': return { screen: 'after' };
-    case 'system': return { screen: 'system' };
-    default: return { screen: 'studio' };
-  }
-}
 
 const czk = (n: number): string => `${n.toLocaleString('cs-CZ')} Kč`;
 
@@ -78,7 +65,7 @@ export function SettingsHome({ c }: { c: Ctx }) {
           <div class="p-top"><span class="p-title">{t('adm.s_card_title')}</span><span class="p-count">{t('adm.s_card_count', { done: p.done, total: p.total })}</span></div>
           <div class="pbar" role="progressbar" aria-valuemin={0} aria-valuemax={p.total} aria-valuenow={p.done}><i style={{ width: `${Math.round((p.done / Math.max(1, p.total)) * 100)}%` }} /></div>
           {nextItem && <div class="p-next">{t('adm.s_next', { item: itemLabel(nextItem.id) })}</div>}
-          <Button onClick={() => { const g = nextTarget(nextItem?.screen ?? 'name'); if (g.tab) c.goTab(g.tab); else c.open(g.screen!); }}>{t('adm.s_continue')}</Button>
+          <Button onClick={() => c.openWizard()}>{t('adm.s_continue')}</Button>
           <button class="link" style={{ padding: '10px 0 0' }} onClick={() => setList(true)}>{t('adm.s_full_list')}</button>
           {home?.lang_hint && <div class="p-hint">{t('adm.s_lang_hint')}</div>}
         </div>

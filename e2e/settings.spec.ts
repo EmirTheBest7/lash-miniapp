@@ -3,7 +3,7 @@ import { mkdirSync } from 'node:fs';
 import { blockTelegramScript } from './helpers';
 
 const BASE = '/lash-miniapp/';
-const open = async (page: Page, q = '', role = 'owner') => { await blockTelegramScript(page); await page.goto(`${BASE}?mock=1&role=${role}&staff=2${q}`); await page.getByRole('tab', { name: 'Settings' }).click(); };
+const open = async (page: Page, q = '', role = 'owner') => { await blockTelegramScript(page); await page.goto(`${BASE}?mock=1&role=${role}&staff=2${q}`); await page.getByRole('tab').last().click(); };
 const shot = async (page: Page, name: string) => { mkdirSync('e2e-artifacts', { recursive: true }); await page.screenshot({ path: `e2e-artifacts/${name}.png`, fullPage: true }); };
 const row = (page: Page, re: RegExp) => page.getByRole('button', { name: re });
 const primaries = (page: Page) => page.locator('.btn:not(.secondary)').count();
@@ -68,10 +68,11 @@ test('language tabs: an empty language is marked, Translate drafts only the empt
   await page.getByLabel('Public area CS').fill('Praha 4');
   await expect(page.getByRole('button', { name: 'Translate' })).toBeVisible();
   await page.getByRole('button', { name: 'Translate' }).click();
-  await expect(page.getByText('Translation drafts')).toBeVisible();
-  await expect(page.getByLabel('RU')).toHaveValue('[ru] Praha 4');
-  await page.getByLabel('RU').fill('Прага 4');
-  await page.getByRole('button', { name: 'Use' }).click();
+  const dlg = page.getByRole('dialog');
+  await expect(dlg.getByText('Translation drafts')).toBeVisible();
+  await expect(dlg.getByLabel('RU')).toHaveValue('[ru] Praha 4');
+  await dlg.getByLabel('RU').fill('Прага 4');
+  await dlg.getByRole('button', { name: 'Use' }).click();
   await area.getByRole('tab', { name: /RU/ }).click();
   await expect(page.getByLabel('Public area RU')).toHaveValue('Прага 4');
   await expect(area.getByRole('tab', { name: /○/ })).toHaveCount(0);               // every empty language was drafted: no mark is left
@@ -85,7 +86,7 @@ test('language tabs: an empty language is marked, Translate drafts only the empt
 test('Translate is hidden when the AI is off', async ({ page }) => {
   await open(page, '&notranslate=1');
   await row(page, /^Studio/).click();
-  await page.getByRole('tab', { name: /^CS/ }).first().click();
+  await page.getByRole('tablist', { name: 'Public area' }).getByRole('tab', { name: /^CS/ }).click();
   await page.getByLabel('Public area CS').fill('Praha 4');
   await expect(page.getByRole('button', { name: 'Translate' })).toHaveCount(0);
 });
@@ -110,3 +111,17 @@ for (const [lang, theme] of [['cs', 'light'], ['ru', 'dark'], ['uk', 'light'], [
     }
   });
 }
+
+test('service editor: name, description, aftercare and pre-care all have language tabs; voucher terms too', async ({ page }) => {
+  await blockTelegramScript(page);
+  await page.goto(`${BASE}?mock=1&role=owner&staff=2`);
+  await page.getByRole('tab', { name: 'Services' }).click();
+  await page.getByRole('button', { name: 'New service' }).click();
+  for (const label of ['Name', 'Description', 'Aftercare text', 'Pre-care before the visit']) {
+    await expect(page.getByRole('tablist', { name: new RegExp('^' + label) }).getByRole('tab')).toHaveCount(4);
+  }
+  await page.keyboard.press('Escape');
+  await page.getByRole('tab', { name: 'Vouchers' }).click();
+  await page.getByRole('button', { name: /Voucher settings/ }).click();
+  await expect(page.getByRole('tablist').filter({ has: page.getByRole('tab', { name: /^CS/ }) }).last()).toBeVisible();
+});

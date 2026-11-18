@@ -1,0 +1,386 @@
+{
+    "cs": {
+        "title": "Nápověda pro mistrovou",
+        "topics": [
+            {
+                "id": "wizard",
+                "title": "Základní nastavení znovu",
+                "steps": [
+                    "V aplikaci otevřete **Nastavení** a pak **Nápověda**.",
+                    "Klepněte na **Projít základní nastavení znovu**.",
+                    "Procházejte kroky. **Přeskočit** nic nemaže, přeskočený krok najdete na posledním kroku."
+                ],
+                "open": "wizard"
+            },
+            {
+                "id": "add-service",
+                "title": "Jak přidat službu",
+                "steps": [
+                    "Karta **Služby**, tlačítko **Nová služba**.",
+                    "Vyplňte **název**, **délku** a **cenu**. **Rezerva** je čas navíc na přípravu, klientka ho nevidí.",
+                    "U služby na řasy doplňte **text péče po návštěvě** a **Doplnění za (dnů)**.",
+                    "Klepněte na **Uložit**."
+                ],
+                "open": "services"
+            },
+            {
+                "id": "day-off",
+                "title": "Volno nebo dovolená",
+                "steps": [
+                    "V **Kalendáři** klepněte na své jméno.",
+                    "Zapněte **Volno** (celý den) nebo zvolte **Blokovat čas** (jen část dne).",
+                    "Klientky v tom čase neuvidí žádné volné termíny."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "move-booking",
+                "title": "Přesunout rezervaci",
+                "steps": [
+                    "V **Kalendáři** klepněte na rezervaci.",
+                    "Zvolte **Přesunout**.",
+                    "Klepněte na nový čas v kalendáři. Klientka se to dozví."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "confirm-decline",
+                "title": "Potvrdit nebo odmítnout",
+                "steps": [
+                    "Nová rezervace přijde jako zpráva v chatu a je vidět v kalendáři.",
+                    "**Potvrdit**: klientka dostane potvrzení a soubor do kalendáře.",
+                    "**Odmítnout** nebo **Zrušit rezervaci**: klientka dostane omluvu a nabídku nového termínu."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "send-address",
+                "title": "Poslat adresu klientce",
+                "steps": [
+                    "Otevřete potvrzenou rezervaci v **Kalendáři**.",
+                    "V části **Přesná adresa** klepněte na **Poslat adresu**: klientka dostane adresu, bod na mapě a aktualizovaný soubor do kalendáře.",
+                    "Kdo adresu dostane sám a kdy, nastavíte v **Nastavení → Studio**."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "sell-voucher",
+                "title": "Prodat poukaz",
+                "steps": [
+                    "Poukaz vytvořte **až po přijetí peněz**.",
+                    "Karta **Poukazy**, **Nový poukaz**: hodnota nebo služba, platnost, způsob platby.",
+                    "Kód se ukáže **jen jednou**: zkopírujte ho, sdílejte, nebo stáhněte kartu k tisku."
+                ],
+                "open": "vouchers"
+            },
+            {
+                "id": "client-view",
+                "title": "Co vidí klientka",
+                "steps": [
+                    "V **Nápovědě** klepněte na **Otevřít pohled klientky** a rezervujte jako klientka.",
+                    "Jak vypadají zprávy po návštěvě, uvidíte v **Po návštěvě → Náhled zpráv**. Pošlou se jen vám.",
+                    "Zpět se vrátíte tlačítkem v aplikaci."
+                ],
+                "open": "client"
+            },
+            {
+                "id": "troubleshooting",
+                "title": "Když něco nejde",
+                "steps": [
+                    "Klientka nevidí volný termín: zkontrolujte pracovní dobu v kartě **Tým** a volno nebo blokace v kalendáři.",
+                    "Zprávy a připomínky nechodí: musí být zapnutá **Automatika** (nastavuje ten, kdo vám bota spravuje).",
+                    "Cokoli dalšího: napište tomu, kdo vám bota spravuje, a přiložte snímek obrazovky."
+                ],
+                "open": "none"
+            }
+        ]
+    },
+    "en": {
+        "title": "Help for the master",
+        "topics": [
+            {
+                "id": "wizard",
+                "title": "Run the basic setup again",
+                "steps": [
+                    "In the app open **Settings**, then **Help**.",
+                    "Tap **Run the basic setup again**.",
+                    "Go through the steps. **Skip** deletes nothing: a skipped step is listed on the last screen."
+                ],
+                "open": "wizard"
+            },
+            {
+                "id": "add-service",
+                "title": "How to add a service",
+                "steps": [
+                    "The **Services** tab, button **New service**.",
+                    "Fill in the **name**, **length** and **price**. **Reserve** is extra time for preparation; clients do not see it.",
+                    "For a lash service add the **aftercare text** and **Fill after (days)**.",
+                    "Tap **Save**."
+                ],
+                "open": "services"
+            },
+            {
+                "id": "day-off",
+                "title": "A day off or a holiday",
+                "steps": [
+                    "In the **Calendar** tap your name.",
+                    "Switch on **Day off** (the whole day) or choose **Block time** (part of a day).",
+                    "Clients will see no free times in that period."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "move-booking",
+                "title": "Move a booking",
+                "steps": [
+                    "In the **Calendar** tap the booking.",
+                    "Choose **Move**.",
+                    "Tap the new time in the calendar. The client is told."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "confirm-decline",
+                "title": "Confirm or decline",
+                "steps": [
+                    "A new booking arrives as a message in the chat and shows in the calendar.",
+                    "**Confirm**: the client gets a confirmation and a calendar file.",
+                    "**Decline** or **Cancel booking**: the client gets an apology and an offer of a new time."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "send-address",
+                "title": "Send the address to a client",
+                "steps": [
+                    "Open a confirmed booking in the **Calendar**.",
+                    "In **Exact address** tap **Send address**: the client gets the address, the map pin and an updated calendar file.",
+                    "Who gets the address automatically, and when, is set in **Settings → Studio**."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "sell-voucher",
+                "title": "Sell a voucher",
+                "steps": [
+                    "Create a voucher **only after you have been paid**.",
+                    "The **Vouchers** tab, **New voucher**: value or service, validity, payment method.",
+                    "The code is shown **only once**: copy it, share it or download the card for printing."
+                ],
+                "open": "vouchers"
+            },
+            {
+                "id": "client-view",
+                "title": "What the client sees",
+                "steps": [
+                    "In **Help** tap **Open the client view** and book as a client.",
+                    "How the after-visit messages look is shown in **After the visit → Preview messages**. They go only to you.",
+                    "Come back with the button in the app."
+                ],
+                "open": "client"
+            },
+            {
+                "id": "troubleshooting",
+                "title": "When something does not work",
+                "steps": [
+                    "A client sees no free time: check the working hours on the **Staff** tab and days off or blocks in the calendar.",
+                    "Messages and reminders do not arrive: **Automation** must be on (it is switched on by whoever looks after the bot).",
+                    "Anything else: write to whoever looks after the bot and attach a screenshot."
+                ],
+                "open": "none"
+            }
+        ]
+    },
+    "ru": {
+        "title": "Помощь мастеру",
+        "topics": [
+            {
+                "id": "wizard",
+                "title": "Основная настройка заново",
+                "steps": [
+                    "В приложении откройте **Настройки**, затем **Помощь**.",
+                    "Нажмите **Пройти основную настройку заново**.",
+                    "Идите по шагам. **Пропустить** ничего не удаляет: пропущенный шаг виден на последнем экране."
+                ],
+                "open": "wizard"
+            },
+            {
+                "id": "add-service",
+                "title": "Как добавить услугу",
+                "steps": [
+                    "Вкладка **Услуги**, кнопка **Новая услуга**.",
+                    "Заполните **название**, **длительность** и **цену**. **Запас** — дополнительное время на подготовку, клиент его не видит.",
+                    "Для услуг на ресницы добавьте **текст ухода после визита** и **Доп. запись через (дней)**.",
+                    "Нажмите **Сохранить**."
+                ],
+                "open": "services"
+            },
+            {
+                "id": "day-off",
+                "title": "Выходной или отпуск",
+                "steps": [
+                    "В **Календаре** нажмите на своё имя.",
+                    "Включите **Выходной** (весь день) или выберите **Заблокировать время** (часть дня).",
+                    "В это время клиенты не увидят свободных окон."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "move-booking",
+                "title": "Перенести запись",
+                "steps": [
+                    "В **Календаре** нажмите на запись.",
+                    "Выберите **Перенести**.",
+                    "Нажмите на новое время в календаре. Клиент узнает об этом."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "confirm-decline",
+                "title": "Подтвердить или отклонить",
+                "steps": [
+                    "Новая запись приходит сообщением в чат и видна в календаре.",
+                    "**Подтвердить**: клиент получает подтверждение и файл для календаря.",
+                    "**Отклонить** или **Отменить запись**: клиент получает извинение и предложение нового времени."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "send-address",
+                "title": "Отправить адрес клиенту",
+                "steps": [
+                    "Откройте подтверждённую запись в **Календаре**.",
+                    "В разделе **Точный адрес** нажмите **Адрес клиенту**: клиент получит адрес, точку на карте и обновлённый файл для календаря.",
+                    "Кому и когда адрес уходит сам, настраивается в **Настройки → Студия**."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "sell-voucher",
+                "title": "Продать ваучер",
+                "steps": [
+                    "Создавайте ваучер **только после получения денег**.",
+                    "Вкладка **Ваучеры**, **Новый ваучер**: сумма или услуга, срок, способ оплаты.",
+                    "Код показывается **только один раз**: скопируйте его, поделитесь или скачайте карточку для печати."
+                ],
+                "open": "vouchers"
+            },
+            {
+                "id": "client-view",
+                "title": "Что видит клиент",
+                "steps": [
+                    "В **Помощи** нажмите **Открыть вид клиента** и запишитесь как клиент.",
+                    "Как выглядят сообщения после визита, видно в **После визита → Предпросмотр сообщений**. Они приходят только вам.",
+                    "Вернуться можно кнопкой в приложении."
+                ],
+                "open": "client"
+            },
+            {
+                "id": "troubleshooting",
+                "title": "Если что-то не работает",
+                "steps": [
+                    "Клиент не видит свободное время: проверьте рабочие часы во вкладке **Команда** и выходные или блокировки в календаре.",
+                    "Сообщения и напоминания не приходят: должна быть включена **Автоматика** (её включает тот, кто настраивает бота).",
+                    "Всё остальное: напишите тому, кто настраивает бота, и приложите скриншот."
+                ],
+                "open": "none"
+            }
+        ]
+    },
+    "uk": {
+        "title": "Допомога майстру",
+        "topics": [
+            {
+                "id": "wizard",
+                "title": "Основне налаштування знову",
+                "steps": [
+                    "У застосунку відкрийте **Налаштування**, потім **Допомога**.",
+                    "Натисніть **Пройти основне налаштування знову**.",
+                    "Йдіть по кроках. **Пропустити** нічого не видаляє: пропущений крок видно на останньому екрані."
+                ],
+                "open": "wizard"
+            },
+            {
+                "id": "add-service",
+                "title": "Як додати послугу",
+                "steps": [
+                    "Вкладка **Послуги**, кнопка **Нова послуга**.",
+                    "Заповніть **назву**, **тривалість** і **ціну**. **Запас** — додатковий час на підготовку, клієнт його не бачить.",
+                    "Для послуг на вії додайте **текст догляду після візиту** та **Доп. запис через (днів)**.",
+                    "Натисніть **Зберегти**."
+                ],
+                "open": "services"
+            },
+            {
+                "id": "day-off",
+                "title": "Вихідний або відпустка",
+                "steps": [
+                    "У **Календарі** натисніть на своє ім'я.",
+                    "Увімкніть **Вихідний** (увесь день) або виберіть **Заблокувати час** (частину дня).",
+                    "У цей час клієнти не побачать вільних вікон."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "move-booking",
+                "title": "Перенести запис",
+                "steps": [
+                    "У **Календарі** натисніть на запис.",
+                    "Виберіть **Перенести**.",
+                    "Натисніть на новий час у календарі. Клієнт дізнається про це."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "confirm-decline",
+                "title": "Підтвердити або відхилити",
+                "steps": [
+                    "Новий запис надходить повідомленням у чат і видно в календарі.",
+                    "**Підтвердити**: клієнт отримує підтвердження та файл для календаря.",
+                    "**Відхилити** або **Скасувати запис**: клієнт отримує вибачення й пропозицію нового часу."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "send-address",
+                "title": "Надіслати адресу клієнту",
+                "steps": [
+                    "Відкрийте підтверджений запис у **Календарі**.",
+                    "У розділі **Точна адреса** натисніть **Адресу клієнту**: клієнт отримає адресу, точку на мапі й оновлений файл для календаря.",
+                    "Кому й коли адреса надходить сама, налаштовується в **Налаштування → Студія**."
+                ],
+                "open": "calendar"
+            },
+            {
+                "id": "sell-voucher",
+                "title": "Продати ваучер",
+                "steps": [
+                    "Створюйте ваучер **лише після отримання грошей**.",
+                    "Вкладка **Ваучери**, **Новий ваучер**: сума або послуга, термін, спосіб оплати.",
+                    "Код показується **лише один раз**: скопіюйте його, поділіться або завантажте картку для друку."
+                ],
+                "open": "vouchers"
+            },
+            {
+                "id": "client-view",
+                "title": "Що бачить клієнт",
+                "steps": [
+                    "У **Допомозі** натисніть **Відкрити вигляд клієнта** й запишіться як клієнт.",
+                    "Як виглядають повідомлення після візиту, видно в **Після візиту → Попередній перегляд**. Вони надходять лише вам.",
+                    "Повернутися можна кнопкою в застосунку."
+                ],
+                "open": "client"
+            },
+            {
+                "id": "troubleshooting",
+                "title": "Якщо щось не працює",
+                "steps": [
+                    "Клієнт не бачить вільного часу: перевірте робочі години на вкладці **Команда** та вихідні чи блокування в календарі.",
+                    "Повідомлення й нагадування не надходять: має бути ввімкнена **Автоматика** (її вмикає той, хто налаштовує бота).",
+                    "Усе інше: напишіть тому, хто налаштовує бота, і додайте скриншот."
+                ],
+                "open": "none"
+            }
+        ]
+    }
+}

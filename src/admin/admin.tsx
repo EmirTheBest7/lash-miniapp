@@ -19,7 +19,9 @@ type Tab = 'cal' | 'staff' | 'svc' | 'vch' | 'set';
 export function AdminApp({ onClientView, initial }: { onClientView: () => void; initial?: AdminBoot }) {
   const [boot, setBoot] = useState<AdminBoot | null>(initial ?? null);
   const [err, setErr] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>('cal');
+  const go = new URLSearchParams(location.hash.replace(/^#/, '')).get('go') ?? undefined;          // /navod buttons open the Mini App at a screen: #go=services
+  const goTab: Tab = go === 'services' ? 'svc' : go === 'vouchers' ? 'vch' : go && ['wizard', 'studio', 'rules', 'preview', 'help'].includes(go) ? 'set' : 'cal';
+  const [tab, setTab] = useState<Tab>(goTab);
   const [toastText, toast] = useToast();
   const [viewAs, setViewAs] = useState<ViewAs>('real');            // owner-only front-end simulation of the administrator / master screens (the server still enforces the real role)
 
@@ -47,7 +49,7 @@ export function AdminApp({ onClientView, initial }: { onClientView: () => void; 
       {tab === 'staff' && <StaffTab boot={eff} toast={toast} reloadBoot={load} />}
       {tab === 'svc' && <ServicesTab boot={eff} toast={toast} reloadBoot={load} />}
       {tab === 'vch' && <VouchersTab boot={eff} toast={toast} />}
-      {(tab === 'set') && <SettingsTab key={viewAs}  boot={eff} toast={toast} reloadBoot={load} onClientView={onClientView} goTab={setTab} viewAs={viewAs} setViewAs={setViewAs} realOwner={realOwner} />}
+      {(tab === 'set') && <SettingsTab key={viewAs}  boot={eff} toast={toast} reloadBoot={load} onClientView={onClientView} goTab={setTab} viewAs={viewAs} setViewAs={setViewAs} realOwner={realOwner} initialGo={go} />}
       <Toast text={toastText} />
     </>
   );

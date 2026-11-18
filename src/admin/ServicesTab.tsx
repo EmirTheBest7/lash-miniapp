@@ -4,11 +4,11 @@ import { duration, money } from '../format';
 import { t } from '../i18n';
 import { haptic } from '../tg';
 import { Button, Cell, Section, Sheet, Switch } from '../ui/components';
+import { LangTabs } from './LangTabs';
 import { PreviewBox } from './PreviewBox';
 import type { AdminBoot, SvcRow } from './types';
 
 type Names = Record<'cs' | 'en' | 'ru' | 'uk', string>;
-const LANGS: [keyof Names, string][] = [['cs', 'Čeština'], ['en', 'English'], ['ru', 'Русский'], ['uk', 'Українська']];
 const EMPTY: Names = { cs: '', en: '', ru: '', uk: '' };
 const NEW_CAT = -1;
 
@@ -16,20 +16,20 @@ const NEW_CAT = -1;
 export function ServicesTab({ boot, toast, reloadBoot }: { boot: AdminBoot; toast: (s: string) => void; reloadBoot: () => Promise<void> }) {
   // edit: an existing row, or { addon } while creating
   const [edit, setEdit] = useState<SvcRow | { addon: boolean } | null>(null);
-  const [f, setF] = useState({ dur: 60, buf: 15, price: 0, from: false, active: true, staffOnly: false, names: EMPTY, after: EMPTY, rebook: 0, cat: 0, newCat: '' });
+  const [f, setF] = useState({ dur: 60, buf: 15, price: 0, from: false, active: true, staffOnly: false, names: EMPTY, after: EMPTY, desc: EMPTY, pre: EMPTY, rebook: 0, cat: 0, newCat: '' });
   const [busy, setBusy] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
   const existing = edit !== null && 'id' in edit ? edit : null;
   const isAddon = edit !== null && ('id' in edit ? edit.is_addon : edit.addon);
-  const open = (s: SvcRow) => { setEdit(s); setConfirmDel(false); setF({ dur: s.duration_min, buf: s.buffer_min, price: s.price, from: s.price_from, active: s.active, staffOnly: !!s.staff_only, names: s.names, after: s.aftercare ?? EMPTY, rebook: s.rebook_after_days ?? 0, cat: s.category_id ?? 0, newCat: '' }); };
-  const create = (addon: boolean) => { setEdit({ addon }); setConfirmDel(false); setF({ dur: addon ? 15 : 60, buf: addon ? 0 : 15, price: 0, from: false, active: true, staffOnly: false, names: EMPTY, after: EMPTY, rebook: addon ? 0 : 14, cat: 0, newCat: '' }); };
+  const open = (s: SvcRow) => { setEdit(s); setConfirmDel(false); setF({ dur: s.duration_min, buf: s.buffer_min, price: s.price, from: s.price_from, active: s.active, staffOnly: !!s.staff_only, names: s.names, desc: s.descriptions ?? EMPTY, pre: s.precare ?? EMPTY, after: s.aftercare ?? EMPTY, rebook: s.rebook_after_days ?? 0, cat: s.category_id ?? 0, newCat: '' }); };
+  const create = (addon: boolean) => { setEdit({ addon }); setConfirmDel(false); setF({ dur: addon ? 15 : 60, buf: addon ? 0 : 15, price: 0, from: false, active: true, staffOnly: false, names: EMPTY, after: EMPTY, desc: EMPTY, pre: EMPTY, rebook: addon ? 0 : 14, cat: 0, newCat: '' }); };
   const num = (v: string): number => Math.max(0, Math.round(Number(v) || 0));
 
   async function save() {
     if (!edit || busy) return;
     if (!Object.values(f.names).some((n) => n.trim() !== '')) { haptic.error(); toast(t('adm.name_required')); return; }
     setBusy(true);
-    const body: Record<string, unknown> = { duration_min: f.dur, buffer_min: f.buf, price: f.price, price_from: f.from, active: f.active, staff_only: f.staffOnly, names: f.names, aftercare: f.after, rebook_after_days: isAddon ? null : (f.rebook || null) };
+    const body: Record<string, unknown> = { duration_min: f.dur, buffer_min: f.buf, price: f.price, price_from: f.from, active: f.active, staff_only: f.staffOnly, names: f.names, descriptions: f.desc, precare: f.pre, aftercare: f.after, rebook_after_days: isAddon ? null : (f.rebook || null) };
     if (existing) body.id = existing.id; else body.is_addon = isAddon;
     if (!isAddon) { if (f.cat === NEW_CAT) { if (f.newCat.trim()) body.new_category = f.newCat.trim(); } else body.category_id = f.cat === 0 ? null : f.cat; }
     const r = await api('admin/service/save', body, newOpId());
@@ -64,9 +64,8 @@ export function ServicesTab({ boot, toast, reloadBoot }: { boot: AdminBoot; toas
       </Section>
       <Sheet open={edit !== null} onClose={() => setEdit(null)} title={existing ? existing.name : t(isAddon ? 'adm.new_addon' : 'adm.new_service')}>
         <Section footer={t('adm.names_note')}>
-          {LANGS.map(([l, label]) => (
-            <label class="field" key={l}><span>{t('adm.name_label')} · {label}</span><input maxLength={60} value={f.names[l]} onInput={(e) => setF({ ...f, names: { ...f.names, [l]: (e.target as HTMLInputElement).value } })} /></label>
-          ))}
+          <LangTabs label={t('adm.name_label')} values={f.names} rows={1} max={60} canTranslate={!!boot.can_translate} toast={toast} onChange={(l, v) => setF((p) => ({ ...p, names: { ...p.names, [l]: v } }))} />
+          <LangTabs label={t('adm.desc_label')} values={f.desc} rows={2} max={300} canTranslate={!!boot.can_translate} toast={toast} onChange={(l, v) => setF((p) => ({ ...p, desc: { ...p.desc, [l]: v } }))} />
         </Section>
         {!isAddon && (
           <label class="field"><span>{t('adm.category')}</span>
@@ -92,9 +91,8 @@ export function ServicesTab({ boot, toast, reloadBoot }: { boot: AdminBoot; toas
         {!isAddon && (
           <Section title={t('adm.aftercare')} footer={t('adm.aftercare_note')}>
             <label class="field"><span>{t('adm.rebook_days')}</span><input type="number" inputMode="numeric" min={0} max={365} value={f.rebook} onInput={(e) => setF({ ...f, rebook: Math.min(365, num((e.target as HTMLInputElement).value)) })} /></label>
-            {LANGS.map(([l, label]) => (
-              <label class="field" key={l}><span>{t('adm.aftercare_text')} · {label}</span><textarea rows={3} maxLength={800} value={f.after[l]} onInput={(e) => setF({ ...f, after: { ...f.after, [l]: (e.target as HTMLTextAreaElement).value } })} /></label>
-            ))}
+            <LangTabs label={t('adm.aftercare_text')} values={f.after} rows={3} max={800} canTranslate={!!boot.can_translate} toast={toast} onChange={(l, v) => setF((p) => ({ ...p, after: { ...p.after, [l]: v } }))} />
+            <LangTabs label={t('adm.precare_label')} values={f.pre} rows={3} max={800} canTranslate={!!boot.can_translate} toast={toast} onChange={(l, v) => setF((p) => ({ ...p, pre: { ...p.pre, [l]: v } }))} />
           </Section>
         )}
         {existing && !isAddon && <PreviewBox boot={boot} toast={toast} serviceId={existing.id} />}

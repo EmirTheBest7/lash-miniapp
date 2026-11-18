@@ -1,3 +1,4 @@
+import { LangTabs } from './LangTabs';
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import { api, newOpId } from '../api';
 import { money } from '../format';
@@ -170,9 +171,8 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
             <label class="field"><span>{t('vch.def_min')}</span><input type="number" inputMode="numeric" min={1} value={editDefs.min} onInput={(e) => setEditDefs({ ...editDefs, min: Math.max(1, num((e.target as HTMLInputElement).value)) })} /></label>
             <Section footer={t('vch.partial_hint')}><Cell title={t('vch.partial')} after={<Switch label={t('vch.partial')} checked={editDefs.partial} onChange={(v) => setEditDefs({ ...editDefs, partial: v })} />} /></Section>
             <Section footer={t('vch.terms_hint')}>
-              {(['cs', 'en', 'ru', 'uk'] as const).map((l) => (
-                <label class="field" key={l}><span>{t('vch.terms')} · {l.toUpperCase()}</span><textarea rows={3} maxLength={600} value={editDefs.terms[l]} onInput={(e) => setEditDefs({ ...editDefs, terms: { ...editDefs.terms, [l]: (e.target as HTMLTextAreaElement).value } })} /></label>
-              ))}
+              <LangTabs label={t('vch.terms')} values={editDefs.terms} rows={3} max={600} canTranslate={!!boot.can_translate} toast={toast}
+                onChange={(l, v) => setEditDefs((d) => (d ? { ...d, terms: { ...d.terms, [l]: v } } : d))} />
             </Section>
             <Button disabled={busy} onClick={async () => {
               setBusy(true);

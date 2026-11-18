@@ -7,7 +7,7 @@ import type { AdminBoot, AdminSettings, SettingsHomeData, ViewAs } from './types
 
 /** Everything the Settings screens share: the settings row and its saver, the home facts, navigation, and the "view as" simulation. */
 export interface Ctx {
-  boot: AdminBoot; toast: (s: string) => void; reloadBoot: () => Promise<void>; goTab: (t: Tab) => void; open: (s: Screen | null) => void; onClientView: () => void;
+  boot: AdminBoot; toast: (s: string) => void; reloadBoot: () => Promise<void>; goTab: (t: Tab) => void; open: (s: Screen | null) => void; openWizard: (start?: number) => void; onClientView: () => void;
   s: AdminSettings; save: (patch: Partial<AdminSettings>) => Promise<void>; home: SettingsHomeData | null; reloadHome: () => Promise<void>;
   viewAs: ViewAs; setViewAs: (v: ViewAs) => void; realOwner: boolean;
 }

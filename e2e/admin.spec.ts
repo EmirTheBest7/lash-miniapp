@@ -205,13 +205,15 @@ test('services: add a service and an add-on, rename, then delete one (unused = r
   await page.getByRole('button', { name: 'New service' }).click();
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('status')).toContainText('Enter a name');
-  await page.getByLabel(/^Name · English/).fill('Brow lamination');
+  await page.getByRole('tablist', { name: 'Name' }).getByRole('tab', { name: /^EN/ }).click();
+  await page.getByLabel('Name EN').fill('Brow lamination');
   await page.getByLabel('Category').selectOption({ label: 'New category…' });
   await page.getByPlaceholder('Category name').fill('Brows');
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('button', { name: /Brow lamination/ })).toBeVisible();
   await page.getByRole('button', { name: 'New add-on' }).click();
-  await page.getByLabel(/^Name · English/).fill('Brow tint');
+  await page.getByRole('tablist', { name: 'Name' }).getByRole('tab', { name: /^EN/ }).click();
+  await page.getByLabel('Name EN').fill('Brow tint');
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('button', { name: /Brow tint/ })).toBeVisible();
   // delete needs a second tap
@@ -352,22 +354,25 @@ test('after the visit (owner): review link must be https, delay fields appear on
   await cat(page, /^After the visit/);
   await expect(page.getByRole('heading', { name: 'After the visit' })).toBeVisible();
   await expect(page.getByLabel('Ask for a review after (hours)')).toHaveCount(0);
-  await page.getByLabel('Google review link (https, pasted from Google)').fill('http://nope.example/x');
-  await page.getByLabel('Google review link (https, pasted from Google)').blur();
-  await expect(page.getByLabel('Ask for a review after (hours)')).toHaveCount(0);
-  await page.getByLabel('Google review link (https, pasted from Google)').fill('https://g.page/r/abc/review');
-  await page.getByLabel('Google review link (https, pasted from Google)').blur();
+  await page.getByRole('button', { name: 'Add a link' }).click();
+  await page.getByLabel('Link address (https)').fill('http://nope.example/x');
+  await page.getByRole('button', { name: 'Save', exact: true }).last().click();
+  await expect(page.getByRole('alert')).toContainText('https://');
+  await page.getByLabel('Link address (https)').fill('https://g.page/r/abc/review');
+  await page.getByRole('button', { name: 'Save', exact: true }).last().click();
+  await toast(page, 'Saved');
   await expect(page.getByLabel('Ask for a review after (hours)')).toBeVisible();
   await shot(page, 'admin-after-visit-settings');
   await page.getByRole('tab', { name: 'Services' }).click();
   await page.getByRole('button', { name: /Lash extensions/ }).first().click();
-  await page.getByLabel('Aftercare text · English').fill('Keep lashes dry for 24 h.');
+  await page.getByRole('tablist', { name: 'Aftercare text' }).getByRole('tab', { name: /^EN/ }).click();
+  await page.getByLabel('Aftercare text EN').fill('Keep lashes dry for 24 h.');
   await page.getByLabel('Fill after (days)').fill('21');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await toast(page, 'Saved');
   await page.goto(`${BASE}?mock=1&role=master&staff=2`);
   await cat(page, /^After the visit/);
-  await expect(page.getByLabel('Google review link (https, pasted from Google)')).toHaveCount(0);
+  await expect(page.getByLabel('Link address (https)')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Send preview to my chat' })).toBeVisible();
 });
 
@@ -398,12 +403,14 @@ test('setup progress card: counts, "Continue setup" opens the next missing item,
   await page.getByRole('switch', { name: /Privacy notice reviewed/ }).click();
   await back(page);
   await expect(page.getByTestId('setup-card')).toContainText('3 of 11');
-  await page.getByRole('button', { name: 'Continue setup' }).click();               // the next missing item is the studio name
+  await page.getByRole('button', { name: 'Continue setup' }).click();               // the wizard opens at the first missing step: the studio name
   await page.getByLabel('Studio name').fill('Viktoriia Lashes');
-  await page.getByLabel('Address', { exact: true }).fill('Vinohradská 1, Praha');
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByLabel('Telegram username (without @)').fill('viktoriia_lash');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
-  await toast(page, 'Saved');
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByLabel('Address', { exact: true }).fill('Vinohradská 1, Praha');
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('button', { name: /^Leave setup/ }).click();
   await expect(page.getByTestId('setup-card')).toContainText('6 of 11');
   await page.getByRole('button', { name: /^Bookings and rules/ }).click();
   await page.getByRole('tab', { name: /^CS/ }).click();
@@ -422,20 +429,37 @@ test('setup progress card: counts, "Continue setup" opens the next missing item,
   await expect(page.getByRole('button', { name: /^System/ })).toHaveCount(0);
 });
 
-test('master guide in Settings (staff): opens the guide with its sections and formatting; clients never get it', async ({ page }) => {
+test('Help (staff): task topics in the app language, 2-4 steps and a button that opens exactly that screen; clients never load them', async ({ page }) => {
   await open(page);
   await cat(page, /^Help/);
-  await page.getByRole('button', { name: 'Master guide' }).click();
-  await expect(page.getByRole('heading', { name: /5\. Volno a blokování času/ })).toBeVisible();
-  await expect(page.locator('.guide strong').first()).toBeVisible();
-  await expect(page.locator('.guide ol li').first()).toBeVisible();
-  await shot(page, 'admin-master-guide');
+  await expect(page.getByRole('button', { name: /How to add a service/ })).toBeVisible();
+  await page.getByRole('button', { name: /How to add a service/ }).click();
+  await expect(page.getByTestId('help-steps').locator('li')).toHaveCount(4);
+  await expect(page.locator('.help-steps strong').first()).toBeVisible();
+  await shot(page, 'admin-help-topic');
+  await page.getByRole('button', { name: 'Open Services' }).click();
+  await expect(page.getByRole('heading', { name: 'Services' })).toBeVisible();                 // exactly that screen
   const chunks: string[] = [];
-  page.on('request', (r) => { if (/guide|admin-/.test(r.url())) chunks.push(r.url()); });
+  page.on('request', (r) => { if (/help|admin-/.test(r.url())) chunks.push(r.url()); });
   await page.evaluate(() => localStorage.clear());                       // the staff hint is per device: a real client never has it
   await page.goto(`${BASE}?mock=1`);
   await expect(page.getByRole('button', { name: /Lash/ }).first()).toBeVisible();
-  expect(chunks.filter((u) => /admin-/.test(u))).toHaveLength(0);
+  expect(chunks.filter((u) => /admin-|help/.test(u))).toHaveLength(0);
+});
+
+test('Help in cs / ru / uk: the topics follow the language; a master sees them without the setup topic', async ({ page }) => {
+  await blockTelegramScript(page);
+  for (const [lang, title] of [['cs', 'Jak přidat službu'], ['ru', 'Как добавить услугу'], ['uk', 'Як додати послугу']] as const) {
+    await page.goto(`${BASE}?mock=1&role=owner&staff=2&lang=${lang}`);
+    await page.getByRole('tab').last().click();
+    await page.getByRole('button', { name: /^(Nápověda|Помощь|Допомога)/ }).click();
+    await expect(page.getByRole('button', { name: new RegExp(title) })).toBeVisible();
+  }
+  await page.goto(`${BASE}?mock=1&role=master&staff=2&lang=en`);
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await page.getByRole('button', { name: /^Help/ }).click();
+  await expect(page.getByRole('button', { name: /Run the basic setup again/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Move a booking/ })).toBeVisible();
 });
 
 test('studio info: the map pin fields accept a typed decimal point', async ({ page }) => {

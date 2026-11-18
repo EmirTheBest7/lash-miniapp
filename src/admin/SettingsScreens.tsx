@@ -3,10 +3,10 @@ import { api, newOpId } from '../api';
 import { t } from '../i18n';
 import { haptic } from '../tg';
 import { Button, Cell, Section, Segmented, Switch } from '../ui/components';
-import { GuideBox } from './GuideBox';
 import { LaunchList } from './LaunchBox';
 import { LangTabs } from './LangTabs';
 import { PreviewBox } from './PreviewBox';
+import { ReviewLinksEditor } from './ReviewLinks';
 import { Shell } from './Shell';
 import type { AdminSettings, BroadcastInfo, Lang4, StudioInfo, ViewAs } from './types';
 import type { Ctx } from './useSettings';
@@ -117,14 +117,19 @@ export function AfterScreen({ c }: { c: Ctx }) {
           <Cell title={t('adm.fill_nudge')} after={<Switch label={t('adm.fill_nudge')} checked={s.fill_nudge_on} onChange={(on) => void save({ fill_nudge_on: on })} />} />
           <Cell title={t('adm.autocomplete')} after={<Switch label={t('adm.autocomplete')} checked={s.autocomplete_on} onChange={(on) => void save({ autocomplete_on: on })} />} />
           {s.autocomplete_on && hours('autocomplete_h', t('adm.autocomplete_h'), 1, 72)}
-          <label class="field"><span>{t('adm.review_url')}</span><input type="url" inputMode="url" placeholder="https://…" maxLength={500} key={s.google_review_url} defaultValue={s.google_review_url} onChange={(e) => void save({ google_review_url: (e.target as HTMLInputElement).value.trim() })} /></label>
-          {s.google_review_url !== '' && (
+          {(s.review_links ?? []).some((l) => l.enabled) && (
             <>
               {hours('review_delay_h', t('adm.review_delay'), 1, 168)}
               {hours('review_gap_days', t('adm.review_gap'), 30, 3650)}
             </>
           )}
         </Section>
+      )}
+      {boot.can_manage && (
+        <>
+          <div class="sec-title-lite">{t('adm.rv_title')}</div>
+          <ReviewLinksEditor c={c} />
+        </>
       )}
       <PreviewBox boot={boot} toast={c.toast} />
     </Shell>
@@ -219,18 +224,6 @@ export function SystemScreen({ c }: { c: Ctx }) {
       <Section title={t('adm.s_viewas')} footer={t('adm.s_viewas_note')}>
         <Cell title={t('adm.s_viewas_admin')} chevron onClick={() => { c.setViewAs('admin'); c.open(null); }} />
         <Cell title={t('adm.s_viewas_master')} chevron onClick={() => { c.setViewAs('master'); c.open(null); }} />
-      </Section>
-    </Shell>
-  );
-}
-
-/** Help: the guide (the task-based Help with deep links comes in S3), and "what clients see". */
-export function HelpScreen({ c }: { c: Ctx }) {
-  return (
-    <Shell title={t('adm.s_help')} onBack={() => c.open(null)}>
-      <GuideBox />
-      <Section footer={t('adm.client_view_note')}>
-        <Cell icon="user" title={t('adm.client_view')} chevron onClick={c.onClientView} />
       </Section>
     </Shell>
   );
