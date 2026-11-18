@@ -48,6 +48,7 @@ const busy = (staff: number, a: number, b: number, skip = 0) => state.appts.some
 // a 1x1 PNG stand-in for the QR in the mock (the real PNG is produced and decode-tested on the server)
 const MOCK_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 let vsettings: VoucherSettings = { months: 12, partial: true, min: 100, terms: { cs: '', en: '', ru: '', uk: '' } };
+const sentCards: number[] = [];
 const vouchers: VoucherRow[] = [];
 const voucherOps = new Map<string, VoucherRow>();
 
@@ -81,6 +82,17 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       vouchers.push(v); voucherOps.set(d.op, v);
       return ok({ replayed: false, qr: MOCK_QR, code: 'MOCK-ABCD-EFGH-JKMN', link: 'https://t.me/mock_bot?start=gv_MOCKABCDEFGHJKMN', voucher: v });
     }
+    case 'admin/vouchers/reissue': {
+      if (!owner) return err(403, 'forbidden');
+      const old = vouchers.find((x) => x.id === d.id); if (!old) return err(404, 'not_found');
+      if (old.reserved > 0) return err(409, 'voucher_reserved');
+      if (old.status !== 'active') return err(409, 'voucher_not_active');
+      old.status = 'void';
+      const nv: VoucherRow = { ...old, id: vouchers.length + 1, status: 'active', hint: 'NEW1', value: old.kind === 'value' ? old.balance : 0, paid: 0, received: 0 };
+      vouchers.push(nv);
+      return ok({ replayed: false, qr: MOCK_QR, code: 'NEW1-ABCD-EFGH-JKMN', link: 'https://t.me/mock_bot?start=gv_NEW1ABCDEFGHJKMN', voucher: nv });
+    }
+    case 'admin/vouchers/send-card': { if (!owner) return err(403, 'forbidden'); sentCards.push(String(d.png).length); return ok({ sent: true }); }
     case 'admin/vouchers/extend': { const v = vouchers.find((x) => x.id === d.id); if (!v) return err(404, 'not_found'); v.expires_at += d.months * 30 * 86400; v.extended = true; return ok({ ok: true, voucher: v }); }
     case 'admin/vouchers/void': { const v = vouchers.find((x) => x.id === d.id); if (!v) return err(404, 'not_found'); v.status = 'void'; return ok({ ok: true, voucher: v }); }
     case 'admin/calendar': {

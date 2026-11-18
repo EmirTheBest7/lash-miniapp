@@ -334,5 +334,11 @@
   "vch.def_months": "Default validity (months)",
   "vch.def_min": "Minimum amount (Kč)",
   "vch.terms": "Terms text",
-  "vch.terms_hint": "Shown to the recipient with a new voucher. Leave empty for the built-in text. {until} is replaced by the expiry date."
+  "vch.terms_hint": "Shown to the recipient with a new voucher. Leave empty for the built-in text. {until} is replaced by the expiry date.",
+  "vch.send_card": "Send card to my chat",
+  "vch.card_sent": "Card sent to your chat",
+  "vch.too_big": "The card is too large to send (over 1 MB).",
+  "vch.reissue": "Reissue",
+  "vch.reissue_confirm": "Tap again: old code stops, new one is created",
+  "vch.reissue_reserved": "A booking holds this voucher. Cancel or complete it first."
 }

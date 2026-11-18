@@ -30,6 +30,7 @@ async function cardPng(opts: { studio: string; title: string; what: string; unti
   g.font = '600 44px ui-monospace, Menlo, monospace'; g.fillText(opts.hint, W / 2, 1135);
   return new Promise((res) => c.toBlob((b) => res(b), 'image/png'));
 }
+const toBase64 = (blob: Blob): Promise<string> => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] ?? ''); r.onerror = () => rej(r.error); r.readAsDataURL(blob); });
 const saveBlob = (blob: Blob, name: string): void => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
 const num = (v: string): number => Math.max(0, Math.round(Number(v) || 0));
 
@@ -49,6 +50,7 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<VoucherCreated | null>(null);
   const [confirmVoid, setConfirmVoid] = useState(false);
+  const [confirmReissue, setConfirmReissue] = useState(false);
 
   const load = useCallback(async () => {
     const r = await api<{ enabled: boolean; settings: VoucherSettings; items: VoucherRow[] }>('admin/vouchers/list');
@@ -86,12 +88,35 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
 
   const [card, setCard] = useState<string | null>(null);
   const downloadQr = (c: VoucherCreated) => { if (!c.qr) return; const a = document.createElement('a'); a.href = c.qr; a.download = 'voucher-qr.png'; document.body.appendChild(a); a.click(); a.remove(); toast(t('vch.saved_hint')); };
+  const renderCard = (c: VoucherCreated): Promise<Blob | null> => {
+    const v = c.voucher;
+    return cardPng({ studio: boot.config.studio_name, title: t('vch.card_title'), what: v.kind === 'service' ? (v.service ?? '') : money(v.value), until: t('vch.valid') + ' ' + dateOf(v.expires_at), hint: `••••-${v.hint}`, scan: t('vch.card_scan'), qr: c.qr ?? '' });
+  };
   const downloadCard = async (c: VoucherCreated) => {
     if (!c.qr) return;
-    const v = c.voucher;
-    const blob = await cardPng({ studio: boot.config.studio_name, title: t('vch.card_title'), what: v.kind === 'service' ? (v.service ?? '') : money(v.value), until: t('vch.valid') + ' ' + dateOf(v.expires_at), hint: `••••-${v.hint}`, scan: t('vch.card_scan'), qr: c.qr });
+    const blob = await renderCard(c);
     if (!blob) { toast(t('err.network')); return; }
     setCard(URL.createObjectURL(blob)); saveBlob(blob, 'voucher-card.png'); toast(t('vch.saved_hint'));
+  };
+  /** The rendered card goes to the owner's own chat (a CORS simple request: the PNG travels as base64 in the text/plain JSON body; the server caps it at 1 MiB and checks it). */
+  const sendCard = async (c: VoucherCreated) => {
+    if (!c.qr || busy) return;
+    setBusy(true);
+    const blob = await renderCard(c);
+    if (!blob) { setBusy(false); toast(t('err.network')); return; }
+    if (blob.size > 1_000_000) { setBusy(false); haptic.error(); toast(t('vch.too_big')); return; }
+    const r = await api<{ sent: boolean }>('admin/vouchers/send-card', { id: c.voucher.id, png: await toBase64(blob) }, newOpId());
+    setBusy(false);
+    if (!r.ok) { haptic.error(); toast(t(r.error.code === 'too_large' ? 'vch.too_big' : 'err.network')); return; }
+    haptic.success(); toast(t('vch.card_sent'));
+  };
+  const reissue = async () => {
+    if (!open || busy) return;
+    setBusy(true);
+    const r = await api<VoucherCreated>('admin/vouchers/reissue', { op: newOpId(), id: open.id });
+    setBusy(false);
+    if (!r.ok) { haptic.error(); toast(t(r.error.code === 'voucher_reserved' ? 'vch.reissue_reserved' : 'vch.cannot')); setConfirmReissue(false); return; }
+    haptic.success(); setOpen(null); setConfirmReissue(false); setCreated(r.data); await load();
   };
   const copy = async (text: string) => { try { await navigator.clipboard.writeText(text); toast(t('vch.copied')); } catch { toast(text); } };
   const share = (c: VoucherCreated) => openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(c.link ?? '')}&text=${encodeURIComponent(c.link ? t('vch.share_text') : `${t('vch.share_text')} ${c.code ?? ''}`)}`);
@@ -108,7 +133,7 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
       {items.length === 0 ? <div class="note" data-testid="vch-empty">{t('vch.none')}</div> : (
         <Section>
           {items.map((v) => (
-            <Cell key={v.id} title={`…${v.hint} · ${what(v)}`} subtitle={`${status(v)} · ${t('vch.until', { d: dateOf(v.expires_at) })}`} after={v.kind === 'value' ? money(v.balance) : undefined} chevron onClick={() => { setConfirmVoid(false); setOpen(v); }} />
+            <Cell key={v.id} title={`…${v.hint} · ${what(v)}`} subtitle={`${status(v)} · ${t('vch.until', { d: dateOf(v.expires_at) })}`} after={v.kind === 'value' ? money(v.balance) : undefined} chevron onClick={() => { setConfirmVoid(false); setConfirmReissue(false); setOpen(v); }} />
           ))}
         </Section>
       )}
@@ -173,6 +198,7 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
               <Button secondary onClick={() => share(created)}>{t('vch.share')}</Button>
               {created.qr && <Button secondary onClick={() => downloadQr(created)}>{t('vch.dl_qr')}</Button>}
               {created.qr && <Button secondary onClick={() => void downloadCard(created)}>{t('vch.dl_card')}</Button>}
+              {created.qr && <Button secondary onClick={() => void sendCard(created)} disabled={busy}>{t('vch.send_card')}</Button>}
               <div class="note">{t('vch.in_chat')}</div>
               {card && <img class="vch-qr" data-testid="vch-card" alt="" src={card} />}
             </>)}
@@ -193,6 +219,7 @@ export function VouchersTab({ boot, toast }: { boot: AdminBoot; toast: (s: strin
               <>
                 <Button secondary onClick={() => void act('extend', { months: 3 })} disabled={busy}>{t('vch.ext3')}</Button>
                 <Button secondary onClick={() => void act('extend', { months: 12 })} disabled={busy}>{t('vch.ext12')}</Button>
+                <Button secondary onClick={() => (confirmReissue ? void reissue() : setConfirmReissue(true))} disabled={busy}>{confirmReissue ? t('vch.reissue_confirm') : t('vch.reissue')}</Button>
                 <Button secondary onClick={() => (confirmVoid ? void act('void', {}) : setConfirmVoid(true))} disabled={busy}>{confirmVoid ? t('vch.void_confirm') : t('vch.void')}</Button>
               </>
             )}

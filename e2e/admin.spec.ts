@@ -307,11 +307,19 @@ test('vouchers tab (owner): create a value voucher, the code is shown once, list
   await page.getByRole('button', { name: 'Download printable card' }).click();
   expect((await dl2).suggestedFilename()).toBe('voucher-card.png');
   await expect(page.getByTestId('vch-card')).toBeVisible();
+  await page.getByRole('button', { name: 'Send card to my chat' }).click();
+  await toast(page, 'Card sent to your chat');
   await shot(page, 'admin-voucher-created');
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: /…MOCK · 500/ }).click();
   await expect(page.getByText(/20\d\d/).first()).toBeVisible();              // the expiry date carries the year
   await page.getByRole('button', { name: '+3 months' }).click();
+  await page.getByRole('button', { name: 'Reissue', exact: true }).click();
+  await page.getByRole('button', { name: /Tap again: old code stops/ }).click();
+  await expect(page.getByTestId('vch-code')).toHaveText('NEW1-ABCD-EFGH-JKMN');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: /…MOCK · 500 Kč void/ })).toBeVisible();          // the old one is void in the list
+  await page.getByRole('button', { name: /…NEW1 · 500 Kč active/ }).click();
   await page.getByRole('button', { name: 'Void', exact: true }).click();
   await page.getByRole('button', { name: 'Tap again to void' }).click();
   await expect(page.getByText('void', { exact: true }).first()).toBeVisible();

@@ -334,5 +334,11 @@
   "vch.def_months": "Výchozí platnost (měsíce)",
   "vch.def_min": "Minimální částka (Kč)",
   "vch.terms": "Text podmínek",
-  "vch.terms_hint": "Zobrazí se příjemci s novým poukazem. Prázdné = vestavěný text. {until} se nahradí datem platnosti."
+  "vch.terms_hint": "Zobrazí se příjemci s novým poukazem. Prázdné = vestavěný text. {until} se nahradí datem platnosti.",
+  "vch.send_card": "Poslat kartu do mého chatu",
+  "vch.card_sent": "Karta poslána do vašeho chatu",
+  "vch.too_big": "Karta je příliš velká k odeslání (přes 1 MB).",
+  "vch.reissue": "Vydat znovu",
+  "vch.reissue_confirm": "Klepněte znovu: starý kód přestane platit, vznikne nový",
+  "vch.reissue_reserved": "Poukaz drží rezervace. Nejdřív ji zrušte nebo dokončete."
 }
