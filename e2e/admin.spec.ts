@@ -413,7 +413,7 @@ test('setup progress card: counts, "Continue setup" opens the next missing item,
   await back(page);
   await expect(page.getByTestId('setup-card')).toContainText('7 of 11');
   await page.getByRole('button', { name: 'Full list' }).click();
-  await page.getByRole('button', { name: /Aftercare text and fill days/ }).click();
+  await page.getByRole('button', { name: /Aftercare text and refill days/ }).click();
   await expect(page.getByRole('heading', { name: 'Services' })).toBeVisible();                 // jumped to the Services tab
   await page.goto(`${BASE}?mock=1&role=master&staff=2`);
   await page.getByRole('tab', { name: 'Settings' }).click();

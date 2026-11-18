@@ -399,5 +399,20 @@
   "adm.s_tr_cancel": "Zrušit",
   "adm.s_tr_used": "Přeloženo: zkontrolujte a uložte",
   "adm.s_tr_fail": "Překlad se nepodařil. Zkuste to později nebo text napište sami.",
-  "adm.s_tr_limit": "Denní limit překladů je vyčerpán"
+  "adm.s_tr_limit": "Denní limit překladů je vyčerpán",
+  "adm.s_item_studio": "Název studia",
+  "adm.s_item_address": "Adresa, oblast a bod na mapě",
+  "adm.s_item_contact": "Kontakt (Telegram nebo Instagram)",
+  "adm.s_item_service": "Alespoň jedna služba s cenou",
+  "adm.s_item_aftercare": "Péče po návštěvě a dny do doplnění",
+  "adm.s_item_hours": "Pracovní doba",
+  "adm.s_item_policy": "Pravidla storna",
+  "adm.s_item_privacy": "Oznámení o údajích",
+  "adm.s_item_secrets": "Klíče na serveru (zálohy, poukazy)",
+  "adm.s_item_automation": "Automatické zprávy",
+  "adm.s_item_review": "Odkaz na recenze",
+  "adm.s_item_ai": "Asistentka V",
+  "adm.s_item_staff": "Telegram člena týmu je propojen",
+  "adm.s_list_title": "Seznam nastavení · {done} z {total}",
+  "adm.s_sum_services_one": "Služeb: {n} · {p}"
 }

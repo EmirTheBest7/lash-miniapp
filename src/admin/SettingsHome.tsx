@@ -2,7 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { t } from '../i18n';
 import { Button, Cell, Section, Sheet } from '../ui/components';
 import type { IconName } from '../ui/Icon';
-import { LABEL, LaunchList, type Screen, type Tab } from './LaunchBox';
+import { itemLabel, LaunchList, TECHNICAL, type Screen, type Tab } from './LaunchBox';
 import type { Ctx } from './useSettings';
 
 /** Where the "next missing item" is fixed (the wizard will take over this button in S2). */
@@ -32,7 +32,7 @@ export function SettingsHome({ c }: { c: Ctx }) {
 
   const rows: Row[] = [];
   if (boot.can_manage) {
-    const mains = boot.services.filter((x) => !x.is_addon && x.active);
+    const mains = boot.services.filter((x) => !x.is_addon && x.active && !x.staff_only);       // a staff-only (test) service is not part of the studio's offer
     const prices = mains.map((x) => x.price).filter((p) => p > 0);
     const days = new Set(boot.staff.filter((x) => x.active).flatMap((x) => Object.keys(x.weekly))).size;
     const st = home?.studio;
@@ -40,7 +40,7 @@ export function SettingsHome({ c }: { c: Ctx }) {
       { id: 'studio', icon: 'home', title: t('adm.s_studio'), attention: att.studio, go: () => c.open('studio'),
         summary: st ? [st.name || '–', st.area || t('adm.s_no_area'), st.address_set ? t('adm.s_mode_' + st.mode) : t('adm.s_no_address')].join(' · ') : '…' },
       { id: 'svc', icon: 'scissors', title: t('adm.tab_services'), attention: att.services, go: () => c.goTab('svc'),
-        summary: prices.length ? t('adm.s_sum_services', { n: mains.length, from: czk(Math.min(...prices)), to: czk(Math.max(...prices)) }) : t('adm.s_none_services') },
+        summary: prices.length ? (Math.min(...prices) === Math.max(...prices) ? t('adm.s_sum_services_one', { n: mains.length, p: czk(prices[0] ?? 0) }) : t('adm.s_sum_services', { n: mains.length, from: czk(Math.min(...prices)), to: czk(Math.max(...prices)) })) : t('adm.s_none_services') },
       { id: 'schedule', icon: 'clock', title: t('adm.s_schedule'), attention: att.schedule, go: () => c.open('schedule'), summary: t('adm.s_sum_schedule', { days, off: home?.days_off ?? 0 }) },
       { id: 'rules', icon: 'rules', title: t('adm.s_rules'), attention: att.rules, go: () => c.open('rules'),
         summary: t('adm.s_sum_rules', { h: s.cancel_cutoff_h, rem: t(s.rem1_on || s.rem2_on ? 'adm.s_on' : 'adm.s_off') }) },
@@ -63,15 +63,21 @@ export function SettingsHome({ c }: { c: Ctx }) {
       summary: home?.system ? t('adm.s_sum_system', { auto: t(home.system.automation ? 'adm.s_on' : 'adm.s_off'), backup: home.system.backup_h === null ? t('adm.s_no_backup') : t('adm.s_backup_ago', { h: home.system.backup_h }) }) : '…' });
   }
 
-  const p = home?.progress;
-  const nextItem = home?.next;
+  // the count and the next step are for what THIS viewer can fix (a simulated administrator view hides keys and automation, like a real administrator)
+  const visible = (home?.items ?? []).filter((i) => boot.is_owner || !TECHNICAL.includes(i.id));
+  const req = visible.filter((i) => i.required);
+  const order = ['studio', 'contact', 'address', 'service', 'aftercare', 'hours', 'policy', 'privacy', 'staff', 'secrets', 'automation'];
+  const firstOpen = req.filter((i) => !i.ok).sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))[0];
+  const SCREEN: Record<string, string> = { studio: 'name', contact: 'contacts', address: 'place', service: 'services', aftercare: 'services', hours: 'schedule', policy: 'policy', privacy: 'privacy', staff: 'team', secrets: 'system', automation: 'system' };
+  const p = home ? { done: req.filter((i) => i.ok).length, total: req.length } : undefined;
+  const nextItem = firstOpen ? { id: firstOpen.id, screen: SCREEN[firstOpen.id] ?? 'name' } : null;
   return (
     <>
       {boot.can_manage && p && p.done < p.total && (
         <div class="pcard" data-testid="setup-card">
           <div class="p-top"><span class="p-title">{t('adm.s_card_title')}</span><span class="p-count">{t('adm.s_card_count', { done: p.done, total: p.total })}</span></div>
           <div class="pbar" role="progressbar" aria-valuemin={0} aria-valuemax={p.total} aria-valuenow={p.done}><i style={{ width: `${Math.round((p.done / Math.max(1, p.total)) * 100)}%` }} /></div>
-          {nextItem && <div class="p-next">{t('adm.s_next', { item: t(LABEL[nextItem.id] ?? 'ln.studio') })}</div>}
+          {nextItem && <div class="p-next">{t('adm.s_next', { item: itemLabel(nextItem.id) })}</div>}
           <Button onClick={() => { const g = nextTarget(nextItem?.screen ?? 'name'); if (g.tab) c.goTab(g.tab); else c.open(g.screen!); }}>{t('adm.s_continue')}</Button>
           <button class="link" style={{ padding: '10px 0 0' }} onClick={() => setList(true)}>{t('adm.s_full_list')}</button>
           {home?.lang_hint && <div class="p-hint">{t('adm.s_lang_hint')}</div>}

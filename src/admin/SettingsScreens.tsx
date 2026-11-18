@@ -215,7 +215,7 @@ export function SystemScreen({ c }: { c: Ctx }) {
         <Cell title={t('ln.secrets')} after={home?.system?.keys ? '✅' : '❌'} />
         <Cell title={t('ln.ai')} subtitle={t('adm.s_v_note')} />
       </Section>
-      <LaunchList boot={c.boot} toast={c.toast} goTab={c.goTab} open={c.open} reloadBoot={c.reloadBoot} onChange={() => void c.reloadHome()} />
+      <LaunchList boot={c.boot} toast={c.toast} goTab={c.goTab} open={c.open} reloadBoot={c.reloadBoot} onChange={() => void c.reloadHome()} skip={['automation']} />
       <Section title={t('adm.s_viewas')} footer={t('adm.s_viewas_note')}>
         <Cell title={t('adm.s_viewas_admin')} chevron onClick={() => { c.setViewAs('admin'); c.open(null); }} />
         <Cell title={t('adm.s_viewas_master')} chevron onClick={() => { c.setViewAs('master'); c.open(null); }} />

@@ -399,5 +399,20 @@
   "adm.s_tr_cancel": "Скасувати",
   "adm.s_tr_used": "Перекладено: перевірте й збережіть",
   "adm.s_tr_fail": "Не вдалося перекласти. Спробуйте пізніше або впишіть текст самі.",
-  "adm.s_tr_limit": "Денний ліміт перекладів вичерпано"
+  "adm.s_tr_limit": "Денний ліміт перекладів вичерпано",
+  "adm.s_item_studio": "Назва студії",
+  "adm.s_item_address": "Адреса, район і точка на мапі",
+  "adm.s_item_contact": "Контакт (Telegram або Instagram)",
+  "adm.s_item_service": "Принаймні одна послуга з ціною",
+  "adm.s_item_aftercare": "Текст догляду й дні до корекції",
+  "adm.s_item_hours": "Робочі години",
+  "adm.s_item_policy": "Правила скасування",
+  "adm.s_item_privacy": "Повідомлення про дані",
+  "adm.s_item_secrets": "Ключі на сервері (копії, ваучери)",
+  "adm.s_item_automation": "Автоматичні повідомлення",
+  "adm.s_item_review": "Посилання на відгуки",
+  "adm.s_item_ai": "Асистентка V",
+  "adm.s_item_staff": "Telegram працівника прив'язано",
+  "adm.s_list_title": "Список налаштування · {done} з {total}",
+  "adm.s_sum_services_one": "Послуг: {n} · {p}"
 }

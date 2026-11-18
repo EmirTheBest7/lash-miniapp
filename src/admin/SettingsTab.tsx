@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { t } from '../i18n';
 import { useBack } from '../hooks';
 import type { Screen, Tab } from './LaunchBox';
@@ -15,6 +15,7 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView, goTab, view
   const [screen, setScreen] = useState<Screen | null>(null);
   const st = useSettingsState(boot, toast, reloadBoot);
   useBack(screen ? () => setScreen(null) : null);
+  useEffect(() => { window.scrollTo(0, 0); }, [screen]);                       // a category opens at its top, whatever the scroll position was
   const c: Ctx = { boot, toast, reloadBoot, goTab, open: setScreen, onClientView, ...st, viewAs, setViewAs, realOwner };
   // the master view never reaches an admin / owner screen, whatever the state says
   const allowed = (sc: Screen): boolean => (sc === 'system' ? !!boot.is_owner : sc === 'help' || sc === 'after' || boot.can_manage);

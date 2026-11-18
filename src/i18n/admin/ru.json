@@ -399,5 +399,20 @@
   "adm.s_tr_cancel": "Отмена",
   "adm.s_tr_used": "Переведено: проверьте и сохраните",
   "adm.s_tr_fail": "Не удалось перевести. Попробуйте позже или впишите текст сами.",
-  "adm.s_tr_limit": "Лимит переводов на сегодня исчерпан"
+  "adm.s_tr_limit": "Лимит переводов на сегодня исчерпан",
+  "adm.s_item_studio": "Название студии",
+  "adm.s_item_address": "Адрес, район и точка на карте",
+  "adm.s_item_contact": "Контакты (Telegram или Instagram)",
+  "adm.s_item_service": "Хотя бы одна услуга с ценой",
+  "adm.s_item_aftercare": "Текст ухода и дни до коррекции",
+  "adm.s_item_hours": "Рабочие часы",
+  "adm.s_item_policy": "Правила отмены",
+  "adm.s_item_privacy": "Уведомление о данных",
+  "adm.s_item_secrets": "Ключи на сервере (копии, ваучеры)",
+  "adm.s_item_automation": "Автоматические сообщения",
+  "adm.s_item_review": "Ссылка на отзывы",
+  "adm.s_item_ai": "Ассистентка V",
+  "adm.s_item_staff": "Telegram сотрудника привязан",
+  "adm.s_list_title": "Список настройки · {done} из {total}",
+  "adm.s_sum_services_one": "Услуг: {n} · {p}"
 }

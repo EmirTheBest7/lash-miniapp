@@ -44,6 +44,8 @@ test('View as: the owner previews the administrator and the master (front-end on
   await page.getByRole('button', { name: 'Administrator' }).click();
   await expect(page.getByTestId('viewas')).toContainText('administrator');
   await expect(row(page, /^System/)).toHaveCount(0);
+  await expect(page.getByTestId('setup-card')).toContainText('of 9');                 // the simulated administrator counts like a real one
+  await expect(page.getByTestId('setup-card')).not.toContainText('placeholder');
   await expect(page.getByRole('tab', { name: 'Services' })).toBeVisible();
   await page.getByTestId('viewas').getByRole('button', { name: 'Exit' }).click();
   await expect(row(page, /^System/)).toBeVisible();
