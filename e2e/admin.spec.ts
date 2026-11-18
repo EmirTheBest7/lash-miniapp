@@ -421,3 +421,13 @@ test('master guide in Settings (staff): opens the guide with its sections and fo
   await expect(page.getByRole('button', { name: /Lash/ }).first()).toBeVisible();
   expect(chunks.filter((u) => /admin-/.test(u))).toHaveLength(0);
 });
+
+test('studio info: the map pin fields accept a typed decimal point', async ({ page }) => {
+  await open(page, '&tab=set');
+  await page.getByRole('tab', { name: /Settings/ }).click().catch(() => undefined);
+  await page.getByText('Studio info').first().click();
+  const lat = page.getByLabel(/latitude/);
+  await lat.fill('');
+  await lat.pressSequentially('50.0912');
+  await expect(lat).toHaveValue('50.0912');
+});

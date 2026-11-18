@@ -16,6 +16,8 @@ const POLICY: [keyof StudioInfo, string][] = [['cancel_policy_cs', 'CS'], ['canc
 export function LaunchBox({ boot, toast, goTab, reloadBoot }: { boot: AdminBoot; toast: (s: string) => void; goTab: (t: Tab) => void; reloadBoot: () => Promise<void> }) {
   const [d, setD] = useState<LaunchData | null>(null);
   const [studio, setStudio] = useState<StudioInfo | null>(null);
+  const [pin, setPin] = useState({ lat: '', lon: '' });                       // raw text of the two pin fields (a typed "50." must keep its dot)
+  const openStudio = (s: StudioInfo) => { setPin({ lat: String(s.lat), lon: String(s.lon) }); setStudio({ ...s }); };
   const [busy, setBusy] = useState(false);
   const load = useCallback(async () => { const r = await api<LaunchData>('admin/launch', {}); if (r.ok) setD(r.data); }, []);
   useEffect(() => { void load(); }, [load]);
@@ -35,7 +37,7 @@ export function LaunchBox({ boot, toast, goTab, reloadBoot }: { boot: AdminBoot;
     haptic.success(); toast(t('adm.saved')); setD(r.data); setStudio(null); await reloadBoot();
   }
   function jump(where: string, id: string) {
-    if (where === 'studio') { if (d!.can_manage) setStudio({ ...d!.studio }); else toast(t('ln.f_studio')); return; }
+    if (where === 'studio') { if (d!.can_manage) openStudio(d!.studio); else toast(t('ln.f_studio')); return; }
     if (where === 'svc') { if (boot.can_manage) goTab('svc'); else toast(t('ln.f_service')); return; }
     if (where === 'staff') { goTab('staff'); return; }
     if (where === 'set') { toast(t('ln.f_review')); return; }
@@ -51,7 +53,7 @@ export function LaunchBox({ boot, toast, goTab, reloadBoot }: { boot: AdminBoot;
           if (i.id === 'automation' && d.can_manage) return <Cell key={i.id} title={label} subtitle={!i.ok ? t('ln.f_automation') : undefined} after={<Switch label={label} checked={i.ok} onChange={(on) => void toggle('automation_enabled', on)} />} />;
           return <Cell key={i.id} title={label} after={i.ok ? '✅' : i.required ? '❌' : '➖'} chevron={!i.ok} onClick={i.ok ? undefined : () => jump(i.where, i.id)} />;
         })}
-        {d.can_manage && <Cell title={t('ln.studio_info')} chevron onClick={() => setStudio({ ...d.studio })} />}
+        {d.can_manage && <Cell title={t('ln.studio_info')} chevron onClick={() => openStudio(d.studio)} />}
       </Section>
       <Sheet open={studio !== null} onClose={() => setStudio(null)} title={t('ln.studio_info')}>
         {studio && (
@@ -69,8 +71,8 @@ export function LaunchBox({ boot, toast, goTab, reloadBoot }: { boot: AdminBoot;
                 { value: 'day_before', label: t('ln.t_day') }, { value: 'on_release', label: t('ln.t_now') }]} />
             </Section>
             <div class="row2">
-              <label class="field" style={{ padding: 0 }}><span>{t('ln.f_lat')}</span><input inputMode="decimal" value={String(studio.lat)} onInput={(e) => setStudio({ ...studio, lat: num((e.target as HTMLInputElement).value) })} /></label>
-              <label class="field" style={{ padding: 0 }}><span>{t('ln.f_lon')}</span><input inputMode="decimal" value={String(studio.lon)} onInput={(e) => setStudio({ ...studio, lon: num((e.target as HTMLInputElement).value) })} /></label>
+              <label class="field" style={{ padding: 0 }}><span>{t('ln.f_lat')}</span><input inputMode="decimal" value={pin.lat} onInput={(e) => { const v = (e.target as HTMLInputElement).value; setPin({ ...pin, lat: v }); setStudio({ ...studio, lat: num(v) }); }} /></label>
+              <label class="field" style={{ padding: 0 }}><span>{t('ln.f_lon')}</span><input inputMode="decimal" value={pin.lon} onInput={(e) => { const v = (e.target as HTMLInputElement).value; setPin({ ...pin, lon: v }); setStudio({ ...studio, lon: num(v) }); }} /></label>
             </div>
             <div class="note">{t('ln.f_pin_note')}</div>
             <label class="field"><span>{t('ln.f_contact_name')}</span><input maxLength={60} value={studio.contact_name} onInput={(e) => setStudio({ ...studio, contact_name: (e.target as HTMLInputElement).value })} /></label>
