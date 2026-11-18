@@ -389,3 +389,19 @@ test('launch checklist at the top of Settings: progress, privacy and automation 
   await expect(page.getByText(/Launch checklist/)).toBeVisible();
   await expect(page.getByRole('switch', { name: /Privacy notice reviewed/ })).toHaveCount(0);
 });
+
+test('master guide in Settings (staff): opens the guide with its sections and formatting; clients never get it', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await page.getByRole('button', { name: 'Master guide' }).click();
+  await expect(page.getByRole('heading', { name: /5\. Volno a blokování času/ })).toBeVisible();
+  await expect(page.locator('.guide strong').first()).toBeVisible();
+  await expect(page.locator('.guide ol li').first()).toBeVisible();
+  await shot(page, 'admin-master-guide');
+  const chunks: string[] = [];
+  page.on('request', (r) => { if (/guide|admin-/.test(r.url())) chunks.push(r.url()); });
+  await page.evaluate(() => localStorage.clear());                       // the staff hint is per device: a real client never has it
+  await page.goto(`${BASE}?mock=1`);
+  await expect(page.getByRole('button', { name: /Lash/ }).first()).toBeVisible();
+  expect(chunks.filter((u) => /admin-/.test(u))).toHaveLength(0);
+});

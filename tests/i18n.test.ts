@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { DICT, LANGS, langFromTelegram, t } from '../src/i18n';
+import '../src/i18n/adminTexts';        // the staff texts register themselves from the admin chunk: the lockstep checks cover them too
 
 const keys = Object.keys(DICT.en);
 const ph = (s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
@@ -34,5 +36,13 @@ describe('i18n: cs / en / ru / uk stay in lockstep', () => {
   it('fills placeholders and falls back to English, then to the key', () => {
     expect(t('hello.title', { name: 'Eva' }, 'cs')).toBe('Ahoj, Eva');
     expect(t('does.not.exist', {}, 'ru')).toBe('does.not.exist');
+  });
+  it('keeps the staff texts (adm.*, vch.*, ln.*) OUT of the client dictionaries: clients never download them', () => {
+    for (const l of LANGS) {
+      const base = JSON.parse(readFileSync(`src/i18n/${l}.json`, 'utf8')) as Record<string, string>;
+      expect(Object.keys(base).filter((k) => /^(adm|vch|ln)\./.test(k)), l).toEqual([]);
+      const adm = JSON.parse(readFileSync(`src/i18n/admin/${l}.json`, 'utf8')) as Record<string, string>;
+      expect(Object.keys(adm).filter((k) => !/^(adm|vch|ln)\./.test(k)), l).toEqual([]);
+    }
   });
 });

@@ -3,6 +3,7 @@ import { api, newOpId } from '../api';
 import { t } from '../i18n';
 import { haptic } from '../tg';
 import { Button, Cell, Section, Segmented, Switch } from '../ui/components';
+import { GuideBox } from './GuideBox';
 import { LaunchBox, type Tab } from './LaunchBox';
 import { PreviewBox } from './PreviewBox';
 import type { AdminBoot, AdminSettings, BroadcastInfo } from './types';
@@ -47,6 +48,7 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView, goTab }: { 
     <div class="page">
       <h1 class="large">{t('adm.tab_settings')}</h1>
       <LaunchBox boot={boot} toast={toast} goTab={goTab} reloadBoot={reloadBoot} />
+      <GuideBox />
       {boot.can_manage && (
         <>
           <Section title={t('adm.step')} footer={t('adm.step_note')}>

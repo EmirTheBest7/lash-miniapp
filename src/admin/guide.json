@@ -1,0 +1,187 @@
+{
+    "cs": {
+        "title": "Průvodce pro mistrovou",
+        "sections": [
+            {
+                "title": "",
+                "blocks": [
+                    {
+                        "t": "p",
+                        "x": "Krátký návod, jak každý den pracovat s rezervacemi. Bez složitých slov: stačí telefon a Telegram."
+                    }
+                ]
+            },
+            {
+                "title": "1. Jak aplikaci otevřít",
+                "blocks": [
+                    {
+                        "t": "ol",
+                        "x": [
+                            "V Telegramu otevřete chat s vaším botem.",
+                            "Vlevo dole klepněte na tlačítko **Otevřít**. Otevře se aplikace s pěti záložkami nahoře: **Kalendář**, **Tým**, **Služby**, **Poukazy**, **Nastavení**.",
+                            "Chcete-li zkusit, co vidí klientky, v **Nastavení** klepněte na **Otevřít pohled klientky**. Vrátíte se tlačítkem v aplikaci."
+                        ]
+                    },
+                    {
+                        "t": "p",
+                        "x": "Co potřebujete rychle poslat nebo zjistit, zkuste i v chatu: napište `/launch` (co je hotové a co chybí) nebo `/preview` (ukázky zpráv, viz kapitola 8)."
+                    }
+                ]
+            },
+            {
+                "title": "2. První spuštění: co musí být hotové",
+                "blocks": [
+                    {
+                        "t": "p",
+                        "x": "Než přijdou první klientky, projděte seznam **Kontrola před spuštěním**. Najdete ho nahoře v záložce **Nastavení**, nebo v chatu příkazem `/launch`."
+                    },
+                    {
+                        "t": "ul",
+                        "x": [
+                            "✅ je hotovo, ❌ ještě chybí, ➖ je volitelné.",
+                            "Klepnutím na nedokončenou položku se dostanete tam, kde se opravuje.",
+                            "**Údaje o studiu** (v Nastavení): název studia, adresa, bod na mapě, váš Telegram nebo Instagram a text storno podmínek."
+                        ]
+                    },
+                    {
+                        "t": "p",
+                        "x": "- Bod na mapě: v Google Mapách otevřete své místo, dlouze na něj klepněte a opište dvě čísla, která se ukážou."
+                    },
+                    {
+                        "t": "ul",
+                        "x": [
+                            "Zásady ochrany osobních údajů si jednou přečtěte tak, jak je uvidí klientky, a pak zaškrtněte „Zkontrolováno“.",
+                            "Zapnutí **Automatiky** zařídí, že klientky dostanou připomínky a vy večerní přehled. Zapněte ji, až bude vše připravené.",
+                            "Dvě položky s klíči (zálohy a poukazy) nastavuje ten, kdo vám bota spravuje. U vás stačí, aby byly zelené."
+                        ]
+                    }
+                ]
+            },
+            {
+                "title": "3. Služby a ceny",
+                "blocks": [
+                    {
+                        "t": "ol",
+                        "x": [
+                            "Záložka **Služby**.",
+                            "**Nová služba**. Vyplňte název (stačí v jednom jazyce), **Délku** a **Cenu**.",
+                            "**Rezerva** je čas navíc na přípravu a úklid. Klientka ho nevidí, v kalendáři ho ale máte zarezervovaný.",
+                            "U služby na řasy vyplňte i **Doplnění za (dnů)** a **Text péče po návštěvě**: klientka ho dostane po návštěvě sama.",
+                            "**Uložit**."
+                        ]
+                    },
+                    {
+                        "t": "p",
+                        "x": "Chcete službu jen vyzkoušet a nechat ji skrytou před klientkami? Zapněte **Jen pro personál**. Uvidíte ji jen vy a členové týmu. Službu, ke které už existují rezervace, nejde smazat. Vypněte u ní **Aktivní**."
+                    }
+                ]
+            },
+            {
+                "title": "4. Pracovní doba",
+                "blocks": [
+                    {
+                        "t": "ol",
+                        "x": [
+                            "Záložka **Tým**, klepněte na svou kartu.",
+                            "U každého dne nastavte, od kdy do kdy pracujete. Pauza uprostřed dne se přidá tlačítkem **Přidat interval nebo pauzu** (mezera mezi dvěma časy je pauza).",
+                            "**Uložit**."
+                        ]
+                    }
+                ]
+            },
+            {
+                "title": "5. Volno a blokování času",
+                "blocks": [
+                    {
+                        "t": "ul",
+                        "x": [
+                            "Celý den volno: v záložce **Kalendář** klepněte na své jméno a zapněte **Volno**.",
+                            "Jen část dne (lékař, nákup): klepněte na své jméno a zvolte **Blokovat čas**."
+                        ]
+                    },
+                    {
+                        "t": "p",
+                        "x": "Klientky pak v tomto čase neuvidí žádné volné termíny."
+                    }
+                ]
+            },
+            {
+                "title": "6. Rezervace v kalendáři",
+                "blocks": [
+                    {
+                        "t": "p",
+                        "x": "V záložce **Kalendář** vidíte den po sloupcích. Klepněte na rezervaci a objeví se:"
+                    },
+                    {
+                        "t": "ul",
+                        "x": [
+                            "**Potvrdit**: klientka dostane potvrzení. (Některé nové klientky čekají na vaše potvrzení.)",
+                            "**Přesunout**: klepněte a pak na nový čas v kalendáři. Klientka se to dozví.",
+                            "**Označit jako hotové**: po návštěvě. Až od začátku návštěvy.",
+                            "**Nedostavila se**: pokud nepřišla.",
+                            "**Zrušit rezervaci**: klientka dostane omluvu a nabídku nového termínu."
+                        ]
+                    },
+                    {
+                        "t": "p",
+                        "x": "Rezervaci za klientku vytvoříte tlačítkem **Nová rezervace**. Klientku vyhledáte jménem, nebo přidáte **Novou klientku (bez Telegramu)**."
+                    }
+                ]
+            },
+            {
+                "title": "7. Dárkové poukazy",
+                "blocks": [
+                    {
+                        "t": "ol",
+                        "x": [
+                            "Poukaz vytvořte **až poté, co dostanete peníze** (hotově nebo převodem).",
+                            "Záložka **Poukazy**, **Nový poukaz**. Zvolte hodnotu v korunách, nebo jednu službu. Nastavte platnost, způsob platby a přijatou částku.",
+                            "Po vytvoření se **jen jednou** ukáže kód, odkaz a QR kód. Zkopírujte je, sdílejte, nebo stáhněte kartu k tisku. Později je už ukázat nejde.",
+                            "Klientka zadá kód při rezervaci (tlačítko **Mám poukaz**) nebo klepne na odkaz.",
+                            "Ztratila kód? V detailu poukazu zvolte **Vydat znovu**. Starý kód přestane platit a vznikne nový."
+                        ]
+                    }
+                ]
+            },
+            {
+                "title": "8. Zprávy po návštěvě a náhled",
+                "blocks": [
+                    {
+                        "t": "p",
+                        "x": "Po dokončené návštěvě klientka dostane:"
+                    },
+                    {
+                        "t": "ul",
+                        "x": [
+                            "**Péči po návštěvě** (text, který jste u služby vyplnila) a nabídku objednat doplnění,",
+                            "později **připomínku doplnění** (jen když si ještě nerezervovala),",
+                            "a **prosbu o recenzi** na Googlu (jen když je v Nastavení vložený odkaz na recenze)."
+                        ]
+                    },
+                    {
+                        "t": "p",
+                        "x": "Jak zprávy vypadají, uvidíte hned: v chatu napište `/preview 2 cs` (číslo služby a jazyk), nebo v aplikaci u služby klepněte na **Náhled zpráv**. Pošle se jen vám, označené slovem NÁHLED, tlačítka nic nedělají a klientkám nic neodejde."
+                    },
+                    {
+                        "t": "p",
+                        "x": "Připomínka a prosba o recenzi jsou obchodní sdělení: mají označení a tlačítko **Odhlásit**. Klientka, která se odhlásí, je už nedostane."
+                    }
+                ]
+            },
+            {
+                "title": "9. Když něco nejde",
+                "blocks": [
+                    {
+                        "t": "ul",
+                        "x": [
+                            "Klientka nevidí volný termín: zkontrolujte pracovní dobu (kapitola 4) a že na ten den není volno nebo blokace.",
+                            "Zprávy a připomínky nechodí: v **Nastavení** musí být zapnutá **Automatika**.",
+                            "Nevíte, co ještě chybí k otevření: `/launch`.",
+                            "Cokoli dalšího: napište tomu, kdo vám bota spravuje, a přiložte snímek obrazovky."
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

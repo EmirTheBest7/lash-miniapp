@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'preact/hooks';
+import '../i18n/adminTexts';
 import { api } from '../api';
 import { perfReport } from '../perf';
 import { useToast } from '../hooks';
