@@ -299,5 +299,15 @@
   "ln.f_policy": "Storno podmínky",
   "ln.f_policy_note": "Zobrazí se klientkám při rezervaci. Prázdný jazyk = vestavěný text.",
   "adm.guide": "Návod pro mistrovou",
-  "adm.guide_note": "Stejný text jako příkaz /navod v chatu."
+  "adm.guide_note": "Stejný text jako příkaz /navod v chatu.",
+  "ln.f_address_note": "Přesná adresa (a bod na mapě) se posílá jen klientce s potvrzenou rezervací.",
+  "ln.f_area": "Veřejná oblast (vidí všichni)",
+  "ln.f_area_note": "Např. „Praha 4 – Nusle“. Ulici sem nepište: texty s přesnou adresou se neuloží (pojistka, ne záruka).",
+  "ln.f_mode": "Kdo dostane přesnou adresu",
+  "ln.m_after": "Po mém potvrzení",
+  "ln.m_auto": "Po potvrzení",
+  "ln.m_manual": "Jen ručně",
+  "ln.f_newmanual": "Nové klientky vždy ručně",
+  "ln.t_day": "Den předem, 18:00",
+  "ln.t_now": "Hned"
 }

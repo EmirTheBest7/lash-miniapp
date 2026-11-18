@@ -299,5 +299,15 @@
   "ln.f_policy": "Cancellation policy",
   "ln.f_policy_note": "Shown to clients at booking. Leave a language empty to use the built-in text.",
   "adm.guide": "Master guide",
-  "adm.guide_note": "The same text as /navod in the chat. In Czech for now."
+  "adm.guide_note": "The same text as /navod in the chat. In Czech for now.",
+  "ln.f_address_note": "The exact address (and the map pin) is sent only to a client with a confirmed booking.",
+  "ln.f_area": "Public area (shown to everyone)",
+  "ln.f_area_note": "E.g. \"Praha 4 – Nusle\". Do not write the street here: texts that contain the exact address are refused (a safety net, not a guarantee).",
+  "ln.f_mode": "Who gets the exact address",
+  "ln.m_after": "After my OK",
+  "ln.m_auto": "On confirmation",
+  "ln.m_manual": "Only by hand",
+  "ln.f_newmanual": "First-time clients always by hand",
+  "ln.t_day": "Day before, 18:00",
+  "ln.t_now": "At once"
 }

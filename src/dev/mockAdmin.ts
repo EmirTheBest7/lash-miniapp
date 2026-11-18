@@ -49,7 +49,7 @@ const busy = (staff: number, a: number, b: number, skip = 0) => state.appts.some
 const MOCK_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 let vsettings: VoucherSettings = { months: 12, partial: true, min: 100, terms: { cs: '', en: '', ru: '', uk: '' } };
 const privacyMock = { on: false };
-const studioMock: StudioInfo = { studio_name: 'Lash Studio', address: '', lat: 50.0755, lon: 14.4378, contact_name: 'Lash Master', contact_username: '', instagram: '', portfolio_url: '', cancel_policy_cs: '', cancel_policy_en: '', cancel_policy_ru: '', cancel_policy_uk: '' };
+const studioMock: StudioInfo = { studio_name: 'Lash Studio', address: '', area_text: '', address_mode: 'after_approval', address_new_clients_manual: true, address_release_timing: 'day_before', lat: 50.0755, lon: 14.4378, contact_name: 'Lash Master', contact_username: '', instagram: '', portfolio_url: '', cancel_policy_cs: '', cancel_policy_en: '', cancel_policy_ru: '', cancel_policy_uk: '' };
 const sentCards: number[] = [];
 const sentPreviews: string[] = [];
 const vouchers: VoucherRow[] = [];

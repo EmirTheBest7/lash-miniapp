@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'preact/hooks';
 import { api, newOpId } from '../api';
 import { t } from '../i18n';
 import { haptic } from '../tg';
-import { Button, Cell, Section, Sheet, Switch } from '../ui/components';
+import { Button, Cell, Section, Segmented, Sheet, Switch } from '../ui/components';
 import type { AdminBoot, LaunchData, StudioInfo } from './types';
 
 export type Tab = 'cal' | 'staff' | 'svc' | 'vch' | 'set';
@@ -58,6 +58,16 @@ export function LaunchBox({ boot, toast, goTab, reloadBoot }: { boot: AdminBoot;
           <>
             <label class="field"><span>{t('ln.f_name')}</span><input maxLength={60} value={studio.studio_name} onInput={(e) => setStudio({ ...studio, studio_name: (e.target as HTMLInputElement).value })} /></label>
             <label class="field"><span>{t('ln.f_address')}</span><input maxLength={200} value={studio.address} onInput={(e) => setStudio({ ...studio, address: (e.target as HTMLInputElement).value })} /></label>
+            <div class="note">{t('ln.f_address_note')}</div>
+            <label class="field"><span>{t('ln.f_area')}</span><input maxLength={80} value={studio.area_text} onInput={(e) => setStudio({ ...studio, area_text: (e.target as HTMLInputElement).value })} /></label>
+            <div class="note">{t('ln.f_area_note')}</div>
+            <Section title={t('ln.f_mode')}>
+              <Segmented value={studio.address_mode} onChange={(v) => setStudio({ ...studio, address_mode: v })} options={[
+                { value: 'after_approval', label: t('ln.m_after') }, { value: 'auto_confirmed', label: t('ln.m_auto') }, { value: 'manual', label: t('ln.m_manual') }]} />
+              <Cell title={t('ln.f_newmanual')} after={<Switch label={t('ln.f_newmanual')} checked={studio.address_new_clients_manual} onChange={(on) => setStudio({ ...studio, address_new_clients_manual: on })} />} />
+              <Segmented value={studio.address_release_timing} onChange={(v) => setStudio({ ...studio, address_release_timing: v })} options={[
+                { value: 'day_before', label: t('ln.t_day') }, { value: 'on_release', label: t('ln.t_now') }]} />
+            </Section>
             <div class="row2">
               <label class="field" style={{ padding: 0 }}><span>{t('ln.f_lat')}</span><input inputMode="decimal" value={String(studio.lat)} onInput={(e) => setStudio({ ...studio, lat: num((e.target as HTMLInputElement).value) })} /></label>
               <label class="field" style={{ padding: 0 }}><span>{t('ln.f_lon')}</span><input inputMode="decimal" value={String(studio.lon)} onInput={(e) => setStudio({ ...studio, lon: num((e.target as HTMLInputElement).value) })} /></label>
