@@ -6,6 +6,12 @@ export interface AdminBoot {
   config: { tz: string; studio_name: string; server_time: number; today: string };
   staff: StaffRow[]; services: SvcRow[]; vouchers_on?: boolean; categories: { id: number; name: string }[]; loyalty_pending: { id: number; client: string; percent: number }[]; settings: AdminSettings; can_manage: boolean;
 }
+export interface LaunchItem { id: string; ok: boolean; required: boolean; where: string }
+export interface StudioInfo {
+  studio_name: string; address: string; lat: number; lon: number; contact_name: string; contact_username: string; instagram: string; portfolio_url: string;
+  cancel_policy_cs: string; cancel_policy_en: string; cancel_policy_ru: string; cancel_policy_uk: string;
+}
+export interface LaunchData { items: LaunchItem[]; progress: { done: number; total: number }; studio: StudioInfo; can_manage: boolean }
 export type VoucherStatus = 'active' | 'reserved' | 'used' | 'expired' | 'void';
 export interface VoucherRow {
   id: number; kind: 'value' | 'service'; hint: string; status: VoucherStatus; service: string | null; value: number; balance: number; reserved: number; partial: boolean;
@@ -29,6 +35,6 @@ export interface SchedSettings {
   rem1_on: boolean; rem1_h: number; rem1_auto: boolean; rem1_warn: boolean; rem2_on: boolean; rem2_h: number;
   rem_unanswered_on: boolean; rem_unanswered_h: number; agenda_on: boolean; agenda_time: string; agenda_empty: boolean;
   waitlist_on: boolean; waitlist_offer_h: number; backup_on: boolean; backup_time: string; backup_key: boolean; backup_last: number; ad_min_days: number;
-  autocomplete_on: boolean; autocomplete_h: number; fill_nudge_on: boolean; google_review_url: string; review_delay_h: number; review_gap_days: number;
+  privacy_reviewed?: boolean; autocomplete_on: boolean; autocomplete_h: number; fill_nudge_on: boolean; google_review_url: string; review_delay_h: number; review_gap_days: number;
 }
 export interface BroadcastInfo { optin: number; clients: number; skipped?: number; min_days?: number; last: { text: string; recipients: number; at: number } | null }

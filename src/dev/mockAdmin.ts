@@ -1,6 +1,6 @@
 // DEV / E2E ONLY: a stateful mock of the admin API (synthetic people, never real data). Follows TG-PHPBot docs/miniapp.md.
 import { addDays, isoWeekday, minutesOf, parseHm, toUtc } from '../admin/time';
-import type { AdmAppt, AdminBoot, CalData, StaffRow, SvcRow, VoucherRow, VoucherSettings } from '../admin/types';
+import type { AdmAppt, AdminBoot, CalData, StaffRow, StudioInfo, SvcRow, VoucherRow, VoucherSettings } from '../admin/types';
 
 const TZ = 'Europe/Prague';
 const NOW = toUtc('2026-11-16', 12 * 60, TZ);
@@ -48,6 +48,8 @@ const busy = (staff: number, a: number, b: number, skip = 0) => state.appts.some
 // a 1x1 PNG stand-in for the QR in the mock (the real PNG is produced and decode-tested on the server)
 const MOCK_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 let vsettings: VoucherSettings = { months: 12, partial: true, min: 100, terms: { cs: '', en: '', ru: '', uk: '' } };
+const privacyMock = { on: false };
+const studioMock: StudioInfo = { studio_name: 'Lash Studio', address: '', lat: 50.0755, lon: 14.4378, contact_name: 'Lash Master', contact_username: '', instagram: '', portfolio_url: '', cancel_policy_cs: '', cancel_policy_en: '', cancel_policy_ru: '', cancel_policy_uk: '' };
 const sentCards: number[] = [];
 const sentPreviews: string[] = [];
 const vouchers: VoucherRow[] = [];
@@ -70,6 +72,21 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
 
   switch (route) {
     case 'admin/bootstrap': return ok(boot());
+    case 'admin/launch': {
+      const done = (b: boolean, id: string, required = true, where = 'set') => ({ id, ok: b, required, where });
+      const items = [done(studioMock.studio_name !== '' && studioMock.studio_name !== 'Lash Studio', 'studio', true, 'studio'), done(studioMock.address !== '', 'address', true, 'studio'), done(studioMock.contact_username !== '', 'contact', true, 'studio'),
+        done(true, 'service', true, 'svc'), done(false, 'aftercare', true, 'svc'), done(true, 'hours', true, 'staff'), done(studioMock.cancel_policy_cs !== '', 'policy', true, 'studio'),
+        done(privacyMock.on, 'privacy', true, 'privacy'), done(false, 'secrets', true, 'server'), done(state.settings.automation_on, 'automation', true, 'automation'), done(state.settings.google_review_url !== '', 'review', false, 'set'),
+        done(false, 'ai', false, 'chat'), done(false, 'staff', true, 'staff')];
+      const req = items.filter((i) => i.required);
+      return ok({ items, progress: { done: req.filter((i) => i.ok).length, total: req.length }, studio: studioMock, can_manage: owner });
+    }
+    case 'admin/studio/save': {
+      if (!owner) return err(403, 'forbidden');
+      if ('studio_name' in d && !String(d.studio_name).trim()) return err(400, 'bad_request');
+      Object.assign(studioMock, d);
+      return adminMock('admin/launch', {}, env);
+    }
     case 'admin/service/preview': return state.services.some((s) => s.id === d.id && !s.is_addon) && ['cs', 'en', 'ru', 'uk'].includes(d.lang) ? (sentPreviews.push(`${d.id}:${d.lang}`), ok({ sent: 3 })) : err(404, 'not_found');
     case 'admin/vouchers/list': return owner ? ok({ enabled: true, settings: vsettings, items: [...vouchers].reverse() }) : err(403, 'forbidden');
     case 'admin/vouchers/settings': { if (!owner) return err(403, 'forbidden'); if (!(d.months >= 1 && d.months <= 60) || !(d.min >= 1)) return err(400, 'bad_request'); vsettings = { months: d.months, partial: d.partial === true, min: d.min, terms: d.terms }; return ok({ settings: vsettings }); }
@@ -227,7 +244,7 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       state.loyaltyPending = state.loyaltyPending.filter((p) => p.id !== d.id);
       return ok({ loyalty_pending: state.loyaltyPending });
     }
-    case 'admin/settings/save': { if (!owner) return err(403, 'forbidden'); if ('google_review_url' in d && d.google_review_url !== '' && !/^https:\/\/\S{4,}$/.test(String(d.google_review_url))) return err(400, 'bad_request'); Object.assign(state.settings, d); if ('automation_enabled' in d) state.settings.automation_on = d.automation_enabled === true; if ('rem1_h' in d) { state.settings.rem1_auto = d.rem1_h === 0; state.settings.rem1_h = d.rem1_h === 0 ? state.settings.cancel_cutoff_h + 2 : d.rem1_h; state.settings.rem1_warn = !state.settings.rem1_auto && state.settings.rem1_h < state.settings.cancel_cutoff_h + 1; } return ok({ settings: state.settings }); }
+    case 'admin/settings/save': { if (!owner) return err(403, 'forbidden'); if ('privacy_reviewed' in d) privacyMock.on = d.privacy_reviewed === true; if ('google_review_url' in d && d.google_review_url !== '' && !/^https:\/\/\S{4,}$/.test(String(d.google_review_url))) return err(400, 'bad_request'); Object.assign(state.settings, d); if ('automation_enabled' in d) state.settings.automation_on = d.automation_enabled === true; if ('rem1_h' in d) { state.settings.rem1_auto = d.rem1_h === 0; state.settings.rem1_h = d.rem1_h === 0 ? state.settings.cancel_cutoff_h + 2 : d.rem1_h; state.settings.rem1_warn = !state.settings.rem1_auto && state.settings.rem1_h < state.settings.cancel_cutoff_h + 1; } return ok({ settings: state.settings }); }
     default: return err(404, 'not_found');
   }
 }

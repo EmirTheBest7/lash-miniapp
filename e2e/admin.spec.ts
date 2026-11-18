@@ -366,3 +366,26 @@ test('preview messages: from the service editor (that service) and from Settings
   await page.getByRole('button', { name: 'Send preview to my chat' }).click();
   await toast(page, 'Preview sent to your chat');
 });
+
+test('launch checklist at the top of Settings: progress, privacy and automation switches, an open item jumps to its place, the studio sheet fills the studio items; a master sees it read-only', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await expect(page.getByText(/Launch checklist · 2 of 11/)).toBeVisible();
+  await shot(page, 'admin-launch-checklist');
+  await page.getByRole('switch', { name: /Privacy notice reviewed/ }).click();
+  await expect(page.getByText(/Launch checklist · 3 of 11/)).toBeVisible();
+  await page.getByRole('button', { name: /Studio name set/ }).click();
+  await page.getByLabel('Studio name').fill('Viktoriia Lashes');
+  await page.getByLabel('Address', { exact: true }).fill('Vinohradská 1, Praha');
+  await page.getByLabel('Telegram username (without @)').fill('viktoriia_lash');
+  await page.getByLabel('Cancellation policy · CS').fill('Storno 24 h předem.');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await toast(page, 'Saved');
+  await expect(page.getByText(/Launch checklist · 7 of 11/)).toBeVisible();
+  await page.getByRole('button', { name: /Aftercare text and fill days/ }).click();
+  await expect(page.getByRole('heading', { name: 'Services' })).toBeVisible();                 // jumped to the Services tab
+  await page.goto(`${BASE}?mock=1&role=master&staff=2`);
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await expect(page.getByText(/Launch checklist/)).toBeVisible();
+  await expect(page.getByRole('switch', { name: /Privacy notice reviewed/ })).toHaveCount(0);
+});

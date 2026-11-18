@@ -42,7 +42,7 @@ export function AdminApp({ onClientView, initial }: { onClientView: () => void; 
       {tab === 'staff' && <StaffTab boot={boot} toast={toast} reloadBoot={load} />}
       {tab === 'svc' && <ServicesTab boot={boot} toast={toast} reloadBoot={load} />}
       {tab === 'vch' && <VouchersTab boot={boot} toast={toast} />}
-      {tab === 'set' && <SettingsTab boot={boot} toast={toast} reloadBoot={load} onClientView={onClientView} />}
+      {tab === 'set' && <SettingsTab boot={boot} toast={toast} reloadBoot={load} onClientView={onClientView} goTab={setTab} />}
       <Toast text={toastText} />
     </>
   );

@@ -3,10 +3,11 @@ import { api, newOpId } from '../api';
 import { t } from '../i18n';
 import { haptic } from '../tg';
 import { Button, Cell, Section, Segmented, Switch } from '../ui/components';
+import { LaunchBox, type Tab } from './LaunchBox';
 import { PreviewBox } from './PreviewBox';
 import type { AdminBoot, AdminSettings, BroadcastInfo } from './types';
 
-export function SettingsTab({ boot, toast, reloadBoot, onClientView }: { boot: AdminBoot; toast: (s: string) => void; reloadBoot: () => Promise<void>; onClientView: () => void }) {
+export function SettingsTab({ boot, toast, reloadBoot, onClientView, goTab }: { boot: AdminBoot; toast: (s: string) => void; reloadBoot: () => Promise<void>; onClientView: () => void; goTab: (t: Tab) => void }) {
   const [s, setS] = useState<AdminSettings>(boot.settings);
   async function save(patch: Partial<AdminSettings>) {
     const next = { ...s, ...patch };
@@ -45,6 +46,7 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView }: { boot: A
   return (
     <div class="page">
       <h1 class="large">{t('adm.tab_settings')}</h1>
+      <LaunchBox boot={boot} toast={toast} goTab={goTab} reloadBoot={reloadBoot} />
       {boot.can_manage && (
         <>
           <Section title={t('adm.step')} footer={t('adm.step_note')}>
