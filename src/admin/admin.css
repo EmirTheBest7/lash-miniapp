@@ -1,5 +1,5 @@
 /* Admin app (calendar etc.). Same tokens as the client app: only themeParams colours, no brand colours. */
-.adm-tabs { position: sticky; top: 0; z-index: 20; background: var(--tg-secondary-bg); padding-top: 4px; }
+.adm-tabs { position: sticky; top: var(--safe-top, 0px); z-index: 20; background: var(--tg-secondary-bg); padding-top: 4px; }
 .adm-tabs .segmented { margin: 4px 16px 8px; }
 .cal-bar { display: flex; align-items: center; gap: 8px; margin: 4px 16px; }
 .cal-bar .grow { flex: 1; text-align: center; font-weight: 600; }
@@ -56,3 +56,26 @@ button.cal-h:active { background: color-mix(in srgb, var(--tg-hint) 14%, transpa
 .guide ul, .guide ol { padding-left: 20px; }
 .guide li { margin: 3px 0; }
 .guide code { font: 600 14px ui-monospace, Menlo, monospace; background: var(--tg-secondary-bg); border-radius: 4px; padding: 0 4px; }
+
+/* Settings home: progress card, category rows, language tabs */
+.pcard { margin: 8px 16px 16px; padding: 14px 16px; border-radius: 12px; background: var(--tg-section-bg); }
+.pcard .p-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.pcard .p-title { font-weight: 600; font-size: 17px; }
+.pcard .p-count { color: var(--tg-subtitle); font-variant-numeric: tabular-nums; }
+.pbar { height: 4px; border-radius: 2px; margin: 10px 0; background: color-mix(in srgb, var(--tg-hint) 25%, transparent); overflow: hidden; }
+.pbar > i { display: block; height: 100%; background: var(--tg-button); border-radius: 2px; }
+.pcard .p-next { color: var(--tg-subtitle); font-size: 14px; margin-bottom: 10px; }
+.pcard .p-hint { color: var(--tg-hint); font-size: 13px; margin-top: 8px; }
+.attn { width: 8px; height: 8px; border-radius: 50%; background: var(--tg-destructive); display: inline-block; }
+.back-row { margin: 4px 8px 0; }
+.back-row button { display: inline-flex; align-items: center; gap: 2px; padding: 8px; color: var(--tg-link); font-size: 16px; }
+.back-row .icon { width: 18px; height: 18px; }
+.ltabs { display: flex; gap: 6px; padding: 0 16px 6px; }
+.ltab { flex: 1; min-width: 0; padding: 6px 4px; border-radius: 10px; font-size: 13px; font-weight: 600; text-align: center; background: color-mix(in srgb, var(--tg-hint) 12%, transparent); color: var(--tg-text); }
+.ltab[aria-selected="true"] { background: var(--tg-button); color: var(--tg-button-text); }
+.ltab.empty { color: var(--tg-hint); border: 1px dashed var(--tg-hint); background: transparent; }
+.ltab.empty[aria-selected="true"] { background: color-mix(in srgb, var(--tg-hint) 18%, transparent); color: var(--tg-text); }
+.lt-note { padding: 0 16px 6px; font-size: 13px; color: var(--tg-hint); }
+.lt-actions { padding: 0 16px 8px; display: flex; gap: 8px; }
+.viewas { position: sticky; top: calc(var(--safe-top, 0px) + 44px); z-index: 19; margin: 0 16px 6px; padding: 8px 12px; border-radius: 10px; background: color-mix(in srgb, var(--tg-accent) 18%, var(--tg-section-bg)); display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.field-err { padding: 0 16px 6px; font-size: 13px; color: var(--tg-destructive); }

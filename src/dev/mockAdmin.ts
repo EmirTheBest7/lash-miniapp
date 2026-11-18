@@ -7,7 +7,7 @@ const NOW = toUtc('2026-11-16', 12 * 60, TZ);
 const week = (): Record<string, [string, string][]> => ({ '1': [['10:00', '18:00']], '2': [['10:00', '18:00']], '3': [['10:00', '18:00']], '4': [['10:00', '18:00']], '5': [['10:00', '18:00']], '6': [['10:00', '14:00']] });
 type Ev = { ok: true; data: unknown } | { ok: false; status: number; error: { code: string } };
 
-export interface AdminMockEnv { two: boolean; role: string }
+export interface AdminMockEnv { two: boolean; role: string; noTranslate?: boolean }
 const state = {
   staff: [] as StaffRow[], services: [] as SvcRow[], categories: [] as { id: number; name: string }[], appts: [] as AdmAppt[], blocks: [] as { id: number; staff_id: number; start: number; end: number; reason: string }[],
   overrides: [] as { staff_id: number; date: string; closed: boolean; intervals: [string, string][]; note: string }[],
@@ -49,7 +49,7 @@ const busy = (staff: number, a: number, b: number, skip = 0) => state.appts.some
 const MOCK_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 let vsettings: VoucherSettings = { months: 12, partial: true, min: 100, terms: { cs: '', en: '', ru: '', uk: '' } };
 const privacyMock = { on: false };
-const studioMock: StudioInfo = { studio_name: 'Lash Studio', address: '', area_text: '', address_mode: 'after_approval', address_new_clients_manual: true, address_release_timing: 'day_before', lat: 50.0755, lon: 14.4378, contact_name: 'Lash Master', contact_username: '', instagram: '', portfolio_url: '', cancel_policy_cs: '', cancel_policy_en: '', cancel_policy_ru: '', cancel_policy_uk: '' };
+const studioMock: StudioInfo = { studio_name: 'Lash Studio', address: '', area_text_cs: '', area_text_ru: '', area_text_uk: '', area_text_en: '', address_mode: 'after_approval', address_new_clients_manual: true, address_release_timing: 'day_before', lat: 50.0755, lon: 14.4378, contact_name: 'Lash Master', contact_username: '', instagram: '', portfolio_url: '', cancel_policy_cs: '', cancel_policy_en: '', cancel_policy_ru: '', cancel_policy_uk: '' };
 const sentCards: number[] = [];
 const sentPreviews: string[] = [];
 const vouchers: VoucherRow[] = [];
@@ -60,13 +60,14 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
   init(env);
   const ok = (data: unknown): Ev => ({ ok: true, data });
   const err = (status: number, code: string): Ev => ({ ok: false, status, error: { code } });
-  const owner = env.role === 'owner';
+  const realOwner = env.role === 'owner';
+  const owner = realOwner || env.role === 'admin';            // administrator: every business setting, not the System area
   const scope = owner ? state.staff : state.staff.filter((s) => s.mine);
   const can = (id: number) => scope.some((s) => s.id === id);
   const boot = (): AdminBoot => ({
-    me: { id: 1, name: 'Anna Nováková', role: owner ? 'owner' : 'master', lang: 'en' }, config: { tz: TZ, studio_name: 'Lash Studio', server_time: NOW, today: '2026-11-16' },
+    me: { id: 1, name: 'Anna Nováková', role: realOwner ? 'owner' : owner ? 'admin' : 'master', lang: 'en' }, config: { tz: TZ, studio_name: 'Lash Studio', server_time: NOW, today: '2026-11-16' },
     staff: scope.map((s) => ({ ...s, future: state.appts.filter((a) => a.staff_id === s.id && ['pending', 'confirmed'].includes(a.status)).length })),
-    services: state.services, categories: state.categories, loyalty_pending: state.loyaltyPending, settings: state.settings, can_manage: owner, vouchers_on: owner,
+    services: state.services, categories: state.categories, loyalty_pending: state.loyaltyPending, settings: state.settings, can_manage: owner, is_owner: realOwner, vouchers_on: owner,
   });
   const apptOf = (id: number) => state.appts.find((a) => a.id === id);
 
@@ -79,11 +80,38 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
         done(privacyMock.on, 'privacy', true, 'privacy'), done(false, 'secrets', true, 'server'), done(state.settings.automation_on, 'automation', true, 'automation'), done(state.settings.google_review_url !== '', 'review', false, 'set'),
         done(false, 'ai', false, 'chat'), done(false, 'staff', true, 'staff')];
       const req = items.filter((i) => i.required);
-      return ok({ items, progress: { done: req.filter((i) => i.ok).length, total: req.length }, studio: studioMock, can_manage: owner });
+      const mine = realOwner ? items : items.filter((i) => !['secrets', 'automation', 'ai'].includes(i.id));
+      const mreq = mine.filter((i) => i.required);
+      if (!owner) return ok({ items: [], progress: { done: 0, total: 0 }, studio: null, can_manage: false });
+      return ok({ items: mine, progress: { done: mreq.filter((i) => i.ok).length, total: mreq.length }, studio: { ...studioMock, lat: studioMock.lat, lon: studioMock.lon }, can_manage: true });
+    }
+    case 'admin/settings/home': {
+      if (!owner) return err(403, 'forbidden');
+      const l = (adminMock('admin/launch', {}, env) as { data: { items: { id: string; ok: boolean; required: boolean }[]; progress: { done: number; total: number } } }).data;
+      const open = l.items.filter((i) => i.required && !i.ok);
+      const order = ['studio', 'contact', 'address', 'service', 'aftercare', 'hours', 'policy', 'privacy', 'staff', 'secrets', 'automation'];
+      open.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+      const screens: Record<string, string> = { studio: 'name', contact: 'contacts', address: 'place', service: 'services', aftercare: 'services', hours: 'schedule', policy: 'policy', privacy: 'privacy', staff: 'team', secrets: 'system', automation: 'system' };
+      const bad = open.map((i) => i.id);
+      return ok({
+        progress: l.progress, items: l.items, next: open[0] ? { id: open[0].id, screen: screens[open[0].id] } : null,
+        studio: { name: studioMock.studio_name, area: studioMock.area_text_cs, address_set: studioMock.address !== '', mode: studioMock.address_mode }, days_off: 2, vouchers: { n: vouchers.length, sum: vouchers.reduce((a, v) => a + v.balance, 0) },
+        translate: !env.noTranslate, lang_hint: [studioMock.area_text_cs, studioMock.area_text_ru, studioMock.area_text_uk, studioMock.area_text_en].filter((x) => x !== '').length === 1,
+        attention: { studio: bad.some((x) => ['studio', 'contact', 'address'].includes(x)), services: bad.some((x) => ['service', 'aftercare'].includes(x)), schedule: bad.includes('hours'), rules: bad.some((x) => ['policy', 'privacy'].includes(x)), marketing: false, team: bad.includes('staff'), ...(realOwner ? { system: bad.some((x) => ['secrets', 'automation'].includes(x)) } : {}) },
+        ...(realOwner ? { system: { automation: state.settings.automation_on, backup_h: 3, keys: false } } : {}),
+      });
+    }
+    case 'admin/translate': {
+      if (!owner) return err(403, 'forbidden');
+      if (env.noTranslate) return err(503, 'unavailable');
+      const drafts: Record<string, string> = {};
+      for (const l of d.to as string[]) drafts[l] = `[${l}] ${d.text}`;
+      return ok({ drafts });
     }
     case 'admin/studio/save': {
       if (!owner) return err(403, 'forbidden');
       if ('studio_name' in d && !String(d.studio_name).trim()) return err(400, 'bad_request');
+      if (JSON.stringify(d).includes('Testovac')) return { ok: false, status: 400, error: { code: 'address_in_text', message: 'area_text_cs' } } as unknown as Ev;
       Object.assign(studioMock, d);
       return adminMock('admin/launch', {}, env);
     }

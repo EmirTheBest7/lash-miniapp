@@ -11,17 +11,28 @@ export function installMockTelegram(): void {
   const dark = q.get('theme') === 'dark';
   const platform = q.get('platform') ?? 'ios';
   const noop = () => {};
+  // fullscreen / safe-area simulation (e2e): ?safe=top,bottom  ?csafe=top,bottom  ?fsfail=1 (Telegram refuses fullscreen)  ?v=7.6 (old client)
+  const pair = (k: string): { top: number; bottom: number; left: number; right: number } => { const [a = 0, b = 0] = (q.get(k) ?? '').split(',').map(Number); return { top: a || 0, bottom: b || 0, left: 0, right: 0 }; };
+  const calls = { requestFullscreen: 0, expand: 0, disableVerticalSwipes: 0 };
+  const handlers: Record<string, (() => void)[]> = {};
+  const w = window as unknown as { __tg?: typeof calls; __tgFire?: (e: string, patch?: Record<string, unknown>) => void };
+  w.__tg = calls;
   const btn = { text: '', isVisible: false, isActive: true, isProgressVisible: false, setText() { return btn; }, onClick() { return btn; }, offClick() { return btn; }, show() { return btn; }, hide() { return btn; }, enable() { return btn; }, disable() { return btn; }, showProgress() { return btn; }, hideProgress() { return btn; } };
   const app = {
     initData: 'mock', initDataUnsafe: { user: { id: 1, first_name: 'Anna', language_code: q.get('lang') ?? 'en' } }, version: '8.0', platform, colorScheme: dark ? 'dark' : 'light',
-    themeParams: dark ? DARK : LIGHT, isExpanded: true, viewportStableHeight: 800, ready: noop, expand: noop, close: noop, isVersionAtLeast: () => true,
-    setHeaderColor: noop, setBackgroundColor: noop, onEvent: noop, offEvent: noop,
+    themeParams: dark ? DARK : LIGHT, isExpanded: true, viewportStableHeight: 800, ready: noop, expand: () => { calls.expand++; }, close: noop, isVersionAtLeast: (v: string) => parseFloat(q.get('v') ?? '8.0') >= parseFloat(v),
+    safeAreaInset: pair('safe'), contentSafeAreaInset: pair('csafe'), isFullscreen: false,
+    requestFullscreen: () => { calls.requestFullscreen++; if (q.has('fsfail')) setTimeout(() => (handlers.fullscreenFailed ?? []).forEach((h) => h()), 0); else { (app as unknown as { isFullscreen: boolean }).isFullscreen = true; setTimeout(() => (handlers.fullscreenChanged ?? []).forEach((h) => h()), 0); } },
+    disableVerticalSwipes: () => { calls.disableVerticalSwipes++; },
+    setHeaderColor: noop, setBackgroundColor: noop,
+    onEvent: (e: string, cb: () => void) => { (handlers[e] ??= []).push(cb); }, offEvent: (e: string, cb: () => void) => { handlers[e] = (handlers[e] ?? []).filter((h) => h !== cb); },
     BackButton: { isVisible: false, show: noop, hide: noop, onClick: noop, offClick: noop }, MainButton: q.has('nativeMain') ? btn : undefined,
     HapticFeedback: { impactOccurred: noop, notificationOccurred: noop, selectionChanged: noop },
     showConfirm: (_m: string, cb: (ok: boolean) => void) => cb(true),
     requestContact: (cb?: (s: boolean) => void) => { st.phone = true; cb?.(true); },
     openTelegramLink: (u: string) => { (window as unknown as { __opened?: string[] }).__opened = [...((window as unknown as { __opened?: string[] }).__opened ?? []), u]; },
   } as unknown as WebApp;
+  w.__tgFire = (e, patch) => { Object.assign(app as unknown as Record<string, unknown>, patch ?? {}); (handlers[e] ?? []).forEach((h) => h()); };
   window.Telegram = { WebApp: app };
 }
 
@@ -65,7 +76,7 @@ export function installMockApi(): void {
 
   window.__MOCK_API__ = async (route, raw) => {
     ((window as unknown as { __mockCalls?: { route: string; data: unknown }[] }).__mockCalls ??= []).push({ route, data: raw });   // e2e asserts on what the app sends
-    const adm = adminMock(route, raw as Record<string, never>, { two, role: q.get('role') ?? 'client' });
+    const adm = adminMock(route, raw as Record<string, never>, { two, role: q.get('role') ?? 'client', noTranslate: q.has('notranslate') });
     if (adm) return adm;
     const d = raw as Record<string, never> & { service: number; addons?: number[]; date: string; from?: string; start: number; id: number; revision: number; lang: string };
     const ok = (data: unknown) => ({ ok: true as const, data });
@@ -73,7 +84,7 @@ export function installMockApi(): void {
     switch (route) {
       case 'bootstrap':
         if ((d as unknown as { auto?: boolean }).auto && (q.get('role') ?? 'client') !== 'client') {
-          const a = adminMock('admin/bootstrap', {}, { two, role: q.get('role') ?? 'client' });
+          const a = adminMock('admin/bootstrap', {}, { two, role: q.get('role') ?? 'client', noTranslate: q.has('notranslate') });
           return { ok: true as const, data: { me: { id: 1, role: q.get('role'), lang: 'en' }, admin: (a as { data: unknown }).data } };
         }
         return ok({

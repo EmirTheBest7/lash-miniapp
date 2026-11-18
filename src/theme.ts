@@ -44,9 +44,13 @@ export function applyTheme(): void {
   root.dataset.scheme = scheme;
   root.classList.remove('plat-ios', 'plat-android', 'plat-desktop');
   root.classList.add('plat-' + platform());
-  const si = w?.contentSafeAreaInset ?? w?.safeAreaInset;
-  root.style.setProperty('--safe-top', (si?.top ?? 0) + 'px');
-  root.style.setProperty('--safe-bottom', (si?.bottom ?? 0) + 'px');
+  // device insets (notch, home bar) + Telegram's own controls over the app (fullscreen header, bottom bar): both, summed
+  const a = w?.safeAreaInset, b = w?.contentSafeAreaInset;
+  const sum = (k: 'top' | 'bottom' | 'left' | 'right') => ((a?.[k] ?? 0) + (b?.[k] ?? 0)) + 'px';
+  root.style.setProperty('--safe-top', sum('top'));
+  root.style.setProperty('--safe-bottom', sum('bottom'));
+  root.style.setProperty('--safe-left', sum('left'));
+  root.style.setProperty('--safe-right', sum('right'));
   // Blend into Telegram's own chrome (each call is a no-op on clients that do not know it).
   try { w?.setHeaderColor('secondary_bg_color'); w?.setBackgroundColor('secondary_bg_color'); w?.setBottomBarColor?.(vars['--tg-bottom-bar'] as string); } catch { /* old client */ }
 }
@@ -54,7 +58,7 @@ export function applyTheme(): void {
 export function watchTheme(): () => void {
   const w = webApp();
   if (!w) return () => {};
-  const evs = ['themeChanged', 'safeAreaChanged', 'contentSafeAreaChanged'];
+  const evs = ['themeChanged', 'safeAreaChanged', 'contentSafeAreaChanged', 'fullscreenChanged', 'viewportChanged'];
   evs.forEach((e) => w.onEvent(e, applyTheme));
   return () => evs.forEach((e) => w.offEvent(e, applyTheme));
 }

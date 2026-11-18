@@ -22,6 +22,7 @@ test('ONE bootstrap call opens the staff app: no second admin bootstrap, the adm
   expect(first.filter((r) => r === 'bootstrap')).toHaveLength(1);
   expect(first).not.toContain('admin/bootstrap');
   await page.getByRole('tab', { name: 'Settings' }).click();
+  await page.getByRole('button', { name: /^Help/ }).click();
   await page.getByRole('button', { name: 'Client view' }).click();
   await expect(page.getByRole('button', { name: /Book|Lash/ }).first()).toBeVisible();
   const mid = await calls(page);

@@ -18,6 +18,7 @@ export interface WebApp {
   isExpanded: boolean; viewportStableHeight: number;
   safeAreaInset?: { top: number; bottom: number; left: number; right: number };
   contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
+  isFullscreen?: boolean; requestFullscreen?(): void; exitFullscreen?(): void;
   ready(): void; expand(): void; close(): void;
   isVersionAtLeast(v: string): boolean;
   setHeaderColor(c: string): void; setBackgroundColor(c: string): void; setBottomBarColor?(c: string): void;
@@ -93,9 +94,21 @@ export function requestPhone(): Promise<boolean> {
   return new Promise((res) => w.requestContact!((shared) => res(!!shared)));
 }
 
+/**
+ * Start-up. On a phone (iOS / Android) with Bot API >= 8.0 the app asks for FULLSCREEN; if Telegram refuses (`fullscreenFailed`) or the client is older / a desktop
+ * or web client, it simply expands. Vertical swipes are disabled where supported so dragging inside the calendar never closes the app.
+ * Content must then stay clear of the device (safeAreaInset) AND Telegram's own controls (contentSafeAreaInset): see theme.ts (--safe-*).
+ */
 export function readyAndExpand(): void {
   const w = webApp();
   if (!w) return;
-  w.ready(); w.expand();
+  w.ready();
+  const expand = () => { try { w.expand(); } catch { /* old client */ } };
+  if (platform() !== 'desktop' && atLeast('8.0') && typeof w.requestFullscreen === 'function') {
+    w.onEvent('fullscreenFailed', expand);
+    try { w.requestFullscreen(); } catch { expand(); }
+  } else {
+    expand();
+  }
   if (atLeast('7.7')) w.disableVerticalSwipes?.();      // keeps drag gestures inside the calendar from closing the app
 }

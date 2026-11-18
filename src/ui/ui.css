@@ -8,7 +8,7 @@ body {
 }
 .plat-android body { font-size: 16px; }
 .plat-desktop body { font-size: 15px; }
-#app { min-height: 100vh; padding-top: var(--safe-top, 0); padding-bottom: calc(var(--safe-bottom, 0px) + 24px); }
+#app { min-height: 100vh; padding: var(--safe-top, 0px) var(--safe-right, 0px) calc(var(--safe-bottom, 0px) + 24px) var(--safe-left, 0px); }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 h1.large { font-size: 28px; font-weight: 700; margin: 16px 16px 8px; letter-spacing: -.3px; }
 .plat-android h1.large { font-size: 22px; font-weight: 600; letter-spacing: 0; }
@@ -34,7 +34,7 @@ button.cell:active { background: color-mix(in srgb, var(--tg-hint) 14%, transpar
 @media (hover: hover) { button.cell:hover { background: color-mix(in srgb, var(--tg-hint) 8%, transparent); } }
 .cell .c-icon { width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; background: var(--tg-button); color: var(--tg-button-text); flex: none; }
 .cell .c-main { flex: 1; min-width: 0; }
-.cell .c-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cell .c-title { overflow-wrap: anywhere; }                       /* a title wraps (a switch row never clips); the one-line summary below it truncates */
 .cell .c-sub { font-size: 13px; color: var(--tg-subtitle); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cell .c-after { color: var(--tg-hint); flex: none; display: flex; align-items: center; gap: 4px; }
 .cell.destructive .c-title { color: var(--tg-destructive); }
@@ -67,7 +67,7 @@ button.cell:active { background: color-mix(in srgb, var(--tg-hint) 14%, transpar
 /* Bottom sheet */
 .sheet-back { position: fixed; inset: 0; background: rgba(0,0,0,.4); opacity: 0; transition: opacity .2s; z-index: 50; pointer-events: none; }
 .sheet-back.open { opacity: 1; pointer-events: auto; }
-.sheet { position: fixed; left: 0; right: 0; bottom: 0; max-height: 88vh; overflow: auto; background: var(--tg-section-bg); border-radius: 16px 16px 0 0; z-index: 51; transform: translateY(105%); transition: transform .25s cubic-bezier(.2,.8,.2,1); padding: 8px 0 calc(var(--safe-bottom, 0px) + 16px); }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; padding-bottom: var(--safe-bottom, 0px); max-height: calc(100vh - var(--safe-top, 0px) - 12px); overflow: auto; background: var(--tg-section-bg); border-radius: 16px 16px 0 0; z-index: 51; transform: translateY(105%); transition: transform .25s cubic-bezier(.2,.8,.2,1); padding: 8px 0 calc(var(--safe-bottom, 0px) + 16px); }
 .sheet.open { transform: none; }
 .sheet { visibility: hidden; transition: transform .25s cubic-bezier(.2,.8,.2,1), visibility 0s .25s; }   /* a closed (short) sheet must not peek above the screen edge */
 .sheet.open { visibility: visible; transition-delay: 0s; }
@@ -93,3 +93,6 @@ button.cell:active { background: color-mix(in srgb, var(--tg-hint) 14%, transpar
 .note + .note { border-top: 1px solid var(--tg-separator); }
 .big-check { width: 72px; height: 72px; border-radius: 50%; background: var(--tg-button); color: var(--tg-button-text); display: grid; place-items: center; margin: 32px auto 8px; font-size: 36px; }
 .center { text-align: center; padding: 0 24px; }
+
+/* fullscreen: scrolled content must not show through Telegram's own controls above the safe top */
+body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: var(--safe-top, 0px); background: var(--tg-secondary-bg); z-index: 30; pointer-events: none; }

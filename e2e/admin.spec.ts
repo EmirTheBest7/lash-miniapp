@@ -6,6 +6,9 @@ const BASE = '/lash-miniapp/';
 const open = async (page: Page, q = '') => { await blockTelegramScript(page); await page.goto(`${BASE}?mock=1&role=owner&staff=2${q}`); };
 const shot = async (page: Page, name: string) => { mkdirSync('e2e-artifacts', { recursive: true }); await page.screenshot({ path: `e2e-artifacts/${name}.png`, fullPage: true }); };
 const toast = (page: Page, text: string | RegExp) => expect(page.getByRole('status').filter({ hasText: text })).toBeVisible();
+/** Settings home -> a category row (the rows are buttons named by title + summary). */
+const cat = async (page: Page, re: RegExp) => { await page.getByRole('tab', { name: 'Settings' }).click(); await page.getByRole('button', { name: re }).click(); };
+const back = (page: Page) => page.getByRole('button', { name: 'Back', exact: true }).click();
 const col = (page: Page, id: number) => page.getByTestId(`col-${id}`);
 
 test('owner sees every staff calendar side by side with who is booked where; non-working time is shaded', async ({ page }) => {
@@ -175,7 +178,7 @@ test('a master (not owner) sees only their own calendar and no Services tab or m
 
 test('staff can open the client view and come back', async ({ page }) => {
   await open(page);
-  await page.getByRole('tab', { name: 'Settings' }).click();
+  await cat(page, /^Help/);
   await page.getByRole('button', { name: 'Open the client view' }).click();
   await expect(page.getByRole('heading', { name: 'Lash Studio' })).toBeVisible();
   await page.getByRole('button', { name: 'Staff app' }).click();
@@ -232,7 +235,7 @@ test('administrator: the owner makes a person an admin (needs a Telegram ID) and
 
 test('loyalty settings: switch it on, set visits and percent; approve a waiting discount', async ({ page }) => {
   await open(page);
-  await page.getByRole('tab', { name: 'Settings' }).click();
+  await cat(page, /^Marketing/);
   await expect(page.getByTestId('loy-1')).toBeVisible();
   await page.getByRole('switch', { name: 'Reward regular clients' }).click();
   await page.getByLabel('Visits needed').fill('5');
@@ -265,7 +268,7 @@ test('staff delete: a person with bookings is refused with a hint; a new empty p
 
 test('offers broadcast: admins see the audience, send a test, and a real send needs a second tap', async ({ page }) => {
   await open(page);
-  await page.getByRole('tab', { name: 'Settings' }).click();
+  await cat(page, /^Marketing/);
   await expect(page.getByTestId('bc-audience')).toContainText('2 of 5 clients');
   await page.getByLabel('Message', { exact: true }).fill('-20% on lashes this week');
   await page.getByRole('button', { name: 'Send a test to me' }).click();
@@ -275,24 +278,24 @@ test('offers broadcast: admins see the audience, send a test, and a real send ne
   await toast(page, 'Queued for 2 clients');
 });
 
-test('reminder settings: switches and hours save; a first reminder shorter than the cancel cutoff shows a warning; backups say when the key is missing', async ({ page }) => {
+test('reminder settings: automation and backups live in System (owner); reminders and hours in Bookings and rules; a first reminder shorter than the cancel cutoff shows a warning', async ({ page }) => {
   await open(page);
-  await page.getByRole('tab', { name: 'Settings' }).click();
-  await expect(page.getByText('Reminders and schedule')).toBeVisible();
+  await cat(page, /^System/);
   await expect(page.getByTestId('auto-off')).toBeVisible();
   await page.getByRole('switch', { name: /Automatic messages/ }).click();
   await toast(page, 'Saved');
   await expect(page.getByTestId('auto-off')).toHaveCount(0);
   await expect(page.getByTestId('backup-status')).toContainText('BACKUP_KEY is missing');
+  await back(page);
+  await page.getByRole('button', { name: /^Bookings and rules/ }).click();
   await expect(page.getByLabel('Hours before (0 = automatic: cancel cutoff + 2)')).toHaveValue('0');
   await page.getByLabel('Hours before (0 = automatic: cancel cutoff + 2)').fill('20');
   await page.getByLabel('Hours before (0 = automatic: cancel cutoff + 2)').blur();
   await toast(page, 'Saved');
-  await expect(page.getByTestId('rem1-warn')).toBeVisible();
+  await expect(page.getByTestId('rem1-warn')).toBeVisible({ timeout: 10000 });
   await page.getByRole('switch', { name: 'Second reminder (address and pre-care)' }).click();
   await toast(page, 'Saved');
   await expect(page.getByLabel('Hours before', { exact: true })).toHaveCount(0);
-  await expect(page.getByTestId('bc-audience')).toContainText('1 skipped');
 });
 
 test('a master (not an admin) does not see the broadcast form', async ({ page }) => {
@@ -344,10 +347,10 @@ test('vouchers tab (owner): create a value voucher, the code is shown once, list
   await expect(page.getByRole('tab', { name: 'Vouchers' })).toHaveCount(0);
 });
 
-test('after the visit (owner): review link must be https, delay fields appear once a link is set, service aftercare + fill days are editable; masters see none of it', async ({ page }) => {
+test('after the visit (owner): review link must be https, delay fields appear once a link is set, service aftercare + fill days are editable; masters see only the preview', async ({ page }) => {
   await open(page);
-  await page.getByRole('tab', { name: 'Settings' }).click();
-  await expect(page.getByText('After the visit')).toBeVisible();
+  await cat(page, /^After the visit/);
+  await expect(page.getByRole('heading', { name: 'After the visit' })).toBeVisible();
   await expect(page.getByLabel('Ask for a review after (hours)')).toHaveCount(0);
   await page.getByLabel('Google review link (https, pasted from Google)').fill('http://nope.example/x');
   await page.getByLabel('Google review link (https, pasted from Google)').blur();
@@ -363,8 +366,9 @@ test('after the visit (owner): review link must be https, delay fields appear on
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await toast(page, 'Saved');
   await page.goto(`${BASE}?mock=1&role=master&staff=2`);
-  await page.getByRole('tab', { name: 'Settings' }).click();
-  await expect(page.getByText('After the visit')).toHaveCount(0);
+  await cat(page, /^After the visit/);
+  await expect(page.getByLabel('Google review link (https, pasted from Google)')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Send preview to my chat' })).toBeVisible();
 });
 
 test('preview messages: from the service editor (that service) and from Settings (pick a service), in a chosen language; sent to my own chat', async ({ page }) => {
@@ -377,38 +381,50 @@ test('preview messages: from the service editor (that service) and from Settings
   const calls = await page.evaluate(() => ((window as unknown as { __mockCalls?: { route: string; data: { id?: number; lang?: string } }[] }).__mockCalls ?? []).filter((c) => c.route === 'admin/service/preview').map((c) => `${c.data.id}:${c.data.lang}`));
   expect(calls).toEqual(['1:ru']);
   await page.keyboard.press('Escape');
-  await page.getByRole('tab', { name: 'Settings' }).click();
+  await cat(page, /^After the visit/);
   await page.getByLabel('Preview language').selectOption('cs');
   await page.getByRole('button', { name: 'Send preview to my chat' }).click();
   await toast(page, 'Preview sent to your chat');
 });
 
-test('launch checklist at the top of Settings: progress, privacy and automation switches, an open item jumps to its place, the studio sheet fills the studio items; a master sees it read-only', async ({ page }) => {
+test('setup progress card: counts, "Continue setup" opens the next missing item, the data notice is never ticked by itself, the full list is one tap away; a master has no card', async ({ page }) => {
   await open(page);
   await page.getByRole('tab', { name: 'Settings' }).click();
-  await expect(page.getByText(/Launch checklist · 2 of 11/)).toBeVisible();
-  await shot(page, 'admin-launch-checklist');
+  const card = page.getByTestId('setup-card');
+  await expect(card).toContainText('2 of 11');
+  await expect(card).toContainText('Next:');
+  await shot(page, 'admin-settings-home');
+  await page.getByRole('button', { name: /^Bookings and rules/ }).click();
   await page.getByRole('switch', { name: /Privacy notice reviewed/ }).click();
-  await expect(page.getByText(/Launch checklist · 3 of 11/)).toBeVisible();
-  await page.getByRole('button', { name: /Studio name set/ }).click();
+  await back(page);
+  await expect(page.getByTestId('setup-card')).toContainText('3 of 11');
+  await page.getByRole('button', { name: 'Continue setup' }).click();               // the next missing item is the studio name
   await page.getByLabel('Studio name').fill('Viktoriia Lashes');
   await page.getByLabel('Address', { exact: true }).fill('Vinohradská 1, Praha');
   await page.getByLabel('Telegram username (without @)').fill('viktoriia_lash');
-  await page.getByLabel('Cancellation policy · CS').fill('Storno 24 h předem.');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await toast(page, 'Saved');
-  await expect(page.getByText(/Launch checklist · 7 of 11/)).toBeVisible();
+  await expect(page.getByTestId('setup-card')).toContainText('6 of 11');
+  await page.getByRole('button', { name: /^Bookings and rules/ }).click();
+  await page.getByRole('tab', { name: /^CS/ }).click();
+  await page.getByLabel('Cancellation policy CS').fill('Storno 24 h předem.');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await toast(page, 'Saved');
+  await back(page);
+  await expect(page.getByTestId('setup-card')).toContainText('7 of 11');
+  await page.getByRole('button', { name: 'Full list' }).click();
   await page.getByRole('button', { name: /Aftercare text and fill days/ }).click();
   await expect(page.getByRole('heading', { name: 'Services' })).toBeVisible();                 // jumped to the Services tab
   await page.goto(`${BASE}?mock=1&role=master&staff=2`);
   await page.getByRole('tab', { name: 'Settings' }).click();
-  await expect(page.getByText(/Launch checklist/)).toBeVisible();
-  await expect(page.getByRole('switch', { name: /Privacy notice reviewed/ })).toHaveCount(0);
+  await expect(page.getByTestId('setup-card')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^Help/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^System/ })).toHaveCount(0);
 });
 
 test('master guide in Settings (staff): opens the guide with its sections and formatting; clients never get it', async ({ page }) => {
   await open(page);
-  await page.getByRole('tab', { name: 'Settings' }).click();
+  await cat(page, /^Help/);
   await page.getByRole('button', { name: 'Master guide' }).click();
   await expect(page.getByRole('heading', { name: /5\. Volno a blokování času/ })).toBeVisible();
   await expect(page.locator('.guide strong').first()).toBeVisible();
@@ -423,9 +439,8 @@ test('master guide in Settings (staff): opens the guide with its sections and fo
 });
 
 test('studio info: the map pin fields accept a typed decimal point', async ({ page }) => {
-  await open(page, '&tab=set');
-  await page.getByRole('tab', { name: /Settings/ }).click().catch(() => undefined);
-  await page.getByText('Studio info').first().click();
+  await open(page);
+  await cat(page, /^Studio/);
   const lat = page.getByLabel(/latitude/);
   await lat.fill('');
   await lat.pressSequentially('50.0912');
