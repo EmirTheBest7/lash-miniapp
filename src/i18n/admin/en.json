@@ -500,5 +500,14 @@
   "adm.ai_versions_note": "The last 5 are kept. Tap an older one to restore it (it becomes a new version).",
   "adm.ai_chars": "characters",
   "adm.ai_current": "current",
-  "adm.s_v_note2": "Mode, status and instruction"
+  "adm.s_v_note2": "Mode, status and instruction",
+  "adm.ai_tpl_note": "This is a template to edit: replace the [brackets] with your details. It is not saved until you tap Save. V works without any instruction too: it has a built-in personality.",
+  "adm.ai_tpl_clear": "Clear the template",
+  "adm.ai_path_sent": "Model answer",
+  "adm.ai_path_sent_regen": "After the name filter",
+  "adm.ai_path_sent_varied": "Answer without a repeat",
+  "adm.ai_path_sent_retry": "Answer after a retry (timeout)",
+  "adm.ai_path_name_fallback": "Neutral text (name filter)",
+  "adm.ai_path_busy": "\"V is busy\"",
+  "adm.ai_path_retry": "Retries scheduled"
 }

@@ -23,7 +23,8 @@ export interface SettingsHomeData {
 export interface AiState {
   mode: 'off' | 'staff' | 'all'; setting: 'off' | 'staff' | 'all';
   env: { enabled: boolean; key: boolean; model: string; timeout_s: number | null; daily_limit: number };
-  stats: { calls: number; ok: number; codes: Record<string, number>; p50: number; p95: number; replies: Record<string, number>; today: number; last_error: string };
+  stats: { calls: number; ok: number; codes: Record<string, number>; p50: number; p95: number; replies: Record<string, { n: number; p50: number; p95: number }>; today: number; last_error: string };
+  template: Record<'cs' | 'ru', string>;
   prompt: { id: number | null; text: string; versions: { id: number; chars: number; at: number }[] };
 }
 export type ViewAs = 'real' | 'admin' | 'master';

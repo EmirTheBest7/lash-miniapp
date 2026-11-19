@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { api, newOpId } from '../api';
-import { t } from '../i18n';
+import { getLang, t } from '../i18n';
 import { haptic } from '../tg';
 import { Button, Cell, Section, Segmented } from '../ui/components';
 import { Shell } from './Shell';
@@ -15,7 +15,8 @@ export function AiScreen({ c }: { c: Ctx }) {
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [confirmAll, setConfirmAll] = useState(false);
-  const apply = (s: AiState) => { setSt(s); setText(s.prompt.text); };
+  const [tpl, setTpl] = useState(false);                     // the editor shows the ready-to-edit template (NOT saved until she saves)
+  const apply = (s: AiState) => { setSt(s); const tt = s.template[getLang() === 'ru' || getLang() === 'uk' ? 'ru' : 'cs']; setTpl(s.prompt.text === ''); setText(s.prompt.text === '' ? tt : s.prompt.text); };
   useEffect(() => { void api<AiState>('admin/ai/state', {}).then((r) => { if (r.ok) apply(r.data); }); }, []);
   if (!st) return <Shell title={t('adm.ai_title')} onBack={() => c.open(null)}>{null}</Shell>;
   const gate = !st.env.enabled ? t('adm.ai_gate_off') : !st.env.key ? t('adm.ai_gate_nokey') : null;
@@ -54,11 +55,14 @@ export function AiScreen({ c }: { c: Ctx }) {
       <Section title={t('adm.ai_health')} footer={t('adm.ai_health_note')}>
         <Cell title={t('adm.ai_calls')} after={`${s.ok} / ${s.calls}`} subtitle={Object.entries(s.codes).filter(([k]) => k !== 'ok').map(([k, v]) => `${k}: ${v}`).join(' · ') || undefined} />
         <Cell title={t('adm.ai_speed')} after={s.ok ? `${s.p50} / ${s.p95} ms` : '–'} />
+        {Object.entries(s.replies).map(([k, v]) => <Cell key={k} title={t('adm.ai_path_' + k) === 'adm.ai_path_' + k ? k : t('adm.ai_path_' + k)} after={`${v.n} · ${Math.round(v.p50 / 1000)}–${Math.round(v.p95 / 1000)} s`} />)}
         <Cell title={t('adm.ai_today')} after={`${s.today} / ${st.env.daily_limit}`} subtitle={s.last_error ? t('adm.ai_last_error', { e: s.last_error }) : undefined} />
       </Section>
       <Section title={t('adm.ai_prompt')} footer={t('adm.ai_prompt_note', { n: text.length })}>
-        <label class="field"><span>{t('adm.ai_prompt_label')}</span><textarea rows={8} maxLength={8000} value={text} onInput={(e) => setText((e.target as HTMLTextAreaElement).value)} /></label>
-        <div class="lt-actions"><Button secondary onClick={() => void savePrompt({ text })} disabled={busy || text === st.prompt.text}>{t('adm.save')}</Button></div>
+        {tpl && <div class="note" data-testid="ai-template">{t('adm.ai_tpl_note')}</div>}
+        <label class="field"><span>{t('adm.ai_prompt_label')}</span><textarea rows={8} maxLength={8000} value={text} onInput={(e) => { setText((e.target as HTMLTextAreaElement).value); }} /></label>
+        <div class="lt-actions"><Button secondary onClick={() => void savePrompt({ text })} disabled={busy || (!tpl && text === st.prompt.text)}>{t('adm.save')}</Button>
+          {tpl && <Button secondary onClick={() => setText('')} disabled={busy}>{t('adm.ai_tpl_clear')}</Button>}</div>
       </Section>
       {st.prompt.versions.length > 1 && (
         <Section title={t('adm.ai_versions')} footer={t('adm.ai_versions_note')}>

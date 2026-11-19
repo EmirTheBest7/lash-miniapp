@@ -137,6 +137,8 @@ test('V screen (owner): mode off / staff / everyone (everyone needs a confirmati
   await expect(page.getByRole('alert')).toContainText('every client');
   await page.getByRole('button', { name: 'Yes, switch on for everyone' }).click();
   await expect(page.getByRole('tab', { name: 'Everyone' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByTestId('ai-template')).toBeVisible();                                  // empty instruction: the template is prefilled, not saved
+  await expect(page.getByLabel(/^Your text/)).toHaveValue(/V, /);
   await page.getByLabel(/^Your text/).fill('Be brief and kind.');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await page.getByLabel(/^Your text/).fill('Second version.');

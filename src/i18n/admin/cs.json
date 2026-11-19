@@ -500,5 +500,14 @@
   "adm.ai_versions_note": "Uchovává se posledních 5. Klepnutím na starší verzi ji vrátíte (stane se novou verzí).",
   "adm.ai_chars": "znaků",
   "adm.ai_current": "aktuální",
-  "adm.s_v_note2": "Režim, stav a pokyny"
+  "adm.s_v_note2": "Režim, stav a pokyny",
+  "adm.ai_tpl_note": "Toto je šablona k úpravě: místo [závorek] doplňte údaje. Neuloží se, dokud neklepnete na Uložit. Bez pokynů V funguje také: má vestavěnou povahu.",
+  "adm.ai_tpl_clear": "Smazat šablonu",
+  "adm.ai_path_sent": "Odpověď modelu",
+  "adm.ai_path_sent_regen": "Odpověď po filtru jmen",
+  "adm.ai_path_sent_varied": "Odpověď bez opakování",
+  "adm.ai_path_sent_retry": "Odpověď po opakování (timeout)",
+  "adm.ai_path_name_fallback": "Neutrální text (filtr jmen)",
+  "adm.ai_path_busy": "„V je zaneprázdněná“",
+  "adm.ai_path_retry": "Naplánovaná opakování"
 }
