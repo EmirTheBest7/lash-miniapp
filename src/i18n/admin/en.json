@@ -509,5 +509,7 @@
   "adm.ai_path_sent_retry": "Answer after a retry (timeout)",
   "adm.ai_path_name_fallback": "Neutral text (name filter)",
   "adm.ai_path_busy": "\"V is busy\"",
-  "adm.ai_path_retry": "Retries scheduled"
+  "adm.ai_path_retry": "Retries scheduled",
+  "adm.ai_placeholders": "The instruction has unfilled [placeholders]. V ignores those lines. Fill them in or delete them.",
+  "adm.w_v_placeholders": "The V instruction has unfilled placeholders"
 }

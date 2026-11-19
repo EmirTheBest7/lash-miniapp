@@ -83,6 +83,13 @@ test('language tabs: an empty language is marked, Translate drafts only the empt
   await shot(page, 'settings-studio-langtabs');
 });
 
+test('V screen: an instruction with unfilled [placeholders] shows a warning', async ({ page }) => {
+  await open(page, '&aiph=1');
+  await row(page, /^System/).click();
+  await page.getByRole('button', { name: /^Assistant V/ }).click();
+  await expect(page.getByTestId('ai-placeholders')).toBeVisible();
+});
+
 test('Translate is hidden when the AI is off', async ({ page }) => {
   await open(page, '&notranslate=1');
   await row(page, /^Studio/).click();

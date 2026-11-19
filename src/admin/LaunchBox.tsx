@@ -34,6 +34,8 @@ export function LaunchList({ boot, toast, goTab, open, reloadBoot, onChange, ski
     toast(t(id === 'secrets' ? 'ln.f_secrets' : 'ln.f_ai'));
   }
   return (
+    <>
+    {(d.warnings ?? []).map((w) => <div class="banner" key={w} role="alert"><span class="grow">{t('adm.w_' + w)}</span></div>)}
     <Section title={t('adm.s_list_title', { done: shown.filter((i) => i.required && i.ok).length, total: shown.filter((i) => i.required).length })} footer={t(shown.every((i) => !i.required || i.ok) ? 'ln.ready' : 'ln.notready')}>
       {shown.map((i) => {
         const label = itemLabel(i.id) + (i.required ? '' : ' · ' + t('ln.optional'));
@@ -42,5 +44,6 @@ export function LaunchList({ boot, toast, goTab, open, reloadBoot, onChange, ski
         return <Cell key={i.id} title={label} after={i.ok ? '✅' : i.required ? '❌' : '➖'} chevron={!i.ok} onClick={i.ok ? undefined : () => jump(i.where, i.id)} />;
       })}
     </Section>
+    </>
   );
 }

@@ -7,7 +7,7 @@ const NOW = toUtc('2026-11-16', 12 * 60, TZ);
 const week = (): Record<string, [string, string][]> => ({ '1': [['10:00', '18:00']], '2': [['10:00', '18:00']], '3': [['10:00', '18:00']], '4': [['10:00', '18:00']], '5': [['10:00', '18:00']], '6': [['10:00', '14:00']] });
 type Ev = { ok: true; data: unknown } | { ok: false; status: number; error: { code: string } };
 
-export interface AdminMockEnv { two: boolean; role: string; noTranslate?: boolean; lang?: string }
+export interface AdminMockEnv { two: boolean; role: string; noTranslate?: boolean; lang?: string; aiph?: boolean }
 const state = {
   staff: [] as StaffRow[], services: [] as SvcRow[], categories: [] as { id: number; name: string }[], appts: [] as AdmAppt[], blocks: [] as { id: number; staff_id: number; start: number; end: number; reason: string }[],
   overrides: [] as { staff_id: number; date: string; closed: boolean; intervals: [string, string][]; note: string }[],
@@ -50,7 +50,7 @@ const MOCK_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfF
 let vsettings: VoucherSettings = { months: 12, partial: true, min: 100, terms: { cs: '', en: '', ru: '', uk: '' } };
 const privacyMock = { on: false };
 const studioMock: StudioInfo = { studio_name: 'Lash Studio', address: '', studio_description_cs: '', studio_description_ru: '', studio_description_uk: '', studio_description_en: '', area_text_cs: '', area_text_ru: '', area_text_uk: '', area_text_en: '', address_mode: 'after_approval', address_new_clients_manual: true, address_release_timing: 'day_before', lat: 50.0755, lon: 14.4378, contact_name: 'Lash Master', contact_username: '', instagram: '', portfolio_url: '', cancel_policy_cs: '', cancel_policy_en: '', cancel_policy_ru: '', cancel_policy_uk: '' };
-const aiMock: AiState & { texts: Record<number, string> } = { mode: 'staff', setting: 'staff', env: { enabled: true, key: true, model: 'gemini-3.5-flash-lite', timeout_s: null, daily_limit: 200 }, stats: { calls: 4, ok: 0, codes: { timeout: 4 }, p50: 0, p95: 0, replies: { busy: { n: 2, p50: 6000, p95: 6000 }, sent: { n: 3, p50: 6000, p95: 6000 } }, today: 0, last_error: 'timeout' }, template: { cs: 'Jsi V, přátelská asistentka studia řas [název studia]…', ru: 'Ты V, дружелюбная ассистентка студии ресниц [название студии]…' }, prompt: { id: null, text: '', versions: [] }, texts: {} };
+const aiMock: AiState & { texts: Record<number, string> } = { mode: 'staff', setting: 'staff', env: { enabled: true, key: true, model: 'gemini-3.5-flash-lite', timeout_s: null, daily_limit: 200 }, stats: { calls: 4, ok: 0, codes: { timeout: 4 }, p50: 0, p95: 0, replies: { busy: { n: 2, p50: 6000, p95: 6000 }, sent: { n: 3, p50: 6000, p95: 6000 } }, today: 0, last_error: 'timeout' }, template: { cs: 'Jsi V, přátelská asistentka studia řas [název studia]…', ru: 'Ты V, дружелюбная ассистентка студии ресниц [название студии]…' }, placeholders: false, prompt: { id: null, text: '', versions: [] }, texts: {} };
 let wizardMock: { step: number; skipped: string[] } = { step: 0, skipped: [] };
 const sentCards: number[] = [];
 const sentPreviews: string[] = [];
@@ -123,7 +123,7 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
         const id = (aiMock.prompt.versions[0]?.id ?? 0) + 1;
         aiMock.texts[id] = text; aiMock.prompt = { id, text, versions: [{ id, chars: text.length, at: 1795000000 }, ...aiMock.prompt.versions].slice(0, 5) };
       }
-      return ok(aiMock);
+      return ok({ ...aiMock, placeholders: env.aiph === true });
     }
     case 'admin/translate': {
       if (!owner) return err(403, 'forbidden');

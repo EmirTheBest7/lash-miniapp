@@ -11,7 +11,7 @@ export interface StudioInfo {
   studio_name: string; address: string; studio_description_cs: string; studio_description_ru: string; studio_description_uk: string; studio_description_en: string; area_text_cs: string; area_text_ru: string; area_text_uk: string; area_text_en: string; address_mode: 'auto_confirmed' | 'after_approval' | 'manual'; address_new_clients_manual: boolean; address_release_timing: 'on_release' | 'day_before'; lat: number | null; lon: number | null; contact_name: string; contact_username: string; instagram: string; portfolio_url: string;
   cancel_policy_cs: string; cancel_policy_en: string; cancel_policy_ru: string; cancel_policy_uk: string;
 }
-export interface LaunchData { items: LaunchItem[]; progress: { done: number; total: number }; studio: StudioInfo | null; can_manage: boolean }
+export interface LaunchData { items: LaunchItem[]; progress: { done: number; total: number }; studio: StudioInfo | null; can_manage: boolean; warnings?: string[] }
 export type Lang4 = 'cs' | 'ru' | 'uk' | 'en';
 export interface ReviewLink { id: string; platform: string; label: Record<Lang4, string>; url: string; enabled: boolean }
 export interface SettingsHomeData {
@@ -24,7 +24,7 @@ export interface AiState {
   mode: 'off' | 'staff' | 'all'; setting: 'off' | 'staff' | 'all';
   env: { enabled: boolean; key: boolean; model: string; timeout_s: number | null; daily_limit: number };
   stats: { calls: number; ok: number; codes: Record<string, number>; p50: number; p95: number; replies: Record<string, { n: number; p50: number; p95: number }>; today: number; last_error: string };
-  template: Record<'cs' | 'ru', string>;
+  placeholders: boolean; template: Record<'cs' | 'ru', string>;
   prompt: { id: number | null; text: string; versions: { id: number; chars: number; at: number }[] };
 }
 export type ViewAs = 'real' | 'admin' | 'master';

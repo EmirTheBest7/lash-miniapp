@@ -41,6 +41,7 @@ export function AiScreen({ c }: { c: Ctx }) {
   const s = st.stats;
   return (
     <Shell title={t('adm.ai_title')} onBack={() => c.open(null)}>
+      {st.placeholders && <div class="banner" role="alert" data-testid="ai-placeholders"><span class="grow">{t('adm.ai_placeholders')}</span></div>}
       <Section title={t('adm.ai_mode')} footer={t('adm.ai_mode_note')}>
         <Segmented value={st.setting} onChange={(m) => void setMode(m)} options={[{ value: 'off', label: t('adm.ai_m_off') }, { value: 'staff', label: t('adm.ai_m_staff') }, { value: 'all', label: t('adm.ai_m_all') }]} />
         {confirmAll && <div class="note" role="alert">{t('adm.ai_confirm_all')}<div class="lt-actions" style={{ paddingTop: 8 }}><Button onClick={() => void setMode('all')}>{t('adm.ai_confirm_btn')}</Button><Button secondary onClick={() => setConfirmAll(false)}>{t('adm.s_tr_cancel')}</Button></div></div>}
