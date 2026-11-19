@@ -1,6 +1,6 @@
 // DEV / E2E ONLY: a stateful mock of the admin API (synthetic people, never real data). Follows TG-PHPBot docs/miniapp.md.
 import { addDays, isoWeekday, minutesOf, parseHm, toUtc } from '../admin/time';
-import type { AdmAppt, AdminBoot, CalData, ReviewLink, StaffRow, StudioInfo, SvcRow, VoucherRow, VoucherSettings } from '../admin/types';
+import type { AiState, AdmAppt, AdminBoot, CalData, ReviewLink, StaffRow, StudioInfo, SvcRow, VoucherRow, VoucherSettings } from '../admin/types';
 
 const TZ = 'Europe/Prague';
 const NOW = toUtc('2026-11-16', 12 * 60, TZ);
@@ -50,6 +50,7 @@ const MOCK_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfF
 let vsettings: VoucherSettings = { months: 12, partial: true, min: 100, terms: { cs: '', en: '', ru: '', uk: '' } };
 const privacyMock = { on: false };
 const studioMock: StudioInfo = { studio_name: 'Lash Studio', address: '', studio_description_cs: '', studio_description_ru: '', studio_description_uk: '', studio_description_en: '', area_text_cs: '', area_text_ru: '', area_text_uk: '', area_text_en: '', address_mode: 'after_approval', address_new_clients_manual: true, address_release_timing: 'day_before', lat: 50.0755, lon: 14.4378, contact_name: 'Lash Master', contact_username: '', instagram: '', portfolio_url: '', cancel_policy_cs: '', cancel_policy_en: '', cancel_policy_ru: '', cancel_policy_uk: '' };
+const aiMock: AiState & { texts: Record<number, string> } = { mode: 'staff', setting: 'staff', env: { enabled: true, key: true, model: 'gemini-3.5-flash-lite', timeout_s: null, daily_limit: 200 }, stats: { calls: 4, ok: 0, codes: { timeout: 4 }, p50: 0, p95: 0, replies: { busy: 2 }, today: 0, last_error: 'timeout' }, prompt: { id: null, text: '', versions: [] }, texts: {} };
 let wizardMock: { step: number; skipped: string[] } = { step: 0, skipped: [] };
 const sentCards: number[] = [];
 const sentPreviews: string[] = [];
@@ -112,6 +113,17 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
       if (!Array.isArray(d.links) || d.links.length > 4 || d.links.some((l: { url: string }) => !/^https:\/\/\S{4,}$/.test(l.url))) return err(400, 'bad_request');
       state.settings.review_links = (d.links as ReviewLink[]).map((l, i) => ({ ...l, id: l.id || 'r' + i, platform: 'other' }));
       return ok({ links: state.settings.review_links });
+    }
+    case 'admin/ai/state': case 'admin/ai/mode': case 'admin/ai/prompt': {
+      if (!realOwner) return err(403, 'forbidden');
+      if (route === 'admin/ai/mode') { if (!['off', 'staff', 'all'].includes(d.mode)) return err(400, 'bad_request'); aiMock.setting = d.mode; aiMock.mode = d.mode; }
+      if (route === 'admin/ai/prompt') {
+        const text = d.restore ? aiMock.prompt.versions.find((v: { id: number }) => v.id === d.restore) ? aiMock.texts[d.restore] : null : d.text;
+        if (text === null || typeof text !== 'string' || text.length > 8000) return err(text === null ? 404 : 400, text === null ? 'not_found' : 'bad_request');
+        const id = (aiMock.prompt.versions[0]?.id ?? 0) + 1;
+        aiMock.texts[id] = text; aiMock.prompt = { id, text, versions: [{ id, chars: text.length, at: 1795000000 }, ...aiMock.prompt.versions].slice(0, 5) };
+      }
+      return ok(aiMock);
     }
     case 'admin/translate': {
       if (!owner) return err(403, 'forbidden');

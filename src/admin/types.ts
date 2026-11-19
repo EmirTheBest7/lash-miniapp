@@ -20,6 +20,12 @@ export interface SettingsHomeData {
   translate: boolean; lang_hint: boolean; wizard: { step: number; skipped: string[] }; attention: Record<string, boolean>;
   system?: { automation: boolean; backup_h: number | null; keys: boolean };
 }
+export interface AiState {
+  mode: 'off' | 'staff' | 'all'; setting: 'off' | 'staff' | 'all';
+  env: { enabled: boolean; key: boolean; model: string; timeout_s: number | null; daily_limit: number };
+  stats: { calls: number; ok: number; codes: Record<string, number>; p50: number; p95: number; replies: Record<string, number>; today: number; last_error: string };
+  prompt: { id: number | null; text: string; versions: { id: number; chars: number; at: number }[] };
+}
 export type ViewAs = 'real' | 'admin' | 'master';
 export type VoucherStatus = 'active' | 'reserved' | 'used' | 'expired' | 'void';
 export interface VoucherRow {

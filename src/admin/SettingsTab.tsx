@@ -3,6 +3,7 @@ import { t } from '../i18n';
 import { useBack } from '../hooks';
 import type { Screen, Tab } from './LaunchBox';
 import { SettingsHome } from './SettingsHome';
+import { AiScreen } from './AiScreen';
 import { HelpScreen } from './HelpScreen';
 import { AfterScreen, MarketingScreen, RulesScreen, ScheduleScreen, SystemScreen } from './SettingsScreens';
 import { StudioScreen } from './StudioScreen';
@@ -29,7 +30,7 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView, goTab, view
   useEffect(() => { window.scrollTo(0, 0); }, [screen]);                       // a category opens at its top, whatever the scroll position was
   const c: Ctx = { boot, toast, reloadBoot, goTab, open: (sc) => { setWizStart(undefined); setScreen(sc); }, openWizard: (start) => { setWizStart(start); setScreen('wizard'); }, onClientView, ...st, viewAs, setViewAs, realOwner };
   // the master view never reaches an admin / owner screen, whatever the state says
-  const allowed = (sc: Screen): boolean => (sc === 'system' ? !!boot.is_owner : sc === 'help' || sc === 'after' || boot.can_manage);
+  const allowed = (sc: Screen): boolean => ((sc === 'system' || sc === 'ai') ? !!boot.is_owner : sc === 'help' || sc === 'after' || boot.can_manage);
   if (screen === 'wizard' && boot.can_manage) return <Wizard c={c} startAt={wizStart} />;
   if (screen && allowed(screen)) {
     return (
@@ -40,6 +41,7 @@ export function SettingsTab({ boot, toast, reloadBoot, onClientView, goTab, view
         {screen === 'after' && <AfterScreen c={c} />}
         {screen === 'marketing' && <MarketingScreen c={c} />}
         {screen === 'system' && <SystemScreen c={c} />}
+        {screen === 'ai' && <AiScreen c={c} />}
         {screen === 'help' && <HelpScreen c={c} />}
       </>
     );

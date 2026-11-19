@@ -125,3 +125,26 @@ test('service editor: name, description, aftercare and pre-care all have languag
   await page.getByRole('button', { name: /Voucher settings/ }).click();
   await expect(page.getByRole('tablist').filter({ has: page.getByRole('tab', { name: /^CS/ }) }).last()).toBeVisible();
 });
+
+test('V screen (owner): mode off / staff / everyone (everyone needs a confirmation), server gates and 24 h health, instruction save and restore; administrator and master never see it', async ({ page }) => {
+  await open(page);
+  await row(page, /^System/).click();
+  await page.getByRole('button', { name: /^Assistant V/ }).click();
+  await expect(page.getByRole('heading', { name: 'Assistant V' })).toBeVisible();
+  await expect(page.getByText('AI_ENABLED')).toBeVisible();
+  await expect(page.getByText('timeout: 4')).toBeVisible();
+  await page.getByRole('tab', { name: 'Everyone' }).click();
+  await expect(page.getByRole('alert')).toContainText('every client');
+  await page.getByRole('button', { name: 'Yes, switch on for everyone' }).click();
+  await expect(page.getByRole('tab', { name: 'Everyone' })).toHaveAttribute('aria-selected', 'true');
+  await page.getByLabel(/^Your text/).fill('Be brief and kind.');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByLabel(/^Your text/).fill('Second version.');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: /^#1/ }).click();
+  await expect(page.getByLabel(/^Your text/)).toHaveValue('Be brief and kind.');
+  await shot(page, 'settings-ai');
+  await page.goto(`${BASE}?mock=1&role=admin&staff=2`);
+  await page.getByRole('tab').last().click();
+  await expect(row(page, /^System/)).toHaveCount(0);
+});

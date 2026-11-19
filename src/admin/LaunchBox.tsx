@@ -6,7 +6,7 @@ import { Cell, Section, Switch } from '../ui/components';
 import type { AdminBoot, LaunchData } from './types';
 
 export type Tab = 'cal' | 'staff' | 'svc' | 'vch' | 'set';
-export type Screen = 'studio' | 'schedule' | 'rules' | 'after' | 'marketing' | 'system' | 'help' | 'wizard';
+export type Screen = 'studio' | 'schedule' | 'rules' | 'after' | 'marketing' | 'system' | 'help' | 'wizard' | 'ai';
 /** Plain wording for the setup items (no "placeholder", no technical words). */
 export const itemLabel = (id: string): string => t('adm.s_item_' + id);
 export const TECHNICAL = ['secrets', 'automation', 'ai'];
