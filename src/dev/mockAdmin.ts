@@ -1,6 +1,6 @@
 // DEV / E2E ONLY: a stateful mock of the admin API (synthetic people, never real data). Follows TG-PHPBot docs/miniapp.md.
 import { addDays, isoWeekday, minutesOf, parseHm, toUtc } from '../admin/time';
-import type { AiState, AdmAppt, AdminBoot, CalData, ReviewLink, StaffRow, StudioInfo, SvcRow, VoucherRow, VoucherSettings } from '../admin/types';
+import type { AiState, AdmAppt, AdminBoot, CalData, RequestRow, ReviewLink, StaffRow, StudioInfo, SvcRow, VoucherRow, VoucherSettings } from '../admin/types';
 
 const TZ = 'Europe/Prague';
 const NOW = toUtc('2026-11-16', 12 * 60, TZ);
@@ -54,6 +54,7 @@ const aiMock: AiState & { texts: Record<number, string> } = { mode: 'staff', set
 let wizardMock: { step: number; skipped: string[] } = { step: 0, skipped: [] };
 const sentCards: number[] = [];
 const sentPreviews: string[] = [];
+const requestsMock: RequestRow[] = [{ id: 1, name: 'Anna', lang: 'ru', reason: 'unanswered', status: 'open', created_at: 1_790_000_000, last_master_at: null, messages: ['Какой у вас адрес?', 'да'], phone: null, chat_id: 7001 }];
 const vouchers: VoucherRow[] = [];
 const voucherOps = new Map<string, VoucherRow>();
 
@@ -74,6 +75,9 @@ export function adminMock(route: string, d: Record<string, any>, env: AdminMockE
   const apptOf = (id: number) => state.appts.find((a) => a.id === id);
 
   switch (route) {
+    case 'admin/requests': return ok({ items: requestsMock.filter((r) => r.status === 'open') });
+    case 'admin/requests/reply': { const r = requestsMock.find((x) => x.id === d.id); if (!r || r.status !== 'open') return err(409, 'closed'); r.last_master_at = NOW; return ok({ ok: true }); }
+    case 'admin/requests/done': { const r = requestsMock.find((x) => x.id === d.id); if (r) r.status = 'done'; return ok({ ok: true, changed: !!r }); }
     case 'admin/bootstrap': return ok(boot());
     case 'admin/launch': {
       const done = (b: boolean, id: string, required = true, where = 'set') => ({ id, ok: b, required, where });

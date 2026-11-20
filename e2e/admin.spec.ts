@@ -470,3 +470,19 @@ test('studio info: the map pin fields accept a typed decimal point', async ({ pa
   await lat.pressSequentially('50.0912');
   await expect(lat).toHaveValue('50.0912');
 });
+
+test('Requests tab: the open request shows the reason and last messages; reply goes through the bot; Done removes it', async ({ page }) => {
+  await open(page);
+  await page.getByRole('tab', { name: /^Requests/ }).click();
+  await expect(page.getByRole('heading', { name: 'Open requests' })).toBeVisible();
+  await expect(page.getByText('Unanswered question (the client agreed to forward it)')).toBeVisible();
+  await expect(page.getByText('• Какой у вас адрес?')).toBeVisible();
+  await expect(page.getByTestId('rq-1').getByRole('link', { name: 'Open chat' })).toHaveAttribute('href', 'tg://user?id=7001');
+  await page.getByTestId('rq-1').getByRole('button', { name: 'Reply via the bot' }).click();
+  await page.getByPlaceholder('Write your reply…').fill('Адрес пришлю после подтверждения');
+  await page.getByRole('button', { name: 'Send', exact: true }).click();
+  await toast(page, 'Sent to the client.');
+  await page.getByTestId('rq-1').getByRole('button', { name: 'Done' }).click();
+  await toast(page, 'Marked as done.');
+  await expect(page.getByText('No open requests.')).toBeVisible();
+});

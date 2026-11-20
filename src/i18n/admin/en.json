@@ -515,5 +515,21 @@
   "adm.contact_mode": "How clients reach the master",
   "adm.contact_bot": "Through the bot",
   "adm.contact_direct": "Directly in Telegram",
-  "adm.contact_note": "Through the bot: the client taps a button, the master gets a note and her username is never shown to clients. Directly: clients get a link to her Telegram."
+  "adm.contact_note": "Through the bot: the client taps a button, the master gets a note and her username is never shown to clients. Directly: clients get a link to her Telegram.",
+  "adm.tab_requests": "Requests",
+  "adm.rq_title": "Open requests",
+  "adm.rq_empty": "No open requests.",
+  "adm.rq_reply": "Reply via the bot",
+  "adm.rq_open": "Open chat",
+  "adm.rq_done": "Done",
+  "adm.rq_send": "Send",
+  "adm.rq_note": "The client gets your reply from the bot as “Message from the master”.",
+  "adm.rq_placeholder": "Write your reply…",
+  "adm.rq_sent": "Sent to the client.",
+  "adm.rq_failed": "Could not send.",
+  "adm.rq_done_toast": "Marked as done.",
+  "adm.rq_r_asked": "Asked to be contacted",
+  "adm.rq_r_health": "Health / reaction",
+  "adm.rq_r_complaint": "Complaint",
+  "adm.rq_r_unanswered": "Unanswered question (the client agreed to forward it)"
 }

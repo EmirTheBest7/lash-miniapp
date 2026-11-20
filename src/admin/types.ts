@@ -4,7 +4,7 @@ export interface AdminSettings extends SchedSettings { slot_step_min: number; mi
 export interface AdminBoot {
   me: { id: number; name: string; role: 'master' | 'admin' | 'owner'; lang: string };
   config: { tz: string; studio_name: string; server_time: number; today: string };
-  staff: StaffRow[]; services: SvcRow[]; vouchers_on?: boolean; categories: { id: number; name: string }[]; loyalty_pending: { id: number; client: string; percent: number }[]; settings: AdminSettings; can_manage: boolean; is_owner?: boolean; can_translate?: boolean;
+  staff: StaffRow[]; services: SvcRow[]; vouchers_on?: boolean; requests_open?: number; categories: { id: number; name: string }[]; loyalty_pending: { id: number; client: string; percent: number }[]; settings: AdminSettings; can_manage: boolean; is_owner?: boolean; can_translate?: boolean;
 }
 export interface LaunchItem { id: string; ok: boolean; required: boolean; where: string }
 export interface StudioInfo {
@@ -55,3 +55,5 @@ export interface SchedSettings {
   privacy_reviewed?: boolean; autocomplete_on: boolean; autocomplete_h: number; fill_nudge_on: boolean; google_review_url: string; review_delay_h: number; review_gap_days: number;
 }
 export interface BroadcastInfo { optin: number; clients: number; skipped?: number; min_days?: number; last: { text: string; recipients: number; at: number } | null }
+
+export interface RequestRow { id: number; name: string; lang: string; reason: 'asked' | 'health' | 'complaint' | 'unanswered'; status: 'open' | 'done'; created_at: number; last_master_at: number | null; messages: string[]; phone: string | null; chat_id: number | null }

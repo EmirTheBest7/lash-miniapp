@@ -9,11 +9,12 @@ import { Calendar } from './Calendar';
 import { ServicesTab } from './ServicesTab';
 import { SettingsTab } from './SettingsTab';
 import { StaffTab } from './StaffTab';
+import { RequestsTab } from './RequestsTab';
 import { VouchersTab } from './VouchersTab';
 import type { AdminBoot, ViewAs } from './types';
 import './admin.css';
 
-type Tab = 'cal' | 'staff' | 'svc' | 'vch' | 'set';
+type Tab = 'cal' | 'staff' | 'svc' | 'vch' | 'rq' | 'set';
 
 /** The staff app (owner and masters). A separate lazy chunk: clients never download it. */
 export function AdminApp({ onClientView, initial }: { onClientView: () => void; initial?: AdminBoot }) {
@@ -21,7 +22,8 @@ export function AdminApp({ onClientView, initial }: { onClientView: () => void; 
   const [err, setErr] = useState<string | null>(null);
   const go = new URLSearchParams(location.hash.replace(/^#/, '')).get('go') ?? undefined;          // /navod buttons open the Mini App at a screen: #go=services
   const goTab: Tab = go === 'services' ? 'svc' : go === 'vouchers' ? 'vch' : go && ['wizard', 'studio', 'rules', 'preview', 'help'].includes(go) ? 'set' : 'cal';
-  const [tab, setTab] = useState<Tab>(goTab);
+  const [tab, setTab] = useState<Tab>(go === 'requests' ? 'rq' : goTab);
+  const [rqCount, setRqCount] = useState<number | null>(null);
   const [toastText, toast] = useToast();
   const [viewAs, setViewAs] = useState<ViewAs>('real');            // owner-only front-end simulation of the administrator / master screens (the server still enforces the real role)
 
@@ -39,7 +41,7 @@ export function AdminApp({ onClientView, initial }: { onClientView: () => void; 
   const eff: AdminBoot = viewAs === 'real' ? boot : { ...boot, is_owner: false, can_manage: viewAs === 'admin', vouchers_on: viewAs === 'admin' && !!boot.vouchers_on };
   const tabs: { value: Tab; label: string }[] = [
     { value: 'cal', label: t('adm.tab_calendar') }, { value: 'staff', label: t('adm.tab_staff') },
-    ...(eff.can_manage ? [{ value: 'svc' as Tab, label: t('adm.tab_services') }] : []), ...(eff.vouchers_on ? [{ value: 'vch' as Tab, label: t('adm.tab_vouchers') }] : []), { value: 'set', label: t('adm.tab_settings') },
+    ...(eff.can_manage ? [{ value: 'svc' as Tab, label: t('adm.tab_services') }] : []), ...(eff.vouchers_on ? [{ value: 'vch' as Tab, label: t('adm.tab_vouchers') }] : []), { value: 'rq' as Tab, label: t('adm.tab_requests') + ((rqCount ?? boot.requests_open ?? 0) > 0 ? ` (${rqCount ?? boot.requests_open})` : '') }, { value: 'set', label: t('adm.tab_settings') },
   ];
   return (
     <>
@@ -49,6 +51,7 @@ export function AdminApp({ onClientView, initial }: { onClientView: () => void; 
       {tab === 'staff' && <StaffTab boot={eff} toast={toast} reloadBoot={load} />}
       {tab === 'svc' && <ServicesTab boot={eff} toast={toast} reloadBoot={load} />}
       {tab === 'vch' && <VouchersTab boot={eff} toast={toast} />}
+      {tab === 'rq' && <RequestsTab toast={toast} onCount={setRqCount} />}
       {(tab === 'set') && <SettingsTab key={viewAs}  boot={eff} toast={toast} reloadBoot={load} onClientView={onClientView} goTab={setTab} viewAs={viewAs} setViewAs={setViewAs} realOwner={realOwner} initialGo={go} />}
       <Toast text={toastText} />
     </>

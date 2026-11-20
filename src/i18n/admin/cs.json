@@ -515,5 +515,21 @@
   "adm.contact_mode": "Jak klienti kontaktují mistrovou",
   "adm.contact_bot": "Přes bota",
   "adm.contact_direct": "Přímo v Telegramu",
-  "adm.contact_note": "Přes bota: klient klepne na tlačítko, mistrová dostane zprávu a její uživatelské jméno se klientům neukazuje. Přímo: klienti uvidí odkaz na její Telegram."
+  "adm.contact_note": "Přes bota: klient klepne na tlačítko, mistrová dostane zprávu a její uživatelské jméno se klientům neukazuje. Přímo: klienti uvidí odkaz na její Telegram.",
+  "adm.tab_requests": "Požadavky",
+  "adm.rq_title": "Otevřené požadavky",
+  "adm.rq_empty": "Žádné otevřené požadavky.",
+  "adm.rq_reply": "Odpovědět přes bota",
+  "adm.rq_open": "Otevřít chat",
+  "adm.rq_done": "Vyřešeno",
+  "adm.rq_send": "Odeslat",
+  "adm.rq_note": "Klientovi přijde odpověď jménem bota jako „Zpráva od mistrové“.",
+  "adm.rq_placeholder": "Napište odpověď…",
+  "adm.rq_sent": "Odesláno klientovi.",
+  "adm.rq_failed": "Odeslání se nepodařilo.",
+  "adm.rq_done_toast": "Označeno jako vyřešené.",
+  "adm.rq_r_asked": "Chce mluvit s vámi",
+  "adm.rq_r_health": "Zdraví / reakce",
+  "adm.rq_r_complaint": "Stížnost",
+  "adm.rq_r_unanswered": "Otázka bez odpovědi (klient souhlasil s předáním)"
 }
