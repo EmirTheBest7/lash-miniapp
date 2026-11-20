@@ -4,6 +4,7 @@ import { dayLong, duration, money } from '../format';
 import { LANGS, setLang, t } from '../i18n';
 import type { Ctx } from '../nav';
 import type { LangCode, Service } from '../types';
+import { openTelegramLink } from '../tg';
 import { Cell, Empty, Section, Segmented, Sheet, Switch } from '../ui/components';
 
 const LANG_NAME: Record<LangCode, string> = { cs: 'Čeština', en: 'English', ru: 'Русский', uk: 'Українська' };
@@ -52,6 +53,7 @@ export function Home({ ctx }: { ctx: Ctx }) {
       <Section>
         <Cell icon="list" title={t('home.my')} after={boot.my.length ? String(boot.my.length) : undefined} chevron onClick={() => ctx.push({ k: 'appts' })} />
         <Cell icon="settings" title={t('home.offers')} subtitle={t('home.offers_note')} after={<Switch label={t('home.offers')} checked={mk} onChange={(on) => void toggleMarketing(on)} />} />
+        {boot.config.contact_username && <Cell icon="list" title={t('home.write_master')} chevron onClick={() => openTelegramLink(`https://t.me/${boot.config.contact_username}`)} />}
         <Cell icon="settings" title={t('home.language')} after={LANG_NAME[boot.me.lang]} chevron onClick={() => setLangOpen(true)} />
       </Section>
       <Sheet open={langOpen} onClose={() => setLangOpen(false)} title={t('home.language')}>

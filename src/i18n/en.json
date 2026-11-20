@@ -108,5 +108,6 @@
   "loy.pending": "A discount is waiting for approval.",
   "sum.loyalty": "Loyalty discount",
   "home.offers": "Offers and news",
-  "home.offers_note": "Occasional offers and discounts from the studio. You can switch this off any time."
+  "home.offers_note": "Occasional offers and discounts from the studio. You can switch this off any time.",
+  "home.write_master": "Message the master"
 }

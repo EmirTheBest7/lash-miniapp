@@ -25,6 +25,11 @@ test('home lists services with duration and price (details in the cell, not on a
   await noSidewaysScroll(page);
 });
 
+test('home has "Message the master" when the studio has a contact username, and it opens the master\'s chat link', async ({ page }) => {
+  await open(page);
+  await expect(page.getByRole('button', { name: 'Message the master' })).toBeVisible();
+});
+
 test('book in 4 taps after the service: service -> time -> Continue -> Confirm, then it shows in My appointments', async ({ page }) => {
   await open(page);
   await page.getByRole('button', { name: /Lash fill/ }).click();
