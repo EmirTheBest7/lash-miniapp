@@ -109,5 +109,7 @@
   "sum.loyalty": "Loyalty discount",
   "home.offers": "Offers and news",
   "home.offers_note": "Occasional offers and discounts from the studio. You can switch this off any time.",
-  "home.write_master": "Message the master"
+  "home.write_master": "Message the master",
+  "home.master_told": "Passed to the master, she will message you soon.",
+  "home.master_told_again": "Already passed on, the master will reply soon."
 }

@@ -89,13 +89,14 @@ export function installMockApi(): void {
         }
         return ok({
           me: { id: 1, name: 'Anna Nováková', username: 'anna_n', role: q.get('role') ?? 'client', lang: st.lang, phone_set: st.phone, privacy_accepted: st.privacy },
-          config: { tz: 'Europe/Prague', studio_name: 'Lash Studio', currency: 'CZK', min_client_version: 1, contact_username: 'lash_master', server_time: Math.floor(TODAY.getTime() / 1000) },
+          config: { tz: 'Europe/Prague', studio_name: 'Lash Studio', currency: 'CZK', min_client_version: 1, contact_username: q.has('direct') ? 'lash_master' : null, contact_mode: q.has('direct') ? 'direct' : 'bot', server_time: Math.floor(TODAY.getTime() / 1000) },
           start_param: null, categories: [{ id: 1, name: 'Lashes', services: SERVICES }], addons: ADDONS, my: st.my,
           again: q.has('again') ? { service_id: 2, suggest: iso(dayN(2)) } : null,
           policy: { cancel_cutoff_h: 24, horizon_days: 60 },
           marketing: st.marketing, loyalty: q.get('loyalty') === 'ready' ? { visits: 7, percent: 10, progress: 0, ready: 10, pending: false } : q.get('loyalty') === 'card' ? { visits: 7, percent: 10, progress: 3, ready: null, pending: false } : null,
           privacy: { title: 'Privacy notice (draft – needs review)', text: 'We keep only what is necessary: your Telegram ID, name, phone, language and booking history.\nThe master is the data controller.' },
         });
+      case 'contact': return ok({ sent: true });
       case 'marketing': st.marketing = d.on === true; return ok({ marketing: st.marketing });
       case 'language': st.lang = d.lang; return ok({ lang: d.lang });
       case 'me': return ok({ phone_set: st.phone, privacy_accepted: st.privacy });

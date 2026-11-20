@@ -511,5 +511,9 @@
   "adm.ai_path_busy": "„V je zaneprázdněná“",
   "adm.ai_path_retry": "Naplánovaná opakování",
   "adm.ai_placeholders": "V pokynech jsou nevyplněná [pole]. Tyto řádky V ignoruje. Doplňte je nebo smažte.",
-  "adm.w_v_placeholders": "Pokyny pro V obsahují nevyplněná pole"
+  "adm.w_v_placeholders": "Pokyny pro V obsahují nevyplněná pole",
+  "adm.contact_mode": "Jak klienti kontaktují mistrovou",
+  "adm.contact_bot": "Přes bota",
+  "adm.contact_direct": "Přímo v Telegramu",
+  "adm.contact_note": "Přes bota: klient klepne na tlačítko, mistrová dostane zprávu a její uživatelské jméno se klientům neukazuje. Přímo: klienti uvidí odkaz na její Telegram."
 }

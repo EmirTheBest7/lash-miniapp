@@ -25,9 +25,17 @@ test('home lists services with duration and price (details in the cell, not on a
   await noSidewaysScroll(page);
 });
 
-test('home has "Message the master" when the studio has a contact username, and it opens the master\'s chat link', async ({ page }) => {
+test('"Message the master": default = a note through the bot (toast, no username anywhere); direct mode = the t.me link', async ({ page }) => {
   await open(page);
-  await expect(page.getByRole('button', { name: 'Message the master' })).toBeVisible();
+  await page.getByRole('button', { name: 'Message the master' }).click();
+  await expect(page.getByText('Passed to the master')).toBeVisible();
+  expect(await page.content()).not.toContain('lash_master');
+});
+
+test('"Message the master" in direct mode opens the t.me link', async ({ page }) => {
+  await open(page, '&direct=1');
+  await page.getByRole('button', { name: 'Message the master' }).click();
+  expect(await page.evaluate(() => (window as unknown as { __opened?: string[] }).__opened)).toEqual(['https://t.me/lash_master']);
 });
 
 test('book in 4 taps after the service: service -> time -> Continue -> Confirm, then it shows in My appointments', async ({ page }) => {
@@ -162,7 +170,7 @@ test('an outage shows a friendly retry', async ({ page }) => {
 test('every API request is a CORS simple request: POST, text/plain, no custom headers, NO preflight (cross-origin API)', async ({ page }) => {
   await blockTelegramScript(page);
   const seen: { method: string; headers: Record<string, string>; url: string; body: string | null }[] = [];
-  const fx = { me: { id: 1, name: 'Anna', username: null, role: 'client', lang: 'en', phone_set: true, privacy_accepted: true }, config: { tz: 'Europe/Prague', studio_name: '', currency: 'CZK', min_client_version: 1, contact_username: null, server_time: 1790000000 }, start_param: null, categories: [{ id: 1, name: 'Lashes', services: [{ id: 2, name: 'Lash fill', description: '', duration_min: 75, price: 1000, price_from: false }] }], addons: [], my: [], again: null, policy: { cancel_cutoff_h: 24, horizon_days: 60 }, privacy: { title: 'p', text: 't' } };
+  const fx = { me: { id: 1, name: 'Anna', username: null, role: 'client', lang: 'en', phone_set: true, privacy_accepted: true }, config: { tz: 'Europe/Prague', studio_name: '', currency: 'CZK', min_client_version: 1, contact_username: null, contact_mode: 'bot', server_time: 1790000000 }, start_param: null, categories: [{ id: 1, name: 'Lashes', services: [{ id: 2, name: 'Lash fill', description: '', duration_min: 75, price: 1000, price_from: false }] }], addons: [], my: [], again: null, policy: { cancel_cutoff_h: 24, horizon_days: 60 }, privacy: { title: 'p', text: 't' } };
   await page.route('https://api.example.test/**', async (route) => {
     const r = route.request();
     seen.push({ method: r.method(), headers: r.headers(), url: r.url(), body: r.postData() });

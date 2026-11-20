@@ -8,7 +8,7 @@ export interface AdminBoot {
 }
 export interface LaunchItem { id: string; ok: boolean; required: boolean; where: string }
 export interface StudioInfo {
-  studio_name: string; address: string; studio_description_cs: string; studio_description_ru: string; studio_description_uk: string; studio_description_en: string; area_text_cs: string; area_text_ru: string; area_text_uk: string; area_text_en: string; address_mode: 'auto_confirmed' | 'after_approval' | 'manual'; address_new_clients_manual: boolean; address_release_timing: 'on_release' | 'day_before'; lat: number | null; lon: number | null; contact_name: string; contact_username: string; instagram: string; portfolio_url: string;
+  studio_name: string; address: string; studio_description_cs: string; studio_description_ru: string; studio_description_uk: string; studio_description_en: string; area_text_cs: string; area_text_ru: string; area_text_uk: string; area_text_en: string; address_mode: 'auto_confirmed' | 'after_approval' | 'manual'; address_new_clients_manual: boolean; address_release_timing: 'on_release' | 'day_before'; lat: number | null; lon: number | null; contact_name: string; contact_username: string; contact_mode: 'bot' | 'direct'; instagram: string; portfolio_url: string;
   cancel_policy_cs: string; cancel_policy_en: string; cancel_policy_ru: string; cancel_policy_uk: string;
 }
 export interface LaunchData { items: LaunchItem[]; progress: { done: number; total: number }; studio: StudioInfo | null; can_manage: boolean; warnings?: string[] }

@@ -4,7 +4,8 @@ import { duration, whenLong } from '../format';
 import { useBack } from '../hooks';
 import { t } from '../i18n';
 import type { Ctx } from '../nav';
-import { confirmNative, haptic, openTelegramLink } from '../tg';
+import { confirmNative, haptic } from '../tg';
+import { writeMaster } from '../ui/contact';
 import type { Appt } from '../types';
 import { Cell, Empty, Section, Sheet } from '../ui/components';
 
@@ -28,8 +29,7 @@ export function Appts({ ctx }: { ctx: Ctx }) {
   }
 
   function message() {
-    const u = boot.config.contact_username;
-    if (u) openTelegramLink(`https://t.me/${u}`); else ctx.toast(t('appts.no_contact'));
+    void writeMaster(ctx);
   }
 
   return (

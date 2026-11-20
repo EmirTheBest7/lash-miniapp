@@ -52,6 +52,11 @@ export function StudioScreen({ c, part = 'all', onDone }: { c: Ctx; part?: 'all'
           {showContacts && text('portfolio_url', t('ln.f_portfolio'), 300, { type: 'url', placeholder: 'https://…' })}
         </Section>
       )}
+      {showContacts && (
+        <Section title={t('adm.contact_mode')} footer={t('adm.contact_note')}>
+          <Segmented value={f.contact_mode} onChange={(v) => set({ contact_mode: v })} options={[{ value: 'bot', label: t('adm.contact_bot') }, { value: 'direct', label: t('adm.contact_direct') }]} />
+        </Section>
+      )}
       {showName && (
         <Section footer={t('adm.s_desc_note')}>
           <LangTabs label={t('adm.s_desc')} values={descs} rows={3} max={300} canTranslate={!!(c.boot.can_translate || c.home?.translate)} toast={c.toast}

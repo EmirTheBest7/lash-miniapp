@@ -1,7 +1,7 @@
 export type Role = 'client' | 'master' | 'owner';
 export type LangCode = 'cs' | 'en' | 'ru' | 'uk';
 export interface Me { id: number; name: string; username: string | null; role: Role; lang: LangCode; phone_set: boolean; privacy_accepted: boolean }
-export interface Config { tz: string; studio_name: string; currency: string; min_client_version: number; contact_username: string | null; server_time: number }
+export interface Config { tz: string; studio_name: string; currency: string; min_client_version: number; contact_username: string | null; contact_mode: 'bot' | 'direct'; server_time: number }
 export interface Service { id: number; name: string; description: string; duration_min: number; price: number; price_from: boolean }
 export interface Category { id: number; name: string; services: Service[] }
 export interface Addon { id: number; name: string; duration_min: number; price: number }

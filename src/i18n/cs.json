@@ -109,5 +109,7 @@
   "sum.loyalty": "Věrnostní sleva",
   "home.offers": "Nabídky a novinky",
   "home.offers_note": "Občasné nabídky a slevy od studia. Kdykoli lze vypnout.",
-  "home.write_master": "Napsat mistrové"
+  "home.write_master": "Napsat mistrové",
+  "home.master_told": "Předáno mistrové, brzy se vám ozve.",
+  "home.master_told_again": "Už předáno, mistrová brzy odpoví."
 }
